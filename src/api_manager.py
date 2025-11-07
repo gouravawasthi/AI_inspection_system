@@ -1,180 +1,176 @@
-import requests
-from typing import Any, Dict, Optional, Tuple
+import asyncio
+import aiohttp
+import json
+import os
+from typing import Dict, Any, Optional
 
 
-class APIManager:
-    """
-    Handles two dependent API calls (API1 and API2) and subsequent actions:
-    delete, update, append.
+class AsyncAPIManager:
+    def __init__(self, inspection_config: Dict[str, Dict[str, str]], storage_path: str = "pending_actions.json"):
+        """
+        inspection_config = {
+            "visual": {"api1": "http://server1/visual/check_previous",
+                       "api2": "http://server2/visual/check_duplicate"},
+            "electrical": {"api1": "http://server1/electrical/check_previous",
+                           "api2": "http://server2/electrical/check_duplicate"}
+        }
+        """
+        self.inspection_config = inspection_config
+        self.storage_path = storage_path
+        self.pending_actions: Dict[str, Dict[str, Any]] = self._load_pending_actions()
 
-    Usage:
-        api = APIManager(api1_url, api2_url, placeholders=("visual", "electrical"))
-        result = api.process_barcode("12345")
-        if result["action_required"]:
-            api.execute_action("delete", barcode="12345")
-    """
-
-    def __init__(self, api1_url: str, api2_url: str, placeholders: Tuple[str, str]):
-        self.api1_url = api1_url
-        self.api2_url = api2_url
-        self.placeholders = placeholders  # e.g. ("visual", "electrical")
-        self.pending_actions: Dict[str, Dict[str, Any]] = {}  # store future update/append payloads
-
-    # ---------------------------------------------------
-    #  Internal API caller helper
-    # ---------------------------------------------------
-    def _call_api(
-        self,
-        method: str,
-        url: str,
-        payload: Optional[Dict[str, Any]] = None,
-        timeout: int = 5,
-    ) -> Tuple[bool, Optional[Any]]:
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    async def _call_api(self, method: str, url: str, payload: Optional[Dict[str, Any]] = None) -> tuple[bool, Any]:
         try:
-            method = method.lower()
-            if method == "get":
-                response = requests.get(url, timeout=timeout)
-            elif method == "post":
-                response = requests.post(url, json=payload, timeout=timeout)
-            elif method == "put":
-                response = requests.put(url, json=payload, timeout=timeout)
-            elif method == "delete":
-                response = requests.delete(url, json=payload, timeout=timeout)
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
-
-            if response.status_code not in (200, 201, 204):
-                return False, None
-
-            try:
-                return True, response.json()
-            except ValueError:
-                return True, None
-
-        except requests.exceptions.ConnectionError:
+            async with aiohttp.ClientSession() as session:
+                async with session.request(method.upper(), url, json=payload, timeout=5) as resp:
+                    if resp.status not in (200, 201, 204):
+                        return False, None
+                    try:
+                        return True, await resp.json()
+                    except aiohttp.ContentTypeError:
+                        return True, None
+        except aiohttp.ClientConnectionError:
             return False, None
         except Exception as e:
-            print(f"[APIManager] Error calling {url} ({method}): {e}")
+            print(f"[AsyncAPIManager] Error calling {url}: {e}")
             return False, None
 
-    # ---------------------------------------------------
-    #  Main process logic
-    # ---------------------------------------------------
-    def process_barcode(self, barcode: str) -> Dict[str, Any]:
+    def _save_pending_actions(self):
+        try:
+            with open(self.storage_path, "w") as f:
+                json.dump(self.pending_actions, f, indent=2)
+        except Exception as e:
+            print(f"[AsyncAPIManager] Error saving pending actions: {e}")
+
+    def _load_pending_actions(self) -> Dict[str, Dict[str, Any]]:
+        if os.path.exists(self.storage_path):
+            try:
+                with open(self.storage_path, "r") as f:
+                    return json.load(f)
+            except Exception:
+                return {}
+        return {}
+
+    # ------------------------------------------------------------------
+    # Core Logic — Validation + Duplicate check
+    # ------------------------------------------------------------------
+    async def process_barcode(self, barcode: str, inspection_type: str) -> Dict[str, Any]:
         """
-        Main logic orchestrating both APIs.
-        Returns structured dict for GUI.
+        Called when a new barcode is scanned.
+        Runs api1 + api2 concurrently.
+        Returns a message dict for GUI.
         """
+        msg = {"status": "error", "message": "", "buttons": [], "data": None, "action_required": False}
 
-        msg = {
-            "status": "error",
-            "message": "",
-            "buttons": [],
-            "data": None,
-            "action_required": False,
-        }
+        if inspection_type not in self.inspection_config:
+            msg["message"] = f"Unknown inspection type: {inspection_type}"
+            return msg
 
-        ok1, result1 = self._call_api("post", self.api1_url, {"barcode": barcode})
-        ok2, result2 = self._call_api("post", self.api2_url, {"barcode": barcode})
+        cfg = self.inspection_config[inspection_type]
+        api1_url, api2_url = cfg["api1"], cfg["api2"]
 
-        # ---- Server availability ----
+        # Call both APIs concurrently
+        results = await asyncio.gather(
+            self._call_api("post", api1_url, {"barcode": barcode}),
+            self._call_api("post", api2_url, {"barcode": barcode}),
+            return_exceptions=True
+        )
+
+        # Unpack
+        (ok1, result1), (ok2, result2) = results if isinstance(results[0], tuple) else [(False, None), (False, None)]
+
+        # --- Server errors ---
         if not ok1 and not ok2:
-            msg["message"] = "Can't proceed — both servers are not running."
+            msg["message"] = f"Can't proceed — both {inspection_type} servers are not running."
             return msg
         elif not ok1:
-            msg["message"] = "Can't proceed — Server 1 not running."
+            msg["message"] = f"Can't proceed — {inspection_type} Server 1 not running."
             return msg
         elif not ok2:
-            msg["message"] = "Can't proceed — Server 2 not running."
+            msg["message"] = f"Can't proceed — {inspection_type} Server 2 not running."
             return msg
 
-        # ---- API1 None ----
+        # --- API1 returned None ---
         if result1 in (None, "", {}, []):
-            msg["message"] = (
-                f"Barcode was not tested in previous {self.placeholders[0]} inspection, can’t proceed."
-            )
+            msg["message"] = f"Barcode was not tested in previous {inspection_type} inspection, can’t proceed."
             return msg
 
-        # ---- API1 True ----
+        # --- API1 returned True ---
         if result1 is True:
-            # API2 None → proceed silently
             if result2 in (None, "", {}, []):
                 return {
                     "status": "success",
                     "message": "Proceed with inspection.",
                     "buttons": [],
                     "data": None,
-                    "action_required": False,
+                    "action_required": False
                 }
 
-            # API2 contains duplicate → ask user
-            if isinstance(result2, dict) and len(result2) > 0:
-                msg.update(
-                    {
-                        "status": "warning",
-                        "message": f"Barcode already scanned in {self.placeholders[1]} — duplicate record. Do you want to proceed?",
-                        "buttons": ["Delete", "Update", "Append"],
-                        "data": result2,
-                        "action_required": True,
-                    }
-                )
+            if isinstance(result2, dict) and result2:
+                msg.update({
+                    "status": "warning",
+                    "message": f"Barcode already scanned in {inspection_type} — duplicate record. Do you want to proceed?",
+                    "buttons": ["Delete", "Update", "Append"],
+                    "data": result2,
+                    "action_required": True
+                })
                 return msg
 
         msg["message"] = "Unexpected API response."
         return msg
 
-    # ---------------------------------------------------
-    #  Action handlers (delete, update, append)
-    # ---------------------------------------------------
-    def execute_action(self, action: str, barcode: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """
-        Execute user-chosen action:
-          - delete: immediate DELETE call to API2
-          - update/append: store payload for later POST/PUT
-        """
+    # ------------------------------------------------------------------
+    # Handle user choice (Delete / Update / Append)
+    # ------------------------------------------------------------------
+    async def execute_action(self, inspection_type: str, action: str, barcode: str, data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         result = {"status": "error", "message": "", "data": None}
 
+        if inspection_type not in self.inspection_config:
+            result["message"] = f"Unknown inspection type: {inspection_type}"
+            return result
+
+        api2_url = self.inspection_config[inspection_type]["api2"]
         action = action.lower().strip()
 
         if action == "delete":
-            ok, resp = self._call_api("delete", self.api2_url, {"barcode": barcode})
-            if ok:
-                result["status"] = "success"
-                result["message"] = f"Barcode {barcode} deleted successfully."
-                result["data"] = resp
-            else:
-                result["message"] = f"Failed to delete barcode {barcode}."
+            ok, resp = await self._call_api("delete", api2_url, {"barcode": barcode})
+            result.update({
+                "status": "success" if ok else "error",
+                "message": f"Barcode {barcode} deleted successfully." if ok else f"Failed to delete barcode {barcode}.",
+                "data": resp
+            })
             return result
 
         elif action in ("update", "append"):
-            # save for later execution
-            self.pending_actions[barcode] = {"action": action, "data": data}
+            # Store for deferred commit
+            self.pending_actions[barcode] = {"inspection_type": inspection_type, "action": action, "data": data}
+            self._save_pending_actions()
             result["status"] = "pending"
-            result["message"] = f"Action '{action}' recorded for barcode {barcode}. Will execute after inspection."
+            result["message"] = f"Action '{action}' recorded for barcode {barcode} ({inspection_type}). Will execute after inspection."
             return result
 
-        else:
-            result["message"] = f"Invalid action '{action}'."
-            return result
+        result["message"] = f"Invalid action '{action}'."
+        return result
 
-    # ---------------------------------------------------
-    #  Trigger pending actions after inspection
-    # ---------------------------------------------------
-    def commit_pending_actions(self) -> Dict[str, Any]:
-        """
-        Execute all stored update/append actions.
-        Returns summary.
-        """
+    # ------------------------------------------------------------------
+    # Commit pending update/append (after inspection ends)
+    # ------------------------------------------------------------------
+    async def commit_pending_actions(self) -> Dict[str, int]:
         summary = {"executed": 0, "failed": 0}
 
-        for barcode, action_info in list(self.pending_actions.items()):
-            action = action_info["action"]
-            data = action_info["data"]
+        for barcode, info in list(self.pending_actions.items()):
+            inspection_type = info["inspection_type"]
+            api2_url = self.inspection_config[inspection_type]["api2"]
+            action = info["action"]
+            data = info["data"]
 
             if action == "update":
-                ok, _ = self._call_api("put", self.api2_url, {"barcode": barcode, "data": data})
+                ok, _ = await self._call_api("put", api2_url, {"barcode": barcode, "data": data})
             elif action == "append":
-                ok, _ = self._call_api("post", self.api2_url, {"barcode": barcode, "data": data})
+                ok, _ = await self._call_api("post", api2_url, {"barcode": barcode, "data": data})
             else:
                 ok = False
 
@@ -184,4 +180,40 @@ class APIManager:
             else:
                 summary["failed"] += 1
 
+        self._save_pending_actions()
         return summary
+
+#------------------------------------------------------------------Call-----------------------------------------
+
+import asyncio
+from api_manager_async import AsyncAPIManager
+
+config = {
+    "visual": {
+        "api1": "http://localhost:5001/visual/check_previous",
+        "api2": "http://localhost:5002/visual/check_duplicate"
+    },
+    "electrical": {
+        "api1": "http://localhost:5001/electrical/check_previous",
+        "api2": "http://localhost:5002/electrical/check_duplicate"
+    }
+}
+
+api = AsyncAPIManager(config)
+
+async def main():
+    # GUI scans barcode
+    result = await api.process_barcode("ABC123", "visual")
+    print(result["message"])
+
+    if result["action_required"]:
+        # simulate user choice
+        user_action = "update"
+        r = await api.execute_action("visual", user_action, "ABC123", data={"temp": 42})
+        print(r["message"])
+
+    # after inspection done for ABC123
+    summary = await api.commit_pending_actions()
+    print("Pending summary:", summary)
+
+asyncio.run(main())
