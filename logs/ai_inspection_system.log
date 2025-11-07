@@ -1,0 +1,33 @@
+2025-11-06 22:57:55,203 - Main - INFO - Starting API server only (GUI disabled)
+2025-11-06 22:57:55,225 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-11-06 22:57:55,225 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-06 22:58:05,251 - werkzeug - INFO - 127.0.0.1 - - [06/Nov/2025 22:58:05] "[35m[1mGET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1[0m" 500 -
+2025-11-06 23:05:32,649 - Main - INFO - Starting API server only (GUI disabled)
+2025-11-06 23:05:32,668 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-11-06 23:05:32,668 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-06 23:05:47,193 - server - ERROR - Exception on /api/INLINEINSPECTIONTOP [GET]
+Traceback (most recent call last):
+  File "/Users/gourav/opt/anaconda3/lib/python3.9/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/gourav/opt/anaconda3/lib/python3.9/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/gourav/opt/anaconda3/lib/python3.9/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/gourav/opt/anaconda3/lib/python3.9/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/Users/gourav/Desktop/Taisys/AI_inspection_system/./src/server/server.py", line 72, in dynamic_handler
+    return dynamic_get(table)
+NameError: name 'dynamic_get' is not defined
+2025-11-06 23:05:47,196 - werkzeug - INFO - 127.0.0.1 - - [06/Nov/2025 23:05:47] "[35m[1mGET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1[0m" 500 -
+2025-11-06 23:06:52,896 - Main - INFO - Starting API server only (GUI disabled)
+2025-11-06 23:06:52,911 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-11-06 23:06:52,911 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-06 23:06:57,592 - werkzeug - INFO - 127.0.0.1 - - [06/Nov/2025 23:06:57] "[35m[1mGET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1[0m" 500 -
+2025-11-06 23:17:56,716 - Main - INFO - Starting API server only (GUI disabled)
+2025-11-06 23:17:56,738 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-11-06 23:17:56,738 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-06 23:18:02,396 - werkzeug - INFO - 127.0.0.1 - - [06/Nov/2025 23:18:02] "[35m[1mGET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1[0m" 500 -
