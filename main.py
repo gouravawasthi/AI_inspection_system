@@ -84,7 +84,13 @@ def load_config(config_path: str = 'config.ini') -> dict:
             'auto_start': 'false',
             'save_inspection_images': 'true',
             'inspection_log_path': 'data/inspection_logs'
-        }
+        },
+        'api' = {
+            'visual_api1': 'http://localhost:5001/visual/check_previous',
+            'visual_api2': 'http://localhost:5002/visual/check_duplicate',
+            'electrical_api1': 'http://localhost:5001/electrical/check_previous',
+            'electrical_api2': 'http://localhost:5002/electrical/check_duplicate'
+}
     }
     
     # Load default configuration
