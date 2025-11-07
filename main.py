@@ -13,9 +13,9 @@ from pathlib import Path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_dir = os.path.join(current_dir, 'src')
 sys.path.insert(0, src_dir)
-# server.py is in the 'src/server' folder
-sys.path.append('./src/server')
-from server import start_server
+# Import the server module directly
+from server.server import start_server, configure_database
+from api.api_manager import APIManager
 
 
 def setup_logging(log_level: str = 'INFO'):
@@ -79,6 +79,18 @@ def load_config(config_path: str = 'config.ini') -> dict:
             'scan_timeout': '5.0',
             'supported_formats': 'CODE128,QR'
         },
+        'api_manager': {
+            'server_host': '127.0.0.1',
+            'server_port': '5000',
+            'workflow': 'CHIP_TO_EOLT',
+            'api1_endpoint': 'CHIP_INSPECTION',
+            'api2_endpoint': 'EOLT_INSPECTION',
+            'api1_description': 'chip inspection',
+            'api2_description': 'EOLT testing',
+            'timeout': '5',
+            'auto_retry': 'true',
+            'retry_count': '3'
+        },
         'system': {
             'log_level': 'INFO',
             'auto_start': 'false',
@@ -117,11 +129,18 @@ def load_config(config_path: str = 'config.ini') -> dict:
             # Try to convert to appropriate types
             if value.lower() in ('true', 'false'):
                 config_dict[section_name][key] = value.lower() == 'true'
-            elif value.replace('.', '').isdigit():
-                if '.' in value:
+            elif value.replace('.', '').replace('-', '').isdigit():
+                # Check if it's a simple number, not an IP address or complex string
+                dot_count = value.count('.')
+                if dot_count == 0:
+                    # Integer
+                    config_dict[section_name][key] = int(value)
+                elif dot_count == 1 and not any(char.isalpha() for char in value):
+                    # Simple float  
                     config_dict[section_name][key] = float(value)
                 else:
-                    config_dict[section_name][key] = int(value)
+                    # Multiple dots (likely IP) or contains letters - keep as string
+                    config_dict[section_name][key] = value
             else:
                 config_dict[section_name][key] = value
     
@@ -134,12 +153,54 @@ def create_directory_structure():
         'data/raw',
         'data/processed', 
         'data/inspection_logs',
-        'data/api_logs'
+        'data/api_logs',
         'logs'
     ]
     
     for directory in directories:
         Path(directory).mkdir(parents=True, exist_ok=True)
+
+
+def create_api_manager(config: dict) -> APIManager:
+    """
+    Create and configure APIManager from configuration settings
+    
+    Args:
+        config: Configuration dictionary
+        
+    Returns:
+        Configured APIManager instance
+    """
+    api_config = config.get('api_manager', {})
+    
+    # Method 1: Use predefined workflow if specified
+    workflow = api_config.get('workflow')
+    if workflow and workflow != 'custom':
+        try:
+            api_manager = APIManager.create_workflow(workflow)
+            print(f"✅ Created API Manager using workflow: {workflow}")
+            return api_manager
+        except ValueError as e:
+            print(f"⚠️  Workflow creation failed: {e}")
+            print("   Falling back to endpoint configuration...")
+    
+    # Method 2: Use endpoint configuration
+    api1_endpoint = api_config.get('api1_endpoint', 'CHIP_INSPECTION')
+    api2_endpoint = api_config.get('api2_endpoint', 'EOLT_INSPECTION')
+    api1_desc = api_config.get('api1_description', 'previous inspection')
+    api2_desc = api_config.get('api2_description', 'current inspection')
+    
+    try:
+        api_manager = APIManager.create_from_config(
+            api1_endpoint=api1_endpoint,
+            api2_endpoint=api2_endpoint,
+            placeholders=(api1_desc, api2_desc)
+        )
+        print(f"✅ Created API Manager: {api1_endpoint} -> {api2_endpoint}")
+        return api_manager
+    except ValueError as e:
+        print(f"❌ API Manager creation failed: {e}")
+        raise
 
 
 def main():
@@ -157,6 +218,28 @@ def main():
 
         logger = logging.getLogger('Main')
         logger.info("Starting API server only (GUI disabled)")
+
+        # Configure database path from config
+        db_full_path = config.get('database', {}).get('db_full_path', 'data/db/inspection_data.db')
+        # Make sure path is absolute
+        if not os.path.isabs(db_full_path):
+            db_full_path = os.path.join(current_dir, db_full_path)
+        
+        logger.info(f"Configuring database at: {db_full_path}")
+        configure_database(db_full_path)
+
+        # Create and configure API Manager
+        try:
+            api_manager = create_api_manager(config)
+            logger.info("API Manager configured successfully")
+            
+            # Store API manager instance globally for use by other modules
+            # (You can also inject it into other components as needed)
+            globals()['api_manager'] = api_manager
+            
+        except Exception as e:
+            logger.error(f"Failed to configure API Manager: {e}")
+            logger.warning("Continuing without API Manager...")
 
         # Start Flask server (blocking)
         start_server()
