@@ -1,0 +1,73 @@
+[
+  {
+    "name": "CHIPINSPECTION",
+    "columns": [
+      "Barcode",
+      "DT",
+      "Process_id",
+      "Station_ID",
+      "PASS_FAIL"
+    ],
+    "primary_key": "Barcode",
+    "timestamp_column": "DT"
+  },
+  {
+    "name": "INLINEINSPECTIONTOP",
+    "columns": [
+      "Barcode",
+      "DT",
+      "Process_id",
+      "Station_ID",
+      "Screw",
+      "Plate",
+      "Result",
+      "ManualScrew",
+      "ManualPlate",
+      "ManualResult"
+    ],
+    "primary_key": "Barcode",
+    "timestamp_column": "DT"
+  },
+  {
+    "name": "INLINEINSPECTIONBOTTOM",
+    "columns": [
+      "Barcode",
+      "DT",
+      "Process_id",
+      "Station_ID",
+      "Antenna",
+      "Capacitor",
+      "Speaker",
+      "Result",
+      "ManualAntenna",
+      "ManualCapacitor",
+      "ManualSpeaker",
+      "ManualResult"
+    ],
+    "primary_key": "Barcode",
+    "timestamp_column": "DT"
+  },
+  {
+    "name": "EOLTINSPECTION",
+    "columns": [
+      "Barcode",
+      "DT",
+      "Process_id",
+      "Station_ID",
+      "Upper",
+      "Lower",
+      "Left",
+      "Right",
+      "Result",
+      "Printtext",
+      "Barcodetext",
+      "ManualUpper",
+      "ManualLower",
+      "ManualLeft",
+      "ManualRight",
+      "ManualResult"
+    ],
+    "primary_key": "Barcode",
+    "timestamp_column": "DT"
+  }
+]

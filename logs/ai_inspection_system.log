@@ -482,3 +482,417 @@
 2025-11-08 07:34:32,516 - __main__ - INFO - �️  GUI application closed
 2025-11-08 07:34:32,516 - __main__ - INFO - 📷 Camera system stopped
 2025-11-08 07:34:32,516 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:43:00,338 - __main__ - INFO - ============================================================
+2025-11-08 07:43:00,338 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:43:00,338 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:43:00,338 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:43:00,339 - __main__ - INFO - ============================================================
+2025-11-08 07:43:00,339 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:43:00,339 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:43:00,339 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:43:00,339 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:43:00,357 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:43:00,357 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:43:01,397 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:43:01] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:43:01,398 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:43:01,398 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:43:01,398 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:43:01,399 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:43:01,399 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:43:01,937 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 07:43:01,938 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 07:43:01,938 - config - INFO - Creating default configuration
+2025-11-08 07:43:02,315 - __main__ - INFO - ✅ GUI application ready
+2025-11-08 07:43:02,316 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:43:02,316 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-08 07:43:04,237 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 07:43:04,237 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 07:43:04,240 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:43:04] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:43:04,245 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:43:04] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:43:04,246 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:43:04,246 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:43:04,246 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 07:43:04,248 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 07:43:04,248 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 07:43:04,248 - config - INFO - Creating default configuration
+2025-11-08 07:43:46,632 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:43:46,633 - __main__ - INFO - �️  GUI application closed
+2025-11-08 07:43:46,633 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:43:46,634 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:43:46,634 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:43:46,634 - __main__ - INFO - �️  GUI application closed
+2025-11-08 07:43:46,634 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:43:46,634 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:53:20,540 - __main__ - INFO - ============================================================
+2025-11-08 07:53:20,541 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:53:20,541 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:53:20,541 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:53:20,541 - __main__ - INFO - ============================================================
+2025-11-08 07:53:20,541 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:53:20,541 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:53:20,541 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:53:20,541 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:53:20,572 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:53:20,572 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:53:21,643 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:53:21] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:53:21,644 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:53:21,644 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:53:21,644 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:53:21,644 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:53:21,644 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:53:21,644 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 07:53:21,644 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:53:21,645 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 07:54:19,010 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:54:19] "GET /api/EOLTINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 07:54:40,195 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:54:40,195 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:54:40,195 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:54:40,195 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:54:40,195 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:54:40,195 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:55:37,005 - __main__ - INFO - ============================================================
+2025-11-08 07:55:37,006 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:55:37,006 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:55:37,007 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:55:37,007 - __main__ - INFO - ============================================================
+2025-11-08 07:55:37,007 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:55:37,007 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:55:37,007 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:55:37,007 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:55:37,008 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 07:55:37,008 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 07:55:37,019 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 07:55:37,024 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:55:37,024 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:55:38,082 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:55:38] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:55:38,089 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 07:55:39,092 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:55:39,092 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:55:39,092 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:55:39,092 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:55:39,092 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:55:39,093 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 07:55:39,093 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:55:39,093 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 07:56:28,435 - __main__ - INFO - ============================================================
+2025-11-08 07:56:28,435 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:56:28,435 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:56:28,435 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:56:28,435 - __main__ - INFO - ============================================================
+2025-11-08 07:56:28,435 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:56:28,435 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:56:28,435 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:56:28,436 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:56:28,436 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 07:56:28,436 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 07:56:28,444 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 07:56:28,451 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:56:28,451 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:56:29,449 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:56:29] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:56:29,450 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 07:56:30,451 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:56:30,451 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:56:30,451 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:56:30,451 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:56:30,451 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:56:30,451 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 07:56:30,451 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:56:30,451 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 07:56:44,279 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 07:56:44,279 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 07:56:44,300 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:56:44] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:56:44,305 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:56:44] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:56:44,306 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:56:44,306 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:56:44,306 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 07:57:17,377 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:57:17,377 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:57:17,377 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:57:17,378 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:57:17,378 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:57:17,378 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:57:32,606 - __main__ - INFO - ============================================================
+2025-11-08 07:57:32,607 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:57:32,607 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:57:32,607 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:57:32,607 - __main__ - INFO - ============================================================
+2025-11-08 07:57:32,607 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:57:32,608 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:57:32,608 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:57:32,608 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:57:32,608 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 07:57:32,608 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 07:57:32,620 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 07:57:32,626 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:57:32,626 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:57:33,666 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:57:33] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:57:33,667 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 07:57:34,671 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:57:34,671 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:57:34,671 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:57:34,671 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:57:34,671 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:57:34,671 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 07:57:34,671 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:57:34,671 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 07:57:40,655 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 07:57:40,656 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 07:57:40,659 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:57:40] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:57:40,665 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:57:40] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 07:57:40,665 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:57:40,666 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:57:40,666 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 07:57:46,044 - __main__ - INFO - 🔍 Starting inspection for barcode: a123
+2025-11-08 07:57:46,048 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:57:46] "[33mGET /api/CHIPINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:57:46,052 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:57:46] "[33mGET /api/EOLTINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:57:46,052 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:57:46,053 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:58:02,594 - __main__ - INFO - 🔍 Starting inspection for barcode: a123
+2025-11-08 07:58:02,599 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:58:02] "[33mGET /api/CHIPINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:58:02,604 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:58:02] "[33mGET /api/EOLTINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:58:02,604 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:58:02,605 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:58:35,885 - __main__ - INFO - 🔍 Starting inspection for barcode: a123
+2025-11-08 07:58:35,888 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:58:35] "[33mGET /api/CHIPINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:58:35,892 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:58:35] "[33mGET /api/EOLTINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:58:35,893 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:58:35,894 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:58:40,216 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:58:40,217 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:58:40,217 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:58:40,217 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 07:58:40,217 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 07:58:40,217 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 07:58:54,171 - __main__ - INFO - ============================================================
+2025-11-08 07:58:54,172 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 07:58:54,172 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 07:58:54,172 - __main__ - INFO - Config Version: 1.0
+2025-11-08 07:58:54,172 - __main__ - INFO - ============================================================
+2025-11-08 07:58:54,172 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 07:58:54,172 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 07:58:54,172 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 07:58:54,172 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 07:58:54,173 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 07:58:54,173 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 07:58:54,185 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 07:58:54,190 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 07:58:54,190 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 07:58:55,197 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:58:55] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 07:58:55,198 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 07:58:56,199 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 07:58:56,199 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 07:58:56,200 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 07:58:56,200 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 07:58:56,200 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 07:58:56,200 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 07:58:56,200 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 07:58:56,200 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 07:59:17,388 - __main__ - INFO - 🔍 Starting inspection for barcode: a123
+2025-11-08 07:59:17,394 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:59:17] "[33mGET /api/CHIPINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:59:17,398 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:59:17] "[33mGET /api/EOLTINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 07:59:17,399 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 07:59:17,399 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 07:59:39,626 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 07:59:39] "GET /api/EOLTINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:00:08,275 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:00:08,279 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:00:08,280 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:00:08,280 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:00:08,280 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:00:08,280 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:01:46,009 - __main__ - INFO - ============================================================
+2025-11-08 08:01:46,009 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 08:01:46,009 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 08:01:46,009 - __main__ - INFO - Config Version: 1.0
+2025-11-08 08:01:46,009 - __main__ - INFO - ============================================================
+2025-11-08 08:01:46,010 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 08:01:46,010 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 08:01:46,010 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 08:01:46,010 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 08:01:46,010 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 08:01:46,010 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 08:01:46,017 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 08:01:46,026 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 08:01:46,027 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 08:01:47,027 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:01:47] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 08:01:47,028 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 08:01:48,029 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 08:01:48,029 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 08:01:48,029 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 08:01:48,029 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 08:01:48,029 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 08:01:48,029 - __main__ - WARNING - ⚠️  PyQt5 not available - running in console mode
+2025-11-08 08:01:48,029 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 08:01:48,030 - __main__ - INFO - 💻 Running in console mode
+2025-11-08 08:01:56,158 - __main__ - INFO - 🔍 Starting inspection for barcode: a123
+2025-11-08 08:01:56,161 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:01:56] "[33mGET /api/CHIPINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 08:01:56,166 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:01:56] "[33mGET /api/EOLTINSPECTION?barcode=a123 HTTP/1.1[0m" 404 -
+2025-11-08 08:01:56,167 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 08:01:56,167 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 08:02:05,450 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:02:05,450 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:02:05,450 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:02:05,451 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:02:05,451 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:02:05,451 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:03:33,330 - __main__ - INFO - ============================================================
+2025-11-08 08:03:33,331 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 08:03:33,331 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 08:03:33,331 - __main__ - INFO - Config Version: 1.0
+2025-11-08 08:03:33,331 - __main__ - INFO - ============================================================
+2025-11-08 08:03:33,331 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 08:03:33,331 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 08:03:33,332 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 08:03:33,332 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 08:03:33,332 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 08:03:33,332 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 08:03:33,342 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 08:03:33,349 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 08:03:33,349 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 08:03:34,365 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:03:34] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 08:03:34,366 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 08:03:35,370 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 08:03:35,370 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 08:03:35,370 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 08:03:35,370 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 08:03:35,370 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 08:03:35,702 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:03:35,703 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:03:35,703 - config - INFO - Creating default configuration
+2025-11-08 08:03:36,008 - __main__ - INFO - ✅ GUI application ready
+2025-11-08 08:03:36,008 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 08:03:36,008 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-08 08:03:38,893 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 08:03:38,893 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 08:03:38,897 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:03:38] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:03:38,912 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:03:38] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:03:38,913 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 08:03:38,913 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 08:03:38,913 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 08:05:26,371 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:05:26,373 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:05:26,373 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:05:26,373 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:05:26,373 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:05:26,373 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:05:26,373 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:05:26,373 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:07:29,103 - __main__ - INFO - ============================================================
+2025-11-08 08:07:29,104 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 08:07:29,104 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 08:07:29,104 - __main__ - INFO - Config Version: 1.0
+2025-11-08 08:07:29,104 - __main__ - INFO - ============================================================
+2025-11-08 08:07:29,105 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 08:07:29,105 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 08:07:29,105 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 08:07:29,105 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 08:07:29,105 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 08:07:29,105 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 08:07:29,113 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 08:07:29,119 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 08:07:29,119 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 08:07:30,141 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:30] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 08:07:30,142 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 08:07:31,148 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 08:07:31,148 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 08:07:31,148 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 08:07:31,148 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 08:07:31,148 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 08:07:31,393 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:07:31,394 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:07:31,394 - config - INFO - Creating default configuration
+2025-11-08 08:07:31,613 - __main__ - INFO - ✅ GUI application ready
+2025-11-08 08:07:31,614 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 08:07:31,614 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-08 08:07:33,524 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 08:07:33,524 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 08:07:33,527 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:33] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:07:34,806 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:34] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:07:34,806 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 08:07:34,806 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 08:07:34,806 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 08:07:42,165 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:42] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:07:42,170 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:42] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:07:42,713 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:42] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:07:42,717 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:07:42] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:08:26,479 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:26] "GET /api/INLINEINSPECTIONBOTTOM?barcode=E123 HTTP/1.1" 200 -
+2025-11-08 08:08:26,482 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:26] "GET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1" 200 -
+2025-11-08 08:08:34,115 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:34] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:08:34,118 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:34] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:08:35,165 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:35] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:08:35,168 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:08:35] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:09:20,672 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:09:20] "[31m[1mGET /api/INSPECTIONTOP?barcode=A123 HTTP/1.1[0m" 400 -
+2025-11-08 08:09:36,755 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:09:36] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:10:05,812 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:10:05] "GET /api/INLINEINSPECTIONTOP?barcode=E123 HTTP/1.1" 200 -
+2025-11-08 08:10:19,467 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:10:19] "GET /api/INLINEINSPECTIONTOP?barcode=H123 HTTP/1.1" 200 -
+2025-11-08 08:10:34,048 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:10:34] "GET /api/INLINEINSPECTIONBOTTOM?barcode=H123 HTTP/1.1" 200 -
+2025-11-08 08:10:34,052 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:10:34] "GET /api/INLINEINSPECTIONTOP?barcode=H123 HTTP/1.1" 200 -
+2025-11-08 08:11:34,218 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:11:34] "GET /api/INLINEINSPECTIONTOP?barcode=H123 HTTP/1.1" 200 -
+2025-11-08 08:11:43,418 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:11:43] "GET /api/INLINEINSPECTIONBOTTOM?barcode=H123 HTTP/1.1" 200 -
+2025-11-08 08:12:13,314 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:12:13,314 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:12:13,314 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:12:13,314 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:12:13,317 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:12:13,317 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:12:13,318 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:12:13,318 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:13:38,504 - __main__ - INFO - ============================================================
+2025-11-08 08:13:38,505 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-08 08:13:38,505 - __main__ - INFO - Application Version: 1.0.0
+2025-11-08 08:13:38,505 - __main__ - INFO - Config Version: 1.0
+2025-11-08 08:13:38,505 - __main__ - INFO - ============================================================
+2025-11-08 08:13:38,506 - __main__ - INFO - ✅ System configuration validated
+2025-11-08 08:13:38,506 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-08 08:13:38,506 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-08 08:13:38,506 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-08 08:13:38,506 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-08 08:13:38,506 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-08 08:13:38,518 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-08 08:13:38,524 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-08 08:13:38,525 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-08 08:13:39,546 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:13:39] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-08 08:13:39,547 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-08 08:13:40,548 - __main__ - INFO - ✅ API server started successfully
+2025-11-08 08:13:40,549 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-08 08:13:40,549 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-08 08:13:40,549 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-08 08:13:40,549 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-08 08:13:40,782 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:13:40,782 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-08 08:13:40,782 - config - INFO - Creating default configuration
+2025-11-08 08:13:40,971 - __main__ - INFO - ✅ GUI application ready
+2025-11-08 08:13:40,971 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-08 08:13:40,971 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-08 08:13:42,683 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-08 08:13:42,683 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-08 08:13:42,687 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:13:42] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:13:42,713 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:13:42] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-08 08:13:42,714 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-08 08:13:42,715 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-08 08:13:42,715 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-08 08:13:49,814 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:13:49] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:13:49,820 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:13:49] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:14:27,582 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:14:27] "[31m[1mGET /api/CHIPNSPECTION?barcode=A123 HTTP/1.1[0m" 400 -
+2025-11-08 08:14:37,392 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:14:37] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-08 08:14:48,349 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:14:48] "GET /api/CHIPINSPECTION?barcode=B123 HTTP/1.1" 200 -
+2025-11-08 08:14:59,998 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:14:59] "GET /api/INLINEINSPECTIONBOTTOM?barcode=B123 HTTP/1.1" 200 -
+2025-11-08 08:15:00,003 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:15:00] "GET /api/INLINEINSPECTIONTOP?barcode=B123 HTTP/1.1" 200 -
+2025-11-08 08:15:37,489 - werkzeug - INFO - 127.0.0.1 - - [08/Nov/2025 08:15:37] "GET /api/INLINEINSPECTIONBOTTOM?barcode=B123 HTTP/1.1" 200 -
+2025-11-08 08:16:10,264 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:16:10,267 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:16:10,268 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:16:10,268 - __main__ - INFO - ✅ System shutdown completed
+2025-11-08 08:16:10,268 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-08 08:16:10,268 - __main__ - INFO - �️  GUI application closed
+2025-11-08 08:16:10,268 - __main__ - INFO - 📷 Camera system stopped
+2025-11-08 08:16:10,268 - __main__ - INFO - ✅ System shutdown completed

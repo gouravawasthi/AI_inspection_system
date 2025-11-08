@@ -40,12 +40,21 @@ from api.api_manager import APIManager
 
 # GUI imports (conditional to handle missing PyQt5)
 try:
-    from ui.mainwindow import MainWindow
+    import sys
+    import os
+    # Ensure the correct path for UI imports
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    ui_path = os.path.join(current_dir, 'src', 'ui')
+    if ui_path not in sys.path:
+        sys.path.insert(0, ui_path)
+    
+    from mainwindow import MainWindow
     PYQT5_AVAILABLE = True
-except ImportError:
+    print("✅ PyQt5 and GUI components available")
+except ImportError as e:
     PYQT5_AVAILABLE = False
     MainWindow = None
-    print("⚠️  PyQt5 not available - GUI will be disabled")
+    print(f"⚠️  GUI not available: {e}")
 
 class AIInspectionSystem:
     """
@@ -452,26 +461,46 @@ class AIInspectionSystem:
     def _run_server(self):
         """Run Flask server in background thread"""
         try:
+            self.logger.info("🔧 Starting Flask server in background thread...")
             start_server()
         except Exception as e:
-            self.logger.error(f"Server thread error: {e}")
+            self.logger.error(f"❌ Server thread error: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
     
-    def _wait_for_server_startup(self, timeout: int = 10):
+    def is_server_running(self) -> bool:
+        """Check if server is currently running and responsive"""
+        try:
+            import requests
+            url = f"http://{self.config.server.host}:{self.config.server.port}/api/CHIPINSPECTION"
+            response = requests.get(url, timeout=2)
+            return response.status_code in (200, 404)
+        except:
+            return False
+    
+    def _wait_for_server_startup(self, timeout: int = 15):
         """Wait for server to start up"""
         import requests
         
         url = f"http://{self.config.server.host}:{self.config.server.port}/api/CHIPINSPECTION"
+        self.logger.info(f"⏳ Waiting for server startup at {url}")
         
-        for _ in range(timeout):
+        for i in range(timeout):
             try:
-                response = requests.get(url, timeout=1)
+                response = requests.get(url, timeout=2)
                 if response.status_code in (200, 404):  # 404 is OK (no data)
                     self.server_running = True
+                    self.logger.info(f"✅ Server responded successfully (status: {response.status_code})")
+                    time.sleep(1)  # Give server extra moment to fully initialize
                     return
+            except requests.exceptions.RequestException as e:
+                if i == 0:
+                    self.logger.info(f"🔄 Server starting... (attempt {i+1}/{timeout})")
             except:
                 pass
             time.sleep(1)
         
+        self.logger.error(f"❌ Server failed to start within {timeout} seconds")
         self.server_running = False
 
 

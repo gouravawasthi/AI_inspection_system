@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 from datetime import datetime
 
 # Import base class
-from .base_inspection_window import BaseInspectionWindow
+from base_inspection_window import BaseInspectionWindow
 
 # Add parent directory to path for API imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -42,57 +42,93 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         try:
             print("🔧 Initializing INLINE API managers...")
             
-            # Load configuration to get API endpoints
-            from config import config_manager
-            config = config_manager.load_config()
+            # Load workflow configuration directly from JSON file
+            import json
+            import os
+            
+            workflow_file = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                'configs', 
+                'inspection_workflows.json'
+            )
+            
+            workflows = []
+            if os.path.exists(workflow_file):
+                with open(workflow_file, 'r') as f:
+                    workflows = json.load(f)
+            else:
+                print(f"❌ Workflow file not found: {workflow_file}")
+                return
+            
+            # Base API URL
+            api_base_url = "http://127.0.0.1:5001/api"
             
             # Initialize BOTTOM inspection API manager (CHIP -> INLINE_BOTTOM)
             bottom_workflow = None
-            for wf in config.workflows:
-                if wf.name == "CHIP_TO_INLINE_BOTTOM":
+            for wf in workflows:
+                if wf.get('name') == "CHIP_TO_INLINE_BOTTOM":
                     bottom_workflow = wf
                     break
             
             if bottom_workflow:
-                api1_url = f"{config.api.base_url}/{bottom_workflow.api1_table}"
-                api2_url = f"{config.api.base_url}/{bottom_workflow.api2_table}"
+                api1_url = f"{api_base_url}/{bottom_workflow['api1_table']}"
+                api2_url = f"{api_base_url}/{bottom_workflow['api2_table']}"
                 
                 self.bottom_api_manager = APIManager(
                     api1_url=api1_url,
                     api2_url=api2_url,
-                    placeholders=(bottom_workflow.api1_table.lower(), bottom_workflow.api2_table.lower())
+                    placeholders=(bottom_workflow['api1_table'].lower(), bottom_workflow['api2_table'].lower())
                 )
                 print(f"✅ INLINE BOTTOM API Manager initialized:")
-                print(f"   📡 API1: {api1_url} ({bottom_workflow.api1_table})")
-                print(f"   📡 API2: {api2_url} ({bottom_workflow.api2_table})")
+                print(f"   📡 API1: {api1_url} ({bottom_workflow['api1_table']})")
+                print(f"   📡 API2: {api2_url} ({bottom_workflow['api2_table']})")
             else:
                 print("❌ CHIP_TO_INLINE_BOTTOM workflow not found")
             
             # Initialize TOP inspection API manager (INLINE_BOTTOM -> INLINE_TOP)
             top_workflow = None
-            for wf in config.workflows:
-                if wf.name == "INLINE_BOTTOM_TO_INLINE_TOP":
+            for wf in workflows:
+                if wf.get('name') == "INLINE_BOTTOM_TO_INLINE_TOP":
                     top_workflow = wf
                     break
             
             if top_workflow:
-                api1_url = f"{config.api.base_url}/{top_workflow.api1_table}"
-                api2_url = f"{config.api.base_url}/{top_workflow.api2_table}"
+                api1_url = f"{api_base_url}/{top_workflow['api1_table']}"
+                api2_url = f"{api_base_url}/{top_workflow['api2_table']}"
                 
                 self.top_api_manager = APIManager(
                     api1_url=api1_url,
                     api2_url=api2_url,
-                    placeholders=(top_workflow.api1_table.lower(), top_workflow.api2_table.lower())
+                    placeholders=(top_workflow['api1_table'].lower(), top_workflow['api2_table'].lower())
                 )
                 print(f"✅ INLINE TOP API Manager initialized:")
-                print(f"   📡 API1: {api1_url} ({top_workflow.api1_table})")
-                print(f"   📡 API2: {api2_url} ({top_workflow.api2_table})")
+                print(f"   📡 API1: {api1_url} ({top_workflow['api1_table']})")
+                print(f"   📡 API2: {api2_url} ({top_workflow['api2_table']})")
             else:
                 print("❌ INLINE_BOTTOM_TO_INLINE_TOP workflow not found")
+                
             
-            # Set the primary API manager for barcode validation (use bottom for initial validation)
-            self.api_manager = self.bottom_api_manager
-            print(f"🔧 Primary API manager set to BOTTOM for barcode validation")
+            # Set the primary API manager for barcode validation
+            # Priority: bottom_api_manager > top_api_manager > fallback to default
+            if hasattr(self, 'bottom_api_manager') and self.bottom_api_manager:
+                self.api_manager = self.bottom_api_manager
+                print(f"🔧 Primary API manager set to BOTTOM for barcode validation")
+            elif hasattr(self, 'top_api_manager') and self.top_api_manager:
+                self.api_manager = self.top_api_manager
+                print(f"🔧 Primary API manager set to TOP for barcode validation")
+            else:
+                # Fallback: Create a basic API manager for barcode validation
+                print("⚠️ Creating fallback API manager for INLINE validation")
+                api_base_url = "http://127.0.0.1:5001/api"
+                fallback_api1 = f"{api_base_url}/INLINEINSPECTIONBOTTOM"
+                fallback_api2 = f"{api_base_url}/INLINEINSPECTIONTOP"
+                
+                self.api_manager = APIManager(
+                    api1_url=fallback_api1,
+                    api2_url=fallback_api2,
+                    placeholders=("inline bottom", "inline top")
+                )
+                print(f"✅ Fallback API manager created: {fallback_api1} -> {fallback_api2}")
             
         except Exception as e:
             print(f"❌ Error initializing INLINE API managers: {e}")

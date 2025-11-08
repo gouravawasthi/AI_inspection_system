@@ -12,8 +12,8 @@ from PyQt5.QtGui import QPixmap, QFont
 # Add parent directory to path for config imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config_manager
-from .eolt_inspection_window import EOLTInspectionWindow
-from .inline_inspection_window import INLINEInspectionWindow
+from eolt_inspection_window import EOLTInspectionWindow
+from inline_inspection_window import INLINEInspectionWindow
 
 
 class MainWindow(QMainWindow):
