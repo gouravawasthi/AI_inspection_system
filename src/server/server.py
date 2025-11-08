@@ -213,8 +213,8 @@ def dynamic_handler(table_name):
 
 # --- New Function for Threading ---
 
-def start_server():
-    """Function to run the Flask app."""
+def start_server(host='127.0.0.1', port=5001, debug=False, threaded=True):
+    """Function to run the Flask app with configurable parameters."""
     if DB_FILE is None:
         raise ValueError("Database not configured. Call configure_database() first.")
     
@@ -222,10 +222,11 @@ def start_server():
     if not os.path.exists(DATA_DIR):
         os.makedirs(DATA_DIR)
         
-    print(f"\n🚀 Starting Flask server on http://127.0.0.1:5001")
+    print(f"\n🚀 Starting Flask server on http://{host}:{port}")
     print(f"   Database expected at: {DB_FILE}\n")
+    
     # Set use_reloader=False to prevent issues with threading
-    app.run(debug=False, use_reloader=False, host='127.0.0.1', port=5001)
+    app.run(debug=debug, use_reloader=False, host=host, port=port, threaded=threaded)
 
 if __name__ == '__main__':
     # Running server.py directly is still supported

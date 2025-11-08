@@ -1,6 +1,57 @@
 import requests
 from typing import Any, Dict, Optional, Tuple
 
+# --- API Endpoint Constants ---
+# Base URL for the inspection API server
+API_BASE_URL = "http://127.0.0.1:5001/api"
+
+# Database table endpoints - based on inspection_data.db tables
+API_ENDPOINTS = {
+    'CHIP_INSPECTION': f"{API_BASE_URL}/CHIPINSPECTION",
+    'INLINE_INSPECTION_TOP': f"{API_BASE_URL}/INLINEINSPECTIONTOP", 
+    'INLINE_INSPECTION_BOTTOM': f"{API_BASE_URL}/INLINEINSPECTIONBOTTOM",
+    'EOLT_INSPECTION': f"{API_BASE_URL}/EOLTINSPECTION"
+}
+
+# Pre-configured API pairs for common inspection workflows
+INSPECTION_WORKFLOWS = {
+    'CHIP_TO_EOLT': {
+        'api1_url': API_ENDPOINTS['CHIP_INSPECTION'],
+        'api2_url': API_ENDPOINTS['EOLT_INSPECTION'],
+        'placeholders': ('chip inspection', 'EOLT testing')
+    },
+    'INLINE_TOP_TO_EOLT': {
+        'api1_url': API_ENDPOINTS['INLINE_INSPECTION_TOP'],
+        'api2_url': API_ENDPOINTS['EOLT_INSPECTION'], 
+        'placeholders': ('inline top inspection', 'EOLT testing')
+    },
+    'INLINE_BOTTOM_TO_EOLT': {
+        'api1_url': API_ENDPOINTS['INLINE_INSPECTION_BOTTOM'],
+        'api2_url': API_ENDPOINTS['EOLT_INSPECTION'],
+        'placeholders': ('inline bottom inspection', 'EOLT testing')
+    },
+    'CHIP_TO_INLINE_TOP': {
+        'api1_url': API_ENDPOINTS['CHIP_INSPECTION'],
+        'api2_url': API_ENDPOINTS['INLINE_INSPECTION_TOP'],
+        'placeholders': ('chip inspection', 'inline top inspection')
+    },
+    'CHIP_TO_INLINE_BOTTOM': {
+        'api1_url': API_ENDPOINTS['CHIP_INSPECTION'],
+        'api2_url': API_ENDPOINTS['INLINE_INSPECTION_BOTTOM'],
+        'placeholders': ('chip inspection', 'inline bottom inspection')
+    },
+    'INLINE_TOP_TO_INLINE_BOTTOM': {
+        'api1_url': API_ENDPOINTS['INLINE_INSPECTION_TOP'],
+        'api2_url': API_ENDPOINTS['INLINE_INSPECTION_BOTTOM'],
+        'placeholders': ('inline top inspection', 'inline bottom inspection')
+    },
+    'INLINE_BOTTOM_TO_INLINE_TOP': {
+        'api1_url': API_ENDPOINTS['INLINE_INSPECTION_BOTTOM'],
+        'api2_url': API_ENDPOINTS['INLINE_INSPECTION_TOP'],
+        'placeholders': ('inline bottom inspection', 'inline top inspection')
+    }   
+}
+
 
 class APIManager:
     """
@@ -17,8 +68,67 @@ class APIManager:
     def __init__(self, api1_url: str, api2_url: str, placeholders: Tuple[str, str]):
         self.api1_url = api1_url
         self.api2_url = api2_url
-        self.placeholders = placeholders  # e.g. ("visual", "electrical")
+        self.placeholders = placeholders  # for user messages
         self.pending_actions: Dict[str, Dict[str, Any]] = {}  # store future update/append payloads
+
+    @classmethod
+    def create_workflow(cls, workflow_name: str) -> 'APIManager':
+        """
+        Factory method to create APIManager from predefined workflows.
+        
+        Args:
+            workflow_name: Name of predefined workflow (e.g., 'CHIP_TO_EOLT')
+            
+        Returns:
+            APIManager instance configured for the workflow
+            
+        Example:
+            api_manager = APIManager.create_workflow('CHIP_TO_EOLT')
+        """
+        if workflow_name not in INSPECTION_WORKFLOWS:
+            available = list(INSPECTION_WORKFLOWS.keys())
+            raise ValueError(f"Unknown workflow '{workflow_name}'. Available workflows: {available}")
+        
+        workflow_config = INSPECTION_WORKFLOWS[workflow_name]
+        return cls(
+            api1_url=workflow_config['api1_url'],
+            api2_url=workflow_config['api2_url'],
+            placeholders=workflow_config['placeholders']
+        )
+
+    @classmethod  
+    def create_from_config(cls, api1_endpoint: str, api2_endpoint: str, placeholders: Tuple[str, str]) -> 'APIManager':
+        """
+        Factory method to create APIManager from endpoint names.
+        
+        Args:
+            api1_endpoint: First API endpoint name (e.g., 'CHIP_INSPECTION')
+            api2_endpoint: Second API endpoint name (e.g., 'EOLT_INSPECTION')
+            placeholders: Description tuple for user messages
+            
+        Returns:
+            APIManager instance
+            
+        Example:
+            api_manager = APIManager.create_from_config(
+                'CHIP_INSPECTION', 
+                'EOLT_INSPECTION',
+                ('chip inspection', 'EOLT testing')
+            )
+        """
+        if api1_endpoint not in API_ENDPOINTS:
+            available = list(API_ENDPOINTS.keys())
+            raise ValueError(f"Unknown endpoint '{api1_endpoint}'. Available endpoints: {available}")
+            
+        if api2_endpoint not in API_ENDPOINTS:
+            available = list(API_ENDPOINTS.keys())  
+            raise ValueError(f"Unknown endpoint '{api2_endpoint}'. Available endpoints: {available}")
+        
+        return cls(
+            api1_url=API_ENDPOINTS[api1_endpoint],
+            api2_url=API_ENDPOINTS[api2_endpoint],
+            placeholders=placeholders
+        )
 
     # ---------------------------------------------------
     #  Internal API caller helper
@@ -43,7 +153,7 @@ class APIManager:
             else:
                 raise ValueError(f"Unsupported HTTP method: {method}")
 
-            if response.status_code not in (200, 201, 204):
+            if response.status_code not in (200, 201, 204, 404):
                 return False, None
 
             try:
@@ -74,19 +184,23 @@ class APIManager:
             "action_required": False,
         }
 
-        ok1, result1 = self._call_api("post", self.api1_url, {"barcode": barcode})
-        ok2, result2 = self._call_api("post", self.api2_url, {"barcode": barcode})
+        ok1, result1 = self._call_api("get", f"{self.api1_url}?barcode={barcode}")
+        ok2, result2 = self._call_api("get", f"{self.api2_url}?barcode={barcode}")
 
         # ---- Server availability ----
         if not ok1 and not ok2:
             msg["message"] = "Can't proceed — both servers are not running."
             return msg
         elif not ok1:
-            msg["message"] = "Can't proceed — Server 1 not running."
+            msg["message"] = f"Can't proceed — Server {self.placeholders[0]} not running."
             return msg
         elif not ok2:
-            msg["message"] = "Can't proceed — Server 2 not running."
+            msg["message"] = f"Can't proceed — Server {self.placeholders[1]} not running."
             return msg
+
+        # Evaluate API responses to get boolean results
+        result1_eval = self._evaluate_manual_result(result1)
+        result2_eval = self._evaluate_manual_result(result2)
 
         # ---- API1 None ----
         if result1 in (None, "", {}, []):
@@ -97,11 +211,11 @@ class APIManager:
 
         # ---- API1 True ----
         if result1 is True:
-            # API2 None → proceed silently
+            # API2 None → proceed with new entry (will do POST request after collecting results)
             if result2 in (None, "", {}, []):
                 return {
                     "status": "success",
-                    "message": "Proceed with inspection.",
+                    "message": f"Proceed with {self.placeholders[1]} - New entry will be created.",
                     "buttons": [],
                     "data": None,
                     "action_required": False,
@@ -122,6 +236,47 @@ class APIManager:
 
         msg["message"] = "Unexpected API response."
         return msg
+    
+    def _evaluate_manual_result(self, api_response: Any) -> Optional[bool]:
+        """
+        Evaluate API response and extract ManualResult or PASS_FAIL value.
+        
+        Args:
+            api_response: Response from API call
+            
+        Returns:
+            True if passed (ManualResult=1 or PASS_FAIL=1)
+            False if failed (ManualResult=0 or PASS_FAIL=0)  
+            None if no record found or invalid response
+        """
+        if not api_response:
+            return None
+            
+        # Handle error responses (404, etc.)
+        if isinstance(api_response, dict) and "message" in api_response:
+            if "No record found" in api_response["message"]:
+                return None
+            return None
+            
+        # Handle successful responses with data
+        if isinstance(api_response, dict) and "data" in api_response:
+            data_list = api_response["data"]
+            if not data_list or len(data_list) == 0:
+                return None
+                
+            # Get the record (latest if multiple)
+            record = data_list[0] if isinstance(data_list, list) else data_list
+            
+            if isinstance(record, dict):
+                # Check ManualResult first (priority)
+                if "ManualResult" in record:
+                    return record["ManualResult"] == 1
+                    
+                # Fallback to PASS_FAIL
+                if "PASS_FAIL" in record:
+                    return record["PASS_FAIL"] == 1
+                    
+        return None
 
     # ---------------------------------------------------
     #  Action handlers (delete, update, append)

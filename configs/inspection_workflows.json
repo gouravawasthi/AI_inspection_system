@@ -1,0 +1,23 @@
+[
+  {
+    "name": "CHIP_TO_EOLT",
+    "api1_table": "CHIPINSPECTION",
+    "api2_table": "EOLTINSPECTION",
+    "description": "Chip inspection to EOLT testing workflow",
+    "enabled": true
+  },
+  {
+    "name": "INLINE_TOP_TO_EOLT",
+    "api1_table": "INLINEINSPECTIONTOP",
+    "api2_table": "EOLTINSPECTION",
+    "description": "Inline top inspection to EOLT testing workflow",
+    "enabled": true
+  },
+  {
+    "name": "INLINE_BOTTOM_TO_EOLT",
+    "api1_table": "INLINEINSPECTIONBOTTOM",
+    "api2_table": "EOLTINSPECTION",
+    "description": "Inline bottom inspection to EOLT testing workflow",
+    "enabled": true
+  }
+]

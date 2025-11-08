@@ -1,0 +1,23 @@
+{
+  "database": {
+    "path": "data/db/inspection_data.db",
+    "backup_enabled": true,
+    "backup_interval": 3600,
+    "schema_version": "1.0"
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 5001,
+    "debug": false,
+    "threaded": true,
+    "max_connections": 100
+  },
+  "api": {
+    "base_url": "http://127.0.0.1:5001/api",
+    "timeout": 30,
+    "retry_attempts": 3,
+    "retry_delay": 1
+  },
+  "app_version": "1.0.0",
+  "config_version": "1.0"
+}
