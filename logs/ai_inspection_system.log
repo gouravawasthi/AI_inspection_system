@@ -896,3 +896,44 @@
 2025-11-08 08:16:10,268 - __main__ - INFO - �️  GUI application closed
 2025-11-08 08:16:10,268 - __main__ - INFO - 📷 Camera system stopped
 2025-11-08 08:16:10,268 - __main__ - INFO - ✅ System shutdown completed
+2025-11-09 11:44:06,842 - __main__ - INFO - ============================================================
+2025-11-09 11:44:06,843 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-09 11:44:06,843 - __main__ - INFO - Application Version: 1.0.0
+2025-11-09 11:44:06,843 - __main__ - INFO - Config Version: 1.0
+2025-11-09 11:44:06,843 - __main__ - INFO - ============================================================
+2025-11-09 11:44:06,844 - __main__ - INFO - ✅ System configuration validated
+2025-11-09 11:44:06,844 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-09 11:44:06,844 - __main__ - INFO - Database: /Users/gourav/Desktop/Taisys/AI_inspection_system/data/db/inspection_data.db
+2025-11-09 11:44:06,844 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-09 11:44:06,844 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-09 11:44:06,844 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-09 11:44:06,857 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-09 11:44:06,874 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-09 11:44:06,874 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-09 11:44:07,903 - werkzeug - INFO - 127.0.0.1 - - [09/Nov/2025 11:44:07] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-09 11:44:07,904 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-09 11:44:08,908 - __main__ - INFO - ✅ API server started successfully
+2025-11-09 11:44:08,908 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-09 11:44:08,908 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-09 11:44:08,908 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-09 11:44:08,908 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-09 11:44:09,401 - config - WARNING - Failed to load JSON config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-09 11:44:09,401 - config - WARNING - Failed to load INI config: __init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-09 11:44:09,401 - config - INFO - Creating default configuration
+2025-11-09 11:44:09,628 - __main__ - INFO - ✅ GUI application ready
+2025-11-09 11:44:09,628 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-09 11:44:09,628 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-09 11:44:12,884 - __main__ - INFO - 🚪 Quit requested from GUI
+2025-11-09 11:44:12,884 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-09 11:44:12,891 - __main__ - INFO - �️  GUI application closed
+2025-11-09 11:44:12,891 - __main__ - INFO - 📷 Camera system stopped
+2025-11-09 11:44:12,891 - __main__ - INFO - ✅ System shutdown completed
+2025-11-09 11:44:12,894 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-09 11:44:12,894 - __main__ - INFO - �️  GUI application closed
+2025-11-09 11:44:12,894 - __main__ - INFO - 📷 Camera system stopped
+2025-11-09 11:44:12,894 - __main__ - INFO - ✅ System shutdown completed
+2025-11-09 11:44:12,894 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-09 11:44:12,894 - __main__ - INFO - �️  GUI application closed
+2025-11-09 11:44:12,895 - __main__ - INFO - 📷 Camera system stopped
+2025-11-09 11:44:12,895 - __main__ - INFO - ✅ System shutdown completed
