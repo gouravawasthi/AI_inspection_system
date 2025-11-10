@@ -27,6 +27,17 @@ class BaseInspectionWindow(QWidget):
     inspection_complete = pyqtSignal(dict)
     window_closed = pyqtSignal()
     
+    # Define inspection states for button logic control
+    class InspectionState:
+        IDLE = "idle"                    # No barcode, ready for input
+        BARCODE_ENTERED = "barcode_entered"  # Barcode entered, ready to start
+        INSPECTION_ACTIVE = "inspection_active"  # Currently inspecting
+        STEP_IN_PROGRESS = "step_in_progress"    # Step being processed  
+        STEP_COMPLETED = "step_completed"        # Step completed, ready for next
+        INSPECTION_COMPLETED = "inspection_completed"  # All steps done
+        OVERRIDE_APPLIED = "override_applied"    # Manual override applied
+        DATA_SUBMITTED = "data_submitted"        # Data sent to API
+    
     def __init__(self, parent=None, inspection_type="GENERIC"):
         super().__init__()
         self.parent_window = parent
@@ -39,6 +50,11 @@ class BaseInspectionWindow(QWidget):
         self.step_start_time = None
         self.api_manager = None
         self.api_data_collected = {}
+        
+        # Initialize inspection state for smart button control
+        self.inspection_state = self.InspectionState.IDLE
+        self.step_data_collected = False  # Track if current step has data
+        self.override_allowed = False     # Track if override is allowed
         
         # Initialize API manager for this inspection type
         self.init_api_manager()
@@ -67,7 +83,16 @@ class BaseInspectionWindow(QWidget):
     def init_ui(self):
         """Initialize the inspection interface"""
         self.setWindowTitle(f"AI VDI System - {self.inspection_type} Inspection")
-        self.showFullScreen()
+        
+        # Import screen utilities for better display handling
+        try:
+            from .screen_utils import apply_fullscreen_to_window
+        except ImportError:
+            from screen_utils import apply_fullscreen_to_window
+        
+        # Apply fullscreen with 5% bottom margin for better UI spacing
+        apply_fullscreen_to_window(self, bottom_margin_percent=5)
+        
         self.setStyleSheet(self.get_base_stylesheet())
         
         # Main layout
@@ -150,49 +175,43 @@ class BaseInspectionWindow(QWidget):
     def create_control_panel(self, main_layout):
         """Create the control panel on the left"""
         control_panel = QFrame()
-        control_panel.setFixedWidth(400)
+        control_panel.setFixedWidth(320)  # Reduced from 400 to 320
         control_panel.setStyleSheet("QFrame { border: 2px solid #ccc; border-radius: 10px; background-color: white; }")
         control_layout = QVBoxLayout()
         control_panel.setLayout(control_layout)
         
         # Title
         title = QLabel(f"{self.inspection_type} Control Panel")
-        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setFont(QFont("Arial", 16, QFont.Bold))  # Reduced font size from 18 to 16
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin: 15px;")
+        title.setStyleSheet("color: #2c3e50; margin: 10px;")  # Reduced margin
         control_layout.addWidget(title)
         
         # Barcode section
         self.create_barcode_section(control_layout)
         
-        # API Status section
-        self.create_api_status_section(control_layout)
-        
-        # Camera settings section
-        self.create_camera_settings(control_layout)
-        
-        # Inspection controls
+        # Inspection controls - increased space allocation
         self.create_inspection_controls(control_layout)
         
-        # Add spacer
-        control_layout.addItem(QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        # Add minimal spacer
+        control_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
         main_layout.addWidget(control_panel)
     
     def create_barcode_section(self, layout):
-        """Create barcode input section"""
+        """Create compact barcode input section"""
         barcode_group = QGroupBox("Barcode Input")
         barcode_layout = QVBoxLayout()
         barcode_group.setLayout(barcode_layout)
         
-        # Barcode status message
+        # Barcode status message - more compact
         self.barcode_status_label = QLabel("Enter or scan a barcode to begin")
         self.barcode_status_label.setStyleSheet("""
             background-color: #e9ecef; 
-            padding: 10px; 
+            padding: 8px; 
             border: 2px solid #adb5bd; 
             border-radius: 5px; 
-            font-size: 14px; 
+            font-size: 12px; 
             color: #495057;
             font-weight: bold;
             text-align: center;
@@ -202,165 +221,421 @@ class BaseInspectionWindow(QWidget):
         
         # Manual barcode input
         self.barcode_input = QLineEdit()
-        self.barcode_input.setPlaceholderText("Enter barcode manually or scan")
+        self.barcode_input.setPlaceholderText("Enter barcode or scan")
         self.barcode_input.returnPressed.connect(self.submit_barcode)
         self.barcode_input.textChanged.connect(self.on_barcode_input_changed)
         barcode_layout.addWidget(self.barcode_input)
         
-        # Buttons
+        # Buttons - more compact styling
         button_layout = QHBoxLayout()
         
-        self.scan_qr_button = QPushButton("Scan QR")
+        self.scan_qr_button = QPushButton("Scan")
+        self.scan_qr_button.setStyleSheet("""
+            QPushButton {
+                background-color: #17a2b8;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #138496;
+            }
+        """)
         self.scan_qr_button.clicked.connect(self.scan_qr_code)
         button_layout.addWidget(self.scan_qr_button)
         
         self.submit_barcode_button = QPushButton("Submit")
+        self.submit_barcode_button.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+        """)
         self.submit_barcode_button.clicked.connect(self.submit_barcode)
         self.submit_barcode_button.setEnabled(False)  # Initially disabled
         button_layout.addWidget(self.submit_barcode_button)
         
         barcode_layout.addLayout(button_layout)
         
-        # Barcode display
+        # Barcode display - more compact
         self.barcode_display = QLabel("No barcode entered")
-        self.barcode_display.setStyleSheet("background-color: #f8f9fa; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;")
+        self.barcode_display.setStyleSheet("background-color: #f8f9fa; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 12px;")
+        barcode_layout.addWidget(self.barcode_display)
         barcode_layout.addWidget(self.barcode_display)
         
         layout.addWidget(barcode_group)
     
-    def create_api_status_section(self, layout):
-        """Create API status section"""
-        api_group = QGroupBox("API Status")
-        api_layout = QVBoxLayout()
-        api_group.setLayout(api_layout)
-        
-        # API endpoints status
-        self.api_status_labels = {}
-        endpoints = self.get_api_endpoints()
-        
-        for endpoint in endpoints:
-            status_label = QLabel(f"{endpoint}: Not Checked")
-            status_label.setStyleSheet("color: #666; padding: 5px; font-size: 12px;")
-            self.api_status_labels[endpoint] = status_label
-            api_layout.addWidget(status_label)
-        
-        # Test API button
-        self.test_api_button = QPushButton("Test API Connection")
-        self.test_api_button.clicked.connect(self.test_api_connections)
-        api_layout.addWidget(self.test_api_button)
-        
-        layout.addWidget(api_group)
-    
-    def create_camera_settings(self, layout):
-        """Create camera settings section"""
-        camera_group = QGroupBox("Camera Settings")
-        camera_layout = QVBoxLayout()
-        camera_group.setLayout(camera_layout)
-        
-        # Camera enable/disable
-        self.camera_enabled = QCheckBox("Camera Enabled")
-        self.camera_enabled.setChecked(True)
-        camera_layout.addWidget(self.camera_enabled)
-        
-        # Flip settings
-        self.flip_horizontal = QCheckBox("Flip Horizontal")
-        camera_layout.addWidget(self.flip_horizontal)
-        
-        self.flip_vertical = QCheckBox("Flip Vertical")
-        camera_layout.addWidget(self.flip_vertical)
-        
-        # Exposure
-        exposure_label = QLabel("Exposure:")
-        camera_layout.addWidget(exposure_label)
-        self.exposure_slider = QSlider(Qt.Horizontal)
-        self.exposure_slider.setRange(-10, 10)
-        self.exposure_slider.setValue(0)
-        camera_layout.addWidget(self.exposure_slider)
-        
-        layout.addWidget(camera_group)
-    
     def create_inspection_controls(self, layout):
-        """Create inspection control buttons"""
+        """Create inspection control buttons with equal size"""
         control_group = QGroupBox("Inspection Controls")
+        control_group.setMinimumHeight(400)  # Increased minimum height
         control_layout = QVBoxLayout()
         control_group.setLayout(control_layout)
         
-        # Main inspection button
-        self.start_inspection_button = QPushButton("Start Inspection")
+        # Common button style for equal sizing
+        button_style = """
+            QPushButton {{
+                font-size: 14px;
+                font-weight: bold;
+                padding: 10px;
+                margin: 2px 0px;
+                min-height: 40px;
+                max-height: 40px;
+                border-radius: 5px;
+            }}
+        """
+        
+        # Main inspection button - renamed to "Capture"
+        self.start_inspection_button = QPushButton("Capture")
+        self.start_inspection_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #45a049;
+            }
+        """)
         self.start_inspection_button.clicked.connect(self.start_inspection)
         self.start_inspection_button.setEnabled(False)
         control_layout.addWidget(self.start_inspection_button)
         
         # Step control buttons
         self.next_step_button = QPushButton("Next Step")
+        self.next_step_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
         self.next_step_button.clicked.connect(self.next_step)
         self.next_step_button.setEnabled(False)
         control_layout.addWidget(self.next_step_button)
         
         self.repeat_step_button = QPushButton("Repeat Step")
+        self.repeat_step_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
         self.repeat_step_button.clicked.connect(self.repeat_current_step)
         self.repeat_step_button.setEnabled(False)
         control_layout.addWidget(self.repeat_step_button)
         
         # Manual controls
         self.manual_override_button = QPushButton("Manual Override")
-        self.manual_override_button.setObjectName("warningButton")
+        self.manual_override_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #F57C00;
+            }
+        """)
         self.manual_override_button.clicked.connect(self.manual_override)
         self.manual_override_button.setEnabled(False)
         control_layout.addWidget(self.manual_override_button)
         
-        # Stop and back buttons
+        # Add some spacing
+        control_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
+        
+        # Stop inspection button
         self.stop_inspection_button = QPushButton("Stop Inspection")
-        self.stop_inspection_button.setObjectName("stopButton")
+        self.stop_inspection_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #f44336;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #d32f2f;
+            }
+        """)
         self.stop_inspection_button.clicked.connect(self.stop_inspection)
         self.stop_inspection_button.setEnabled(False)
         control_layout.addWidget(self.stop_inspection_button)
         
-        self.back_button = QPushButton("Back to Main Menu")
-        self.back_button.setObjectName("stopButton")
+        # Back button - renamed to "Main Menu"
+        self.back_button = QPushButton("Main Menu")
+        self.back_button.setStyleSheet(button_style + """
+            QPushButton {
+                background-color: #607D8B;
+                color: white;
+            }
+            QPushButton:hover {
+                background-color: #455A64;
+            }
+        """)
         self.back_button.clicked.connect(self.back_to_main)
         control_layout.addWidget(self.back_button)
         
         # Quit button
         self.quit_button = QPushButton("QUIT APPLICATION")
-        self.quit_button.setObjectName("quitButton")
-        self.quit_button.clicked.connect(self.quit_application)
-        self.quit_button.setStyleSheet("""
-            QPushButton#quitButton {
+        self.quit_button.setStyleSheet(button_style + """
+            QPushButton {
                 background-color: #dc3545;
                 color: white;
                 font-weight: bold;
-                font-size: 14px;
-                padding: 10px;
-                border: none;
-                border-radius: 5px;
             }
-            QPushButton#quitButton:hover {
+            QPushButton:hover {
                 background-color: #c82333;
             }
-            QPushButton#quitButton:pressed {
+            QPushButton:pressed {
                 background-color: #bd2130;
             }
         """)
+        self.quit_button.clicked.connect(self.quit_application)
         control_layout.addWidget(self.quit_button)
         
         layout.addWidget(control_group)
     
+    # ===== Smart Button Control System =====
+    
+    def update_button_states(self):
+        """Update button states based on current inspection state and logic"""
+        # Get current state info
+        has_barcode = bool(self.barcode)
+        inspection_ongoing = self.inspection_state in [
+            self.InspectionState.INSPECTION_ACTIVE, 
+            self.InspectionState.STEP_IN_PROGRESS,
+            self.InspectionState.STEP_COMPLETED
+        ]
+        inspection_complete = self.inspection_state == self.InspectionState.INSPECTION_COMPLETED
+        all_steps_done = self.current_step >= len(self.inspection_steps)
+        
+        # === CAPTURE BUTTON ===
+        # Enable when: barcode entered and not currently inspecting
+        capture_enabled = (
+            has_barcode and 
+            self.inspection_state in [self.InspectionState.BARCODE_ENTERED, self.InspectionState.DATA_SUBMITTED]
+        )
+        self.start_inspection_button.setEnabled(capture_enabled)
+        self._update_button_visual_state(self.start_inspection_button, capture_enabled, "capture")
+        
+        # === NEXT STEP BUTTON ===  
+        # Enable when: inspection active and step can be progressed
+        next_step_enabled = (
+            inspection_ongoing and
+            self.current_step < len(self.inspection_steps) and
+            self.step_data_collected  # Only enable if current step has data
+        )
+        self.next_step_button.setEnabled(next_step_enabled)
+        self._update_button_visual_state(self.next_step_button, next_step_enabled, "next_step")
+        
+        # === REPEAT STEP BUTTON ===
+        # Enable when: inspection active and there's a current step to repeat
+        repeat_step_enabled = (
+            inspection_ongoing and 
+            self.current_step < len(self.inspection_steps)
+        )
+        self.repeat_step_button.setEnabled(repeat_step_enabled)
+        self._update_button_visual_state(self.repeat_step_button, repeat_step_enabled, "repeat_step")
+        
+        # === MANUAL OVERRIDE BUTTON ===
+        # Enable when: inspection has results and override is contextually appropriate
+        override_enabled = (
+            self.override_allowed and
+            (inspection_complete or len(self.inspection_results) > 0) and
+            self.inspection_state not in [self.InspectionState.OVERRIDE_APPLIED]
+        )
+        self.manual_override_button.setEnabled(override_enabled)
+        self._update_button_visual_state(self.manual_override_button, override_enabled, "manual_override")
+        
+        # Update button tooltips with helpful context
+        self._update_button_tooltips()
+    
+    def _update_button_visual_state(self, button, enabled, button_type):
+        """Update button visual appearance based on enabled state"""
+        if not enabled:
+            # Add visual indication for disabled state while keeping original colors
+            current_style = button.styleSheet()
+            if ":disabled" not in current_style:
+                # Add disabled state styling that preserves original color but dims it
+                if button_type == "capture":
+                    disabled_color = "#A8D8A8"  # Dimmed green
+                elif button_type in ["next_step", "repeat_step"]:
+                    disabled_color = "#A8C8E8"  # Dimmed blue  
+                elif button_type == "manual_override":
+                    disabled_color = "#E8C8A8"  # Dimmed orange
+                else:
+                    disabled_color = "#CCCCCC"  # Default gray
+                
+                button.setStyleSheet(current_style + f"""
+                    QPushButton:disabled {{
+                        background-color: {disabled_color};
+                        color: #888888;
+                        border: 1px solid #BBBBBB;
+                    }}
+                """)
+    
+    def _update_button_tooltips(self):
+        """Update button tooltips based on current state"""
+        # Capture button tooltip
+        if self.inspection_state == self.InspectionState.IDLE:
+            self.start_inspection_button.setToolTip("Enter a barcode first")
+        elif self.inspection_state == self.InspectionState.BARCODE_ENTERED:
+            self.start_inspection_button.setToolTip("Click to start inspection process")
+        elif self.inspection_state in [self.InspectionState.INSPECTION_ACTIVE, self.InspectionState.STEP_IN_PROGRESS]:
+            self.start_inspection_button.setToolTip("Inspection in progress")
+        elif self.inspection_state == self.InspectionState.INSPECTION_COMPLETED:
+            self.start_inspection_button.setToolTip("Complete current inspection first")
+        else:
+            self.start_inspection_button.setToolTip("Ready to start new inspection")
+        
+        # Next Step button tooltip
+        if not self.inspection_state in [self.InspectionState.INSPECTION_ACTIVE, self.InspectionState.STEP_IN_PROGRESS, self.InspectionState.STEP_COMPLETED]:
+            self.next_step_button.setToolTip("Start inspection first")
+        elif self.current_step >= len(self.inspection_steps):
+            self.next_step_button.setToolTip("All steps completed")
+        elif not self.step_data_collected:
+            self.next_step_button.setToolTip("Collect data for current step first")
+        else:
+            step_name = self.inspection_steps[self.current_step] if self.current_step < len(self.inspection_steps) else "Final"
+            self.next_step_button.setToolTip(f"Proceed to next step after {step_name}")
+        
+        # Repeat Step button tooltip
+        if not self.inspection_state in [self.InspectionState.INSPECTION_ACTIVE, self.InspectionState.STEP_IN_PROGRESS, self.InspectionState.STEP_COMPLETED]:
+            self.repeat_step_button.setToolTip("Start inspection first")
+        elif self.current_step >= len(self.inspection_steps):
+            self.repeat_step_button.setToolTip("No active step to repeat")
+        else:
+            step_name = self.inspection_steps[self.current_step]
+            self.repeat_step_button.setToolTip(f"Repeat current step: {step_name}")
+        
+        # Manual Override button tooltip
+        if len(self.inspection_results) == 0:
+            self.manual_override_button.setToolTip("No inspection results to override")
+        elif self.inspection_state == self.InspectionState.OVERRIDE_APPLIED:
+            self.manual_override_button.setToolTip("Override already applied")
+        elif not self.override_allowed:
+            self.manual_override_button.setToolTip("Override not available in current state")
+        else:
+            self.manual_override_button.setToolTip("Apply manual override to inspection results")
+    
+    def set_inspection_state(self, new_state, step_data_collected=None, override_allowed=None):
+        """Set inspection state and update button controls accordingly"""
+        print(f"🔄 State transition: {self.inspection_state} → {new_state}")
+        
+        self.inspection_state = new_state
+        
+        # Update step data flag if provided
+        if step_data_collected is not None:
+            self.step_data_collected = step_data_collected
+            
+        # Update override allowed flag if provided  
+        if override_allowed is not None:
+            self.override_allowed = override_allowed
+            
+        # Update all button states based on new state
+        self.update_button_states()
+        
+        # Log state for debugging
+        self._log_button_state_change(new_state)
+    
+    def _log_button_state_change(self, new_state):
+        """Log button state changes for debugging"""
+        button_states = {
+            'Capture': self.start_inspection_button.isEnabled(),
+            'Next Step': self.next_step_button.isEnabled(),
+            'Repeat Step': self.repeat_step_button.isEnabled(),
+            'Manual Override': self.manual_override_button.isEnabled()
+        }
+        
+        enabled_buttons = [name for name, enabled in button_states.items() if enabled]
+        disabled_buttons = [name for name, enabled in button_states.items() if not enabled]
+        
+        print(f"   📊 Button States in {new_state}:")
+        print(f"      ✅ Enabled: {enabled_buttons if enabled_buttons else 'None'}")
+        print(f"      ❌ Disabled: {disabled_buttons if disabled_buttons else 'None'}")
+        print(f"      📈 Step: {self.current_step}/{len(self.inspection_steps)}")
+        print(f"      🔧 Data Collected: {self.step_data_collected}")
+        print(f"      ⚠️ Override Allowed: {self.override_allowed}")
+    
+    def simulate_step_data_collection(self):
+        """Simulate data collection for current step (for testing/demo purposes)"""
+        if self.current_step < len(self.inspection_steps):
+            self.step_data_collected = True
+            self.override_allowed = True  # Allow override once we have some data
+            self.update_button_states()
+            
+            step_name = self.inspection_steps[self.current_step]
+            self.update_camera_display(f"✅ Data Collected for {step_name}\n\n📊\n\nStep data captured successfully\n\nClick 'Next Step' to continue")
+            print(f"📊 Simulated data collection for step: {step_name}")
+            
+            # Update API data display
+            self.api_data_display.setPlainText(f"Step Data: {step_name}\nTimestamp: {datetime.now()}\nStatus: Data Collected")
+    
+    # ===== Enhanced State Management Methods =====
+    
+    def enter_idle_state(self):
+        """Enter idle state - no barcode, ready for input"""
+        self.set_inspection_state(self.InspectionState.IDLE, 
+                                step_data_collected=False, 
+                                override_allowed=False)
+    
+    def enter_barcode_entered_state(self):
+        """Enter barcode entered state - ready to start inspection"""
+        self.set_inspection_state(self.InspectionState.BARCODE_ENTERED,
+                                step_data_collected=False,
+                                override_allowed=False)
+    
+    def enter_inspection_active_state(self):
+        """Enter inspection active state - currently inspecting"""
+        self.set_inspection_state(self.InspectionState.INSPECTION_ACTIVE,
+                                step_data_collected=False,
+                                override_allowed=False)
+    
+    def enter_step_in_progress_state(self):
+        """Enter step in progress state - step being processed"""
+        self.set_inspection_state(self.InspectionState.STEP_IN_PROGRESS,
+                                step_data_collected=False,
+                                override_allowed=False)
+    
+    def enter_step_completed_state(self):
+        """Enter step completed state - step done, ready for next"""
+        self.set_inspection_state(self.InspectionState.STEP_COMPLETED,
+                                step_data_collected=True,
+                                override_allowed=True)
+    
+    def enter_inspection_completed_state(self):
+        """Enter inspection completed state - all steps done"""
+        self.set_inspection_state(self.InspectionState.INSPECTION_COMPLETED,
+                                step_data_collected=True,
+                                override_allowed=True)
+    
+    def enter_override_applied_state(self):
+        """Enter override applied state - manual override has been applied"""
+        self.set_inspection_state(self.InspectionState.OVERRIDE_APPLIED,
+                                step_data_collected=True,
+                                override_allowed=False)
+    
     def create_camera_panel(self, main_layout):
-        """Create camera display panel"""
+        """Create camera display panel with increased width"""
         camera_panel = QFrame()
         camera_panel.setStyleSheet("QFrame { border: 2px solid #ccc; border-radius: 10px; background-color: white; }")
         camera_layout = QVBoxLayout()
         camera_panel.setLayout(camera_layout)
         
-        # Camera feed placeholder
+        # Camera feed placeholder - larger due to increased panel width
         self.camera_label = QLabel("Camera Feed\n\n📹\n\nCamera integration ready\nfor implementation")
         self.camera_label.setAlignment(Qt.AlignCenter)
-        self.camera_label.setMinimumSize(800, 600)
+        self.camera_label.setMinimumSize(960, 600)  # Increased width from 800 to 960
         self.camera_label.setStyleSheet("""
             background-color: #2c3e50; 
             color: white; 
-            font-size: 24px; 
+            font-size: 28px;  
             border-radius: 8px;
             border: 2px solid #34495e;
         """)
@@ -371,12 +646,12 @@ class BaseInspectionWindow(QWidget):
         
         self.camera_status = QLabel("Camera: Simulation Mode")
         self.camera_status.setAlignment(Qt.AlignCenter)
-        self.camera_status.setStyleSheet("color: #f39c12; font-size: 14px; font-weight: bold; margin: 5px;")
+        self.camera_status.setStyleSheet("color: #f39c12; font-size: 16px; font-weight: bold; margin: 5px;")  # Increased font size
         info_layout.addWidget(self.camera_status)
         
         self.inspection_info = QLabel(f"Type: {self.inspection_type}")
         self.inspection_info.setAlignment(Qt.AlignCenter)
-        self.inspection_info.setStyleSheet("color: #3498db; font-size: 14px; font-weight: bold; margin: 5px;")
+        self.inspection_info.setStyleSheet("color: #3498db; font-size: 16px; font-weight: bold; margin: 5px;")  # Increased font size
         info_layout.addWidget(self.inspection_info)
         
         camera_layout.addLayout(info_layout)
@@ -385,16 +660,16 @@ class BaseInspectionWindow(QWidget):
     def create_inspection_panel(self, main_layout):
         """Create inspection progress and results panel"""
         inspection_panel = QFrame()
-        inspection_panel.setFixedWidth(400)
+        inspection_panel.setFixedWidth(320)  # Reduced from 400 to 320
         inspection_panel.setStyleSheet("QFrame { border: 2px solid #ccc; border-radius: 10px; background-color: white; }")
         inspection_layout = QVBoxLayout()
         inspection_panel.setLayout(inspection_layout)
         
         # Title
         title = QLabel("Inspection Progress")
-        title.setFont(QFont("Arial", 18, QFont.Bold))
+        title.setFont(QFont("Arial", 16, QFont.Bold))  # Reduced font size from 18 to 16
         title.setAlignment(Qt.AlignCenter)
-        title.setStyleSheet("color: #2c3e50; margin: 10px;")
+        title.setStyleSheet("color: #2c3e50; margin: 8px;")  # Reduced margin
         inspection_layout.addWidget(title)
         
         # Progress section
@@ -475,23 +750,108 @@ class BaseInspectionWindow(QWidget):
         layout.addWidget(results_group)
     
     def create_api_data_section(self, layout):
-        """Create API data display section"""
-        api_group = QGroupBox("API Data")
+        """Create API data display section with camera settings and API status"""
+        api_group = QGroupBox("API Data & Settings")
         api_layout = QVBoxLayout()
         api_group.setLayout(api_layout)
         
+        # API Status section (moved from control panel)
+        api_status_subgroup = QGroupBox("API Status")
+        api_status_layout = QVBoxLayout()
+        api_status_subgroup.setLayout(api_status_layout)
+        
+        # API endpoints status
+        self.api_status_labels = {}
+        endpoints = self.get_api_endpoints()
+        
+        for endpoint in endpoints:
+            status_label = QLabel(f"{endpoint}: Not Checked")
+            status_label.setStyleSheet("color: #666; padding: 3px; font-size: 10px;")
+            self.api_status_labels[endpoint] = status_label
+            api_status_layout.addWidget(status_label)
+        
+        # Test API button (smaller)
+        self.test_api_button = QPushButton("Test API")
+        self.test_api_button.setStyleSheet("""
+            QPushButton {
+                background-color: #17a2b8;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #138496;
+            }
+        """)
+        self.test_api_button.clicked.connect(self.test_api_connections)
+        api_status_layout.addWidget(self.test_api_button)
+        
+        api_layout.addWidget(api_status_subgroup)
+        
+        # Camera Settings section (moved from control panel)
+        camera_settings_subgroup = QGroupBox("Camera Settings")
+        camera_settings_layout = QVBoxLayout()
+        camera_settings_subgroup.setLayout(camera_settings_layout)
+        
+        # Camera enable/disable
+        self.camera_enabled = QCheckBox("Camera Enabled")
+        self.camera_enabled.setChecked(True)
+        self.camera_enabled.setStyleSheet("font-size: 11px;")
+        camera_settings_layout.addWidget(self.camera_enabled)
+        
+        # Flip settings in horizontal layout
+        flip_layout = QHBoxLayout()
+        self.flip_horizontal = QCheckBox("Flip H")
+        self.flip_horizontal.setStyleSheet("font-size: 10px;")
+        self.flip_vertical = QCheckBox("Flip V")
+        self.flip_vertical.setStyleSheet("font-size: 10px;")
+        flip_layout.addWidget(self.flip_horizontal)
+        flip_layout.addWidget(self.flip_vertical)
+        camera_settings_layout.addLayout(flip_layout)
+        
+        # Exposure (compact)
+        exposure_layout = QHBoxLayout()
+        exposure_label = QLabel("Exp:")
+        exposure_label.setStyleSheet("font-size: 10px;")
+        self.exposure_slider = QSlider(Qt.Horizontal)
+        self.exposure_slider.setRange(-10, 10)
+        self.exposure_slider.setValue(0)
+        self.exposure_slider.setMaximumHeight(20)
+        exposure_layout.addWidget(exposure_label)
+        exposure_layout.addWidget(self.exposure_slider)
+        camera_settings_layout.addLayout(exposure_layout)
+        
+        api_layout.addWidget(camera_settings_subgroup)
+        
         # API data display
+        api_data_subgroup = QGroupBox("API Data")
+        api_data_layout = QVBoxLayout()
+        api_data_subgroup.setLayout(api_data_layout)
+        
         self.api_data_display = QTextEdit()
-        self.api_data_display.setMaximumHeight(100)
-        self.api_data_display.setStyleSheet("font-size: 11px; background-color: #f8f9fa;")
+        self.api_data_display.setMaximumHeight(80)
+        self.api_data_display.setStyleSheet("font-size: 10px; background-color: #f8f9fa;")
         self.api_data_display.setPlainText("No data collected yet")
-        api_layout.addWidget(self.api_data_display)
+        api_data_layout.addWidget(self.api_data_display)
         
         # Submit data button
         self.submit_data_button = QPushButton("Submit to API")
+        self.submit_data_button.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+        """)
         self.submit_data_button.clicked.connect(self.submit_inspection_data)
         self.submit_data_button.setEnabled(False)
-        api_layout.addWidget(self.submit_data_button)
+        api_data_layout.addWidget(self.submit_data_button)
+        
+        api_layout.addWidget(api_data_subgroup)
         
         layout.addWidget(api_group)
     
@@ -501,9 +861,12 @@ class BaseInspectionWindow(QWidget):
         """Handle barcode input text changes"""
         barcode_text = self.barcode_input.text().strip()
         
-        # Enable submit button only if there's text and inspection is not ongoing
+        # Enable submit button only if there's text and not currently inspecting
         has_text = len(barcode_text) > 0
-        inspection_not_ongoing = not hasattr(self, 'inspection_active') or not self.inspection_active
+        inspection_not_ongoing = self.inspection_state in [
+            self.InspectionState.IDLE, 
+            self.InspectionState.DATA_SUBMITTED
+        ]
         
         self.submit_barcode_button.setEnabled(has_text and inspection_not_ongoing)
         
@@ -511,7 +874,7 @@ class BaseInspectionWindow(QWidget):
         if not has_text:
             self.update_barcode_status("Enter or scan a barcode to begin", "waiting")
         elif not inspection_not_ongoing:
-            self.update_barcode_status("Barcode inspection is ongoing", "inspecting")
+            self.update_barcode_status("Inspection in progress", "inspecting")
         else:
             self.update_barcode_status("Click Submit to validate barcode", "ready")
     
@@ -588,9 +951,11 @@ class BaseInspectionWindow(QWidget):
             self.barcode = barcode
             self.barcode_display.setText(f"Barcode: {barcode}")
             self.barcode_display.setStyleSheet("background-color: #d4edda; padding: 10px; border: 2px solid #c3e6cb; border-radius: 5px; font-size: 14px; color: #155724;")
-            self.start_inspection_button.setEnabled(True)
             self.update_barcode_status(f"Barcode validated: {barcode}", "success")
             self.update_camera_display(f"Barcode Validated: {barcode}\n\nReady to start {self.inspection_type} inspection")
+            
+            # Enter barcode validated state
+            self.enter_barcode_entered_state()
         else:
             self.barcode_display.setText(f"Invalid: {barcode}")
             self.barcode_display.setStyleSheet("background-color: #f8d7da; padding: 10px; border: 2px solid #f5c6cb; border-radius: 5px; font-size: 14px; color: #721c24;")
@@ -706,26 +1071,25 @@ class BaseInspectionWindow(QWidget):
         self.current_step = 0
         self.inspection_results = {}
         self.api_data_collected = {}
-        self.inspection_active = True  # Track inspection state
-        
-        # Enable/disable controls
-        self.start_inspection_button.setEnabled(False)
-        self.next_step_button.setEnabled(True)
-        self.repeat_step_button.setEnabled(True)
-        self.manual_override_button.setEnabled(True)
-        self.stop_inspection_button.setEnabled(True)
-        self.submit_data_button.setEnabled(False)
         
         # Disable barcode submission during inspection
         self.submit_barcode_button.setEnabled(False)
         self.barcode_input.setEnabled(False)
         self.scan_qr_button.setEnabled(False)
-        self.update_barcode_status("Barcode inspection is ongoing", "inspecting")
+        self.update_barcode_status("Inspection in progress", "inspecting")
+        
+        # Enter inspection active state
+        self.enter_inspection_active_state()
         
         # Start first step
         self.start_step_inspection()
         
-        self.update_camera_display(f"🔍 {self.inspection_type} Inspection Started\n\nBarcode: {self.barcode}\n\nClick 'Next Step' to proceed")
+        self.update_camera_display(f"🔍 {self.inspection_type} Inspection Started\n\nBarcode: {self.barcode}\n\nPosition product for first step")
+        
+        # Add helpful instructions for user
+        if len(self.inspection_steps) > 0:
+            first_step = self.inspection_steps[0]
+            self.update_camera_display(f"🔍 Step 1: {first_step}\n\nBarcode: {self.barcode}\n\nPosition product for inspection\n\n💡 Tip: Simulate data collection for demo")
     
     def start_step_inspection(self):
         """Start inspection of current step"""
@@ -733,6 +1097,9 @@ class BaseInspectionWindow(QWidget):
             step_name = self.inspection_steps[self.current_step]
             self.step_start_time = datetime.now()
             self.current_step_label.setText(f"Step: {step_name}")
+            
+            # Enter step in progress state
+            self.enter_step_in_progress_state()
             
             # Update step status
             for i in range(self.step_status_layout.count()):
@@ -743,7 +1110,10 @@ class BaseInspectionWindow(QWidget):
                         label.setStyleSheet("color: #3498db; font-weight: bold; padding: 3px; font-size: 11px;")
             
             # Update camera display for current step
-            self.update_camera_display(f"Inspecting: {step_name}\n\n📹\n\nPosition product for {step_name}\n\nPress 'Next Step' when ready")
+            self.update_camera_display(f"Inspecting: {step_name}\n\n📹\n\nPosition product for {step_name}\n\n💡 Click here to simulate data collection")
+            
+            # Make camera label clickable for demo purposes
+            self.camera_label.mousePressEvent = lambda event: self.simulate_step_data_collection()
     
     def next_step(self):
         """Move to next step of inspection"""
@@ -771,12 +1141,18 @@ class BaseInspectionWindow(QWidget):
                 self.progress_bar.setValue(self.current_step)
                 
                 if self.current_step < len(self.inspection_steps):
+                    # More steps to go
+                    self.enter_step_completed_state()
                     self.start_step_inspection()
                 else:
+                    # All steps completed
                     self.complete_inspection()
             else:
                 QMessageBox.warning(self, "Invalid Data", 
                                   f"Data validation failed for step: {step_name}\n\nPlease check the inspection and try again.")
+                # Reset step data collection flag so user needs to collect data again
+                self.step_data_collected = False
+                self.update_button_states()
     
     def repeat_current_step(self):
         """Repeat the current inspection step"""
@@ -820,13 +1196,11 @@ class BaseInspectionWindow(QWidget):
             self.overall_result.setStyleSheet("color: #e74c3c; font-weight: bold; font-size: 14px; margin: 5px;")
             self.update_camera_display("❌ INSPECTION COMPLETE\n\nRESULT: FAIL\n\nReview required")
         
+        # Enter inspection completed state
+        self.enter_inspection_completed_state()
+        
         # Enable data submission
         self.submit_data_button.setEnabled(True)
-        
-        # Disable step controls
-        self.next_step_button.setEnabled(False)
-        self.repeat_step_button.setEnabled(False)
-        self.stop_inspection_button.setEnabled(False)
         
         # Update API data display
         api_display_text = f"Inspection Complete - {overall_result}\n"
@@ -916,6 +1290,9 @@ class BaseInspectionWindow(QWidget):
         self.overall_result.setStyleSheet("color: #f39c12; font-weight: bold; font-size: 14px; margin: 5px;")
         self.update_camera_display("⚠️ MANUAL OVERRIDE APPLIED\n\nRESULT: PASS\n\nOverride logged for audit")
         
+        # Enter override applied state
+        self.enter_override_applied_state()
+        
         # Log the override
         self.log_manual_override(override_time)
         
@@ -941,7 +1318,6 @@ class BaseInspectionWindow(QWidget):
         self.current_step = 0
         self.inspection_results = {}
         self.api_data_collected = {}
-        self.inspection_active = False  # Mark inspection as inactive
         self.current_step_label.setText("Step: Not Started")
         self.progress_bar.setValue(0)
         self.overall_result.setText("Status: Pending")
@@ -959,29 +1335,26 @@ class BaseInspectionWindow(QWidget):
                 label.setText(f"{step_name}: Pending")
                 label.setStyleSheet("color: #666; padding: 3px; font-size: 11px;")
         
-        # Reset buttons
-        self.start_inspection_button.setEnabled(bool(self.barcode))
-        self.next_step_button.setEnabled(False)
-        self.repeat_step_button.setEnabled(False)
-        self.manual_override_button.setEnabled(False)
-        self.stop_inspection_button.setEnabled(False)
-        self.submit_data_button.setEnabled(False)
+        # Enter appropriate state based on barcode status
+        if self.barcode:
+            self.enter_barcode_entered_state()
+            self.update_barcode_status("Ready to start new inspection", "ready")
+        else:
+            self.enter_idle_state()
+            self.update_barcode_status("Enter or scan a barcode to begin", "waiting")
         
         # Re-enable barcode input after inspection
         self.barcode_input.setEnabled(True)
         self.scan_qr_button.setEnabled(True)
-        
-        # Update barcode status for new scan
-        if self.barcode:
-            self.update_barcode_status("Scan or enter new barcode", "waiting")
-        else:
-            self.update_barcode_status("Enter or scan a barcode to begin", "waiting")
             
         # Trigger input change handler to update submit button state
         self.on_barcode_input_changed()
         
         # Clear API data display
         self.api_data_display.setPlainText("Ready for new inspection")
+        
+        # Disable data submission
+        self.submit_data_button.setEnabled(False)
     
     def reset_for_new_inspection(self):
         """Reset for a new inspection after successful submission"""
@@ -993,10 +1366,9 @@ class BaseInspectionWindow(QWidget):
         self.barcode_display.setText("No barcode entered")
         self.barcode_display.setStyleSheet("background-color: #f8f9fa; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px;")
         
-        # Show message for new barcode entry
+        # Show message for new barcode entry and enter idle state
+        self.enter_idle_state()
         self.update_barcode_status("Scan or enter new barcode", "waiting")
-        
-        self.start_inspection_button.setEnabled(False)
     
     def back_to_main(self):
         """Return to main window"""

@@ -19,19 +19,5 @@
     "api2_table": "EOLTINSPECTION",
     "description": "Inline bottom inspection to EOLT testing workflow",
     "enabled": true
-  },
-  {
-    "name": "CHIP_TO_INLINE_BOTTOM",
-    "api1_table": "CHIPINSPECTION",
-    "api2_table": "INLINEINSPECTIONBOTTOM",
-    "description": "Chip inspection to inline bottom inspection workflow",
-    "enabled": true
-  },
-  {
-    "name": "INLINE_BOTTOM_TO_INLINE_TOP",
-    "api1_table": "INLINEINSPECTIONBOTTOM",
-    "api2_table": "INLINEINSPECTIONTOP",
-    "description": "Inline bottom to inline top inspection workflow",
-    "enabled": true
   }
 ]

@@ -10,7 +10,10 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 from datetime import datetime
 
 # Import base class
-from base_inspection_window import BaseInspectionWindow
+try:
+    from .base_inspection_window import BaseInspectionWindow
+except ImportError:
+    from base_inspection_window import BaseInspectionWindow
 
 # Add parent directory to path for API imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
