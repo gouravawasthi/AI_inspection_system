@@ -12,8 +12,27 @@ from PyQt5.QtGui import QPixmap, QFont
 # Add parent directory to path for config imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import config_manager
-from eolt_inspection_window import EOLTInspectionWindow
-from inline_inspection_window import INLINEInspectionWindow
+
+# Try to import inspection windows - handle both direct and package import
+try:
+    from .eolt_inspection_window import EOLTInspectionWindow
+    from .inline_inspection_window import INLINEInspectionWindow
+except ImportError:
+    # Fallback for direct execution
+    try:
+        from eolt_inspection_window import EOLTInspectionWindow
+        from inline_inspection_window import INLINEInspectionWindow
+    except ImportError:
+        # Mock classes for testing
+        class EOLTInspectionWindow:
+            def __init__(self): pass
+            def show(self): pass
+            def close(self): pass
+        
+        class INLINEInspectionWindow:
+            def __init__(self): pass
+            def show(self): pass
+            def close(self): pass
 
 
 class MainWindow(QMainWindow):
@@ -45,7 +64,24 @@ class MainWindow(QMainWindow):
     def init_ui(self):
         """Initialize the user interface"""
         self.setWindowTitle("AI Inspection System")
-        self.showFullScreen()  # Set to full screen mode
+        
+        # Import screen utilities for better display handling
+        try:
+            from .screen_utils import apply_fullscreen_to_window, force_fullscreen_refresh
+        except ImportError:
+            from screen_utils import apply_fullscreen_to_window, force_fullscreen_refresh
+        
+        # Apply fullscreen with 5% bottom margin for better UI spacing
+        apply_fullscreen_to_window(self, bottom_margin_percent=5)
+        
+        # For Raspberry Pi, schedule a delayed refresh to fix any display issues
+        try:
+            from PyQt5.QtCore import QTimer
+            self.refresh_timer = QTimer()
+            self.refresh_timer.singleShot(500, lambda: force_fullscreen_refresh(self, bottom_margin_percent=5))
+        except Exception as e:
+            print(f"Could not setup refresh timer: {e}")
+        
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #f0f0f0;
@@ -129,11 +165,17 @@ class MainWindow(QMainWindow):
                 border: 2px solid #3498db;
                 border-radius: 10px;
                 background-color: white;
-                padding: 10px;
+                padding: 15px;
+                margin: 5px;
             }
         """)
         taisys_layout = QVBoxLayout()
         taisys_frame.setLayout(taisys_layout)
+        
+        # Set fixed size for consistent appearance
+        frame_width = self.branding.logo_width + 50  # Add extra space for padding
+        frame_height = self.branding.logo_height + 100  # Add space for text
+        taisys_frame.setFixedSize(frame_width, frame_height)
         
         # Taisys image
         taisys_image = QLabel()
@@ -149,8 +191,8 @@ class MainWindow(QMainWindow):
         # Taisys text
         taisys_text = QLabel("Built for Taisys")
         taisys_text.setAlignment(Qt.AlignCenter)
-        taisys_text.setFont(QFont("Arial", 20, QFont.Bold))
-        taisys_text.setStyleSheet("color: #3498db; margin: 15px;")
+        taisys_text.setFont(QFont("Arial", 16, QFont.Bold))
+        taisys_text.setStyleSheet("color: #3498db; margin: 10px 0px;")
         
         taisys_layout.addWidget(taisys_image)
         taisys_layout.addWidget(taisys_text)
@@ -158,7 +200,7 @@ class MainWindow(QMainWindow):
         brand_layout.addWidget(taisys_frame)
         
         # Add spacer between images
-        brand_layout.addItem(QSpacerItem(40, 20, QSizePolicy.Fixed, QSizePolicy.Minimum))
+        brand_layout.addItem(QSpacerItem(30, 20, QSizePolicy.Fixed, QSizePolicy.Minimum))
         
         # Avenya section
         avenya_frame = QFrame()
@@ -167,11 +209,15 @@ class MainWindow(QMainWindow):
                 border: 2px solid #e74c3c;
                 border-radius: 10px;
                 background-color: white;
-                padding: 10px;
+                padding: 15px;
+                margin: 5px;
             }
         """)
         avenya_layout = QVBoxLayout()
         avenya_frame.setLayout(avenya_layout)
+        
+        # Set fixed size for consistent appearance
+        avenya_frame.setFixedSize(frame_width, frame_height)
         
         # Avenya image
         avenya_image = QLabel()
@@ -187,8 +233,8 @@ class MainWindow(QMainWindow):
         # Avenya text
         avenya_text = QLabel("Built by Avenya")
         avenya_text.setAlignment(Qt.AlignCenter)
-        avenya_text.setFont(QFont("Arial", 20, QFont.Bold))
-        avenya_text.setStyleSheet("color: #e74c3c; margin: 15px;")
+        avenya_text.setFont(QFont("Arial", 16, QFont.Bold))
+        avenya_text.setStyleSheet("color: #e74c3c; margin: 10px 0px;")
         
         avenya_layout.addWidget(avenya_image)
         avenya_layout.addWidget(avenya_text)
@@ -244,7 +290,7 @@ class MainWindow(QMainWindow):
         main_layout.addLayout(buttons_layout)
     
     def load_brand_image(self, image_name):
-        """Load brand image and return scaled pixmap with background fill"""
+        """Load brand image and return properly scaled pixmap with background fill"""
         try:
             # Get the path using config
             current_dir = os.path.dirname(os.path.abspath(__file__))  # src/ui/
@@ -255,7 +301,7 @@ class MainWindow(QMainWindow):
             print(f"Looking for image at: {image_path}")  # Debug print
             
             if os.path.exists(image_path):
-                from PyQt5.QtGui import QPainter, QColor
+                from PyQt5.QtGui import QPainter, QColor, QPen
                 from PyQt5.QtCore import QSize
                 
                 # Load original image
@@ -268,11 +314,16 @@ class MainWindow(QMainWindow):
                 target_width = self.branding.logo_width
                 target_height = self.branding.logo_height
                 
+                # Add padding for better visual appearance
+                padding = 10
+                canvas_width = target_width + (2 * padding)
+                canvas_height = target_height + (2 * padding)
+                
                 # Get background color from config (default to white)
                 bg_color = getattr(self.branding, 'background_color', '#ffffff')
                 
-                # Create a new pixmap with target dimensions
-                result_pixmap = QPixmap(target_width, target_height)
+                # Create a new pixmap with canvas dimensions
+                result_pixmap = QPixmap(canvas_width, canvas_height)
                 result_pixmap.fill(QColor(bg_color))
                 
                 # Scale original image to fit within target dimensions while preserving aspect ratio
@@ -283,22 +334,31 @@ class MainWindow(QMainWindow):
                     Qt.SmoothTransformation
                 )
                 
-                # Center the scaled image on the background
+                # Create painter for drawing
                 painter = QPainter(result_pixmap)
                 painter.setRenderHint(QPainter.Antialiasing)
                 painter.setRenderHint(QPainter.SmoothPixmapTransform)
                 
-                # Calculate position to center the image
-                x = (target_width - scaled_pixmap.width()) // 2
-                y = (target_height - scaled_pixmap.height()) // 2
+                # Calculate position to center the image within padding
+                x = padding + (target_width - scaled_pixmap.width()) // 2
+                y = padding + (target_height - scaled_pixmap.height()) // 2
                 
-                # Draw the scaled image centered on the background
+                # Draw the scaled image centered on the canvas
                 painter.drawPixmap(x, y, scaled_pixmap)
+                
+                # Add a subtle border for better definition
+                border_color = QColor("#e0e0e0")
+                pen = QPen(border_color)
+                pen.setWidth(1)
+                painter.setPen(pen)
+                painter.drawRect(0, 0, canvas_width - 1, canvas_height - 1)
+                
                 painter.end()
                 
                 print(f"✅ Successfully loaded and processed image: {image_name}")
                 print(f"   Original size: {original_pixmap.width()}x{original_pixmap.height()}")
-                print(f"   Final size: {target_width}x{target_height} with background fill")
+                print(f"   Scaled to fit: {scaled_pixmap.width()}x{scaled_pixmap.height()}")
+                print(f"   Final canvas: {canvas_width}x{canvas_height} with {padding}px padding")
                 
                 return result_pixmap
             else:

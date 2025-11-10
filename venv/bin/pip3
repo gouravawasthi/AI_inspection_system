@@ -1,4 +1,4 @@
-#!/Users/gourav/Desktop/Taisys/AI_inspection_syste,/venv/bin/python
+#!/home/taisys/Desktop/AI_VDI_System/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

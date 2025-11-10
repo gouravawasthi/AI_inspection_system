@@ -87,8 +87,8 @@ class BrandingConfig:
     logo_directory: str = "brand_images"
     taisys_logo: str = "Taisys.jpeg"
     avenya_logo: str = "Avenya.jpg"
-    logo_width: int = 800
-    logo_height: int = 600
+    logo_width: int = 300
+    logo_height: int = 200
     show_logos: bool = True
     background_color: str = "#ffffff"
 
@@ -98,6 +98,8 @@ class GUIConfig:
     theme: str = "modern"
     window_width: int = 1200
     window_height: int = 800
+    fullscreen_mode: bool = True
+    raspberry_pi_optimized: bool = True
     auto_start_camera: bool = True
     show_debug_info: bool = False
     branding: BrandingConfig = None
