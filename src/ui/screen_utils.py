@@ -269,33 +269,17 @@ class ScreenManager:
             window.resize(width or 1200, height or 800)
     
     def force_fullscreen_refresh(self, window, bottom_margin_percent=0):
-        """Force a fullscreen refresh - useful for Raspberry Pi display issues"""
+        """Force a fullscreen refresh - simple maximize approach"""
         try:
             if self.is_raspberry_pi and self.screen_info:
                 print("🔄 Forcing fullscreen refresh...")
                 
-                # Calculate target dimensions
-                if bottom_margin_percent > 0:
-                    target_width = self.screen_info['total_width']
-                    target_height = int(self.screen_info['total_height'] * (100 - bottom_margin_percent) / 100)
-                else:
-                    target_width = self.screen_info['total_width']
-                    target_height = self.screen_info['total_height']
-                
-                # Re-apply geometry multiple times
-                for i in range(5):
-                    window.setGeometry(0, 0, target_width, target_height)
-                    window.update()
-                    if i < 4:
-                        import time
-                        time.sleep(0.02)
-                
-                # Force window to front
+                # Simple maximize and activate
+                window.showMaximized()
                 window.raise_()
                 window.activateWindow()
-                window.setFocus()
                 
-                print(f"✅ Fullscreen refresh completed: {target_width}x{target_height}")
+                print(f"✅ Fullscreen refresh completed")
                 
         except Exception as e:
             print(f"⚠️  Fullscreen refresh failed: {e}")

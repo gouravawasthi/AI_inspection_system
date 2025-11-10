@@ -232,13 +232,23 @@ class BaseInspectionWindow(QWidget):
         self.scan_qr_button = QPushButton("Scan")
         self.scan_qr_button.setStyleSheet("""
             QPushButton {
-                background-color: #17a2b8;
-                padding: 8px 12px;
-                font-size: 12px;
+                background-color: #2196F3;
+                color: white;
+                border: 1px solid #333;
+                padding: 8px 16px;
+                font-size: 14px;
                 font-weight: bold;
+                border-radius: 4px;
+                margin: 2px 0px;
+                min-height: 40px;
             }
             QPushButton:hover {
-                background-color: #138496;
+                background-color: #1976D2;
+            }
+            QPushButton:disabled {
+                background-color: #A8C8E8;
+                color: #888888;
+                border: 1px solid #BBBBBB;
             }
         """)
         self.scan_qr_button.clicked.connect(self.scan_qr_code)
@@ -247,13 +257,23 @@ class BaseInspectionWindow(QWidget):
         self.submit_barcode_button = QPushButton("Submit")
         self.submit_barcode_button.setStyleSheet("""
             QPushButton {
-                background-color: #28a745;
-                padding: 8px 12px;
-                font-size: 12px;
+                background-color: #4CAF50;
+                color: white;
+                border: 1px solid #333;
+                padding: 8px 16px;
+                font-size: 14px;
                 font-weight: bold;
+                border-radius: 4px;
+                margin: 2px 0px;
+                min-height: 40px;
             }
             QPushButton:hover {
-                background-color: #218838;
+                background-color: #45a049;
+            }
+            QPushButton:disabled {
+                background-color: #A8D8A8;
+                color: #888888;
+                border: 1px solid #BBBBBB;
             }
         """)
         self.submit_barcode_button.clicked.connect(self.submit_barcode)
@@ -774,13 +794,23 @@ class BaseInspectionWindow(QWidget):
         self.test_api_button = QPushButton("Test API")
         self.test_api_button.setStyleSheet("""
             QPushButton {
-                background-color: #17a2b8;
-                padding: 8px 12px;
-                font-size: 12px;
+                background-color: #2196F3;
+                color: white;
+                border: 1px solid #333;
+                padding: 8px 16px;
+                font-size: 14px;
                 font-weight: bold;
+                border-radius: 4px;
+                margin: 2px 0px;
+                min-height: 40px;
             }
             QPushButton:hover {
-                background-color: #138496;
+                background-color: #1976D2;
+            }
+            QPushButton:disabled {
+                background-color: #A8C8E8;
+                color: #888888;
+                border: 1px solid #BBBBBB;
             }
         """)
         self.test_api_button.clicked.connect(self.test_api_connections)
@@ -838,13 +868,23 @@ class BaseInspectionWindow(QWidget):
         self.submit_data_button = QPushButton("Submit to API")
         self.submit_data_button.setStyleSheet("""
             QPushButton {
-                background-color: #28a745;
-                padding: 8px 12px;
-                font-size: 12px;
+                background-color: #4CAF50;
+                color: white;
+                border: 1px solid #333;
+                padding: 8px 16px;
+                font-size: 14px;
                 font-weight: bold;
+                border-radius: 4px;
+                margin: 2px 0px;
+                min-height: 40px;
             }
             QPushButton:hover {
-                background-color: #218838;
+                background-color: #45a049;
+            }
+            QPushButton:disabled {
+                background-color: #A8D8A8;
+                color: #888888;
+                border: 1px solid #BBBBBB;
             }
         """)
         self.submit_data_button.clicked.connect(self.submit_inspection_data)
@@ -1371,7 +1411,7 @@ class BaseInspectionWindow(QWidget):
         self.update_barcode_status("Scan or enter new barcode", "waiting")
     
     def back_to_main(self):
-        """Return to main window"""
+        """Return to main window and bring it to foreground"""
         if self.inspection_results and self.current_step > 0:
             reply = QMessageBox.question(self, "Back to Main", 
                                        "Inspection in progress. Return to main menu?\n\n"
@@ -1383,8 +1423,12 @@ class BaseInspectionWindow(QWidget):
                                        QMessageBox.Yes | QMessageBox.No)
         
         if reply == QMessageBox.Yes:
+            print("🏠 Returning to main menu...")
+            # Emit signal to restore main window (this will bring it to foreground)
             self.window_closed.emit()
+            # Close this inspection window
             self.close()
+            print("✅ Inspection window closed, main window should be restored")
     
     def quit_application(self):
         """Safely quit the entire application"""
