@@ -385,19 +385,21 @@ class MainWindow(QMainWindow):
             # Connect window closed signal to restore main window
             self.eolt_window.window_closed.connect(self.restore_main_window)
             
-            # Minimize main window and show inspection window
-            self.showMinimized()
-            self.eolt_window.show()
+            # Hide main window and show inspection window
+            self.hide()
+            self.eolt_window.showMaximized()
+            self.eolt_window.raise_()
+            self.eolt_window.activateWindow()
             
-            print("✅ EOLT Inspection window opened, main window minimized")
+            print("✅ EOLT Inspection window opened and brought to foreground")
             self.show_inspection_status("EOLT Inspection Window Opened")
         except Exception as e:
             print(f"❌ Error opening EOLT inspection window: {e}")
             self.show_inspection_status(f"Error: {e}")
     
     def on_inline_clicked(self):
-        """Handle Inspect INLINE button click"""
-        print("🔍 INLINE Inspection requested")
+        """Handle Inspect Inline button click"""
+        print("🔍 Inline Inspection requested")
         self.inline_inspection_requested.emit()
         
         # Close any existing inspection windows
@@ -405,21 +407,23 @@ class MainWindow(QMainWindow):
             self.eolt_window.close()
             self.eolt_window = None
             
-        # Create and show INLINE inspection window
+        # Create and show Inline inspection window
         try:
             self.inline_window = INLINEInspectionWindow()
             
             # Connect window closed signal to restore main window
             self.inline_window.window_closed.connect(self.restore_main_window)
             
-            # Minimize main window and show inspection window
-            self.showMinimized()
-            self.inline_window.show()
+            # Hide main window and show inspection window
+            self.hide()
+            self.inline_window.showMaximized()
+            self.inline_window.raise_()
+            self.inline_window.activateWindow()
             
-            print("✅ INLINE Inspection window opened, main window minimized")
-            self.show_inspection_status("INLINE Inspection Window Opened")
+            print("✅ Inline Inspection window opened and brought to foreground")
+            self.show_inspection_status("Inline Inspection Window Opened")
         except Exception as e:
-            print(f"❌ Error opening INLINE inspection window: {e}")
+            print(f"❌ Error opening Inline inspection window: {e}")
             self.show_inspection_status(f"Error: {e}")
     
     def on_quit_clicked(self):
@@ -431,22 +435,79 @@ class MainWindow(QMainWindow):
         self.safe_shutdown()
     
     def restore_main_window(self):
-        """Restore main window when inspection window is closed"""
-        print("🔄 Restoring main window...")
+        """Restore main window to foreground - simple approach"""
+        print("🔄 Restoring main window to foreground...")
         
-        # Clear inspection window references
+        # Close any open inspection windows first
         if self.eolt_window:
+            self.eolt_window.close()
             self.eolt_window = None
         if self.inline_window:
+            self.inline_window.close()
             self.inline_window = None
-            
-        # Restore main window
-        self.showNormal()  # Restore from minimized state
-        self.activateWindow()  # Bring to front
-        self.raise_()  # Ensure it's on top
         
-        print("✅ Main window restored")
+        # Show and bring main window to foreground
+        try:
+            self.showMaximized()
+            self.raise_()
+            self.activateWindow()
+        except Exception as e:
+            print(f"⚠️ Window restoration error: {e}")
+        
+        print("✅ Main window restored to foreground")
         self.show_inspection_status("Returned to Main Menu")
+    
+    def force_main_window_focus(self):
+        """Force main window to have focus - simple maximize and bring to front"""
+        try:
+            self.showMaximized()
+            self.raise_()
+            self.activateWindow()
+            print("   🎯 Main window maximized and focused")
+        except Exception as e:
+            print(f"   ⚠️ Main window focus error: {e}")
+    
+    def ensure_window_foreground(self, window):
+        """Simple method to bring a window to foreground"""
+        if window:
+            try:
+                window.showMaximized()
+                window.raise_()
+                window.activateWindow()
+                print(f"   🎯 Window {window.windowTitle()} brought to foreground")
+            except Exception as e:
+                print(f"   ⚠️ Window focus error: {e}")
+    
+    def remove_stay_on_top(self, window):
+        """Remove stay-on-top flag from window"""
+        if window:
+            try:
+                window.setWindowFlags(window.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                window.show()
+            except:
+                pass
+    
+    def maximize_and_bring_to_front(self):
+        """Simple maximize window and bring to foreground"""
+        try:
+            self.showMaximized()
+            self.raise_()
+            self.activateWindow()
+            print("🔄 Window maximized and brought to foreground")
+        except Exception as e:
+            print(f"⚠️ Window maximize warning: {e}")
+    
+    def mousePressEvent(self, event):
+        """Handle mouse press events"""
+        super().mousePressEvent(event)
+    
+    def showEvent(self, event):
+        """Handle window show event"""
+        super().showEvent(event)
+    
+    def focusInEvent(self, event):
+        """Handle focus in event"""
+        super().focusInEvent(event)
     
     def show_inspection_status(self, message):
         """Show inspection status message"""
