@@ -207,21 +207,26 @@ class AlgorithmEngine:
         right_resized = cv2.resize(right, (left.shape[1], h))
         sep = np.full((h, 2, 3), 255, dtype=np.uint8)
         return np.hstack([left, sep, right_resized])
-
+    
     def detect_circles(self, img: np.ndarray,
                        dp: Optional[float] = None, minDist: Optional[int] = None,
                        param1: Optional[int] = None, param2: Optional[int] = None,
                        minRadius: Optional[int] = None, maxRadius: Optional[int] = None) -> List[Tuple[int,int,int]]:
-        """Circle detection (Hough) using config defaults where arguments are None."""
-        # use ROI-derived maxRadius if not provided
+        """Circle detection (Hough) using config defaults where arguments are None.
+
+        Simpler filtering: accept Hough detections only if local contour has reasonable
+        circularity and area coverage compared to the ideal circle. This rejects
+        strongly elliptical / non-round shapes with minimal computation.
+        """
         dp = dp or self.hough_cfg.dp
         minDist = minDist or self.hough_cfg.minDist
         param1 = param1 or self.hough_cfg.param1
         param2 = param2 or self.hough_cfg.param2
         minRadius = minRadius or self.hough_cfg.minRadius
-        # compute sensible maxRadius if not provided
+
         if maxRadius is None:
             maxRadius = self.hough_cfg.maxRadius or int(min(img.shape[:2]) / 2)
+
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.medianBlur(gray, 5)
         circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=dp, minDist=minDist,
@@ -229,8 +234,39 @@ class AlgorithmEngine:
                                    minRadius=minRadius, maxRadius=maxRadius)
         if circles is None:
             return []
+
         circles = np.uint16(np.around(circles))
-        return [(int(c[0]), int(c[1]), int(c[2])) for c in circles[0,:]]
+        filtered: List[Tuple[int,int,int]] = []
+        for (cx, cy, r) in circles[0, :]:
+            # crop small patch around detection for quick contour check
+            pad = max(5, int(r * 1.2))
+            x0 = max(0, int(cx - pad)); y0 = max(0, int(cy - pad))
+            x1 = min(img.shape[1], int(cx + pad)); y1 = min(img.shape[0], int(cy + pad))
+            patch = gray[y0:y1, x0:x1]
+            if patch.size == 0:
+                continue
+
+            edges = cv2.Canny(patch, 50, 150)
+            contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if not contours:
+                continue
+            largest = max(contours, key=cv2.contourArea)
+            area = cv2.contourArea(largest)
+            perimeter = cv2.arcLength(largest, True)
+            if perimeter <= 0:
+                continue
+
+            # circularity: 1.0 for perfect circle
+            circularity = (4.0 * np.pi * area) / (perimeter * perimeter + 1e-12)
+            # compare contour area to ideal circle area
+            ideal_area = np.pi * (r ** 2)
+            area_ratio = area / (ideal_area + 1e-12)
+
+            # simple acceptance thresholds (tunable in config later)
+            if circularity >= 0.65 and area_ratio >= 0.30:
+                filtered.append((int(cx), int(cy), int(r)))
+
+        return filtered
 
     def detect_text_presence(self, img: np.ndarray) -> bool:
         """Detect whether text-like content exists in ROI. Uses EasyOCR if available else heuristic."""
@@ -238,10 +274,7 @@ class AlgorithmEngine:
             if _EASYOCR_AVAILABLE and _OCR_READER is not None:
                 res = _OCR_READER.readtext(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
                 return bool(res and len(res) > 0)
-            # fallback heuristic
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            _, th = cv2.threshold(gray, 0, 255, cv2.THRESH_OTSU + cv2.THRESH_BINARY)
-            return th.mean() > 10
+           
         except Exception:
             return False
 
