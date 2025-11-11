@@ -15,10 +15,24 @@ from dataclasses import dataclass
 from datetime import datetime
 import os
 import cv2
+from pathlib import Path
 import numpy as np
+import json
 
 # load configuration
-from config.algorithm_config import DEFAULT_ALGO_CONFIG, AlgoConfig
+def load_algo_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+    """Load algorithm configuration from JSON file."""
+    if config_path is None:
+        # Try to find configs/algo.json relative to project root
+        proj_root = Path(__file__).resolve().parents[2]
+        config_path = proj_root / "configs" / "algo.json"
+    
+    config_path = Path(config_path)
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+    
+    with open(config_path, 'r') as f:
+        return json.load(f)
 
 # optional OCR via easyocr
 try:
@@ -41,42 +55,80 @@ class _InternalStatus:
 # Algorithm engine
 # -------------------------
 class AlgorithmEngine:
-    def __init__(self, config: Optional[AlgoConfig] = None, debug: bool = False):
+    def __init__(self, config_path = "/Users/veervardhansingh/NOVUS/AI_inspection_system/configs/algo.json", debug: bool = False):
         """
         :param config: AlgoConfig instance (DEFAULT_ALGO_CONFIG used when None)
         :param debug: print debug traces on exceptions
         """
         self.debug = debug
-        self.config = config if config is not None else DEFAULT_ALGO_CONFIG
+        self.config = load_algo_config(config_path)
+        
         # thresholds & params
-        self.diff_threshold = float(self.config.THRESHOLDS.diff_threshold)
-        self.gradient_threshold = float(self.config.THRESHOLDS.gradient_threshold)
-        self.plate_ratio_thresh = float(self.config.THRESHOLDS.plate_ratio_thresh)
-        self.screw_ratio_thresh = float(self.config.THRESHOLDS.screw_ratio_thresh)
-        # Hough params (use None for maxRadius to compute from ROI)
-        self.hough_cfg = self.config.HOUGH
+        thresholds = self.config.get("THRESHOLDS", {})
+        self.diff_threshold = float(thresholds.get("diff_threshold", 0.05))
+        self.gradient_threshold = float(thresholds.get("gradient_threshold", 30))
+        self.plate_ratio_thresh = float(thresholds.get("plate_ratio_thresh", 0.01))
+        self.screw_ratio_thresh = float(thresholds.get("screw_ratio_thresh", 0.01))
+
+        # Hough params
+        self.hough_cfg = self.config.get("HOUGH", {})
+
         # Registration params
-        self.reg_cfg = self.config.REG
-        # ORB: build with config values
-        orb_cfg = self.config.ORB
-        self._orb = cv2.ORB_create(nfeatures=int(orb_cfg.nfeatures),
-                                   scaleFactor=float(orb_cfg.scaleFactor),
-                                   nlevels=int(orb_cfg.nlevels),
-                                   edgeThreshold=int(orb_cfg.edgeThreshold),
-                                   firstLevel=int(orb_cfg.firstLevel),
-                                   WTA_K=int(orb_cfg.WTA_K),
-                                   scoreType=int(orb_cfg.scoreType),
-                                   patchSize=int(orb_cfg.patchSize))
+        self.reg_cfg = self.config.get("REG", {})
+
+        # ORB configuration
+        self._orb = self.config.get("ORB", {})
+        
+
+        # Matcher
         self._bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        # storage
+
+        # Storage
         self.references: Dict[str, np.ndarray] = {}
         self.masks: Dict[str, np.ndarray] = {}
-        # ensure default paths resolved
-        self.config.resolve_data_paths()
+
+        self.load_all_defaults()
+        
 
     # -------------------------
     # Reference / mask loading
     # -------------------------
+   
+    def load_all_defaults(self) -> Dict[str, bool]:
+        """
+        Load all default references and masks from config PATHS.
+        Uses keys defined under "PATHS" in the JSON configuration.
+
+        Returns:
+            dict: Load status for each entry (True/False)
+        """
+        results = {}
+        paths = self.config.get("PATHS", {})
+
+        if self.debug:
+            print("Loading defaults from config PATHS:")
+
+        for key, path in paths.items():
+            full_path = Path(path).resolve()
+
+            # Identify if it's a mask or reference based on filename
+            if "mask" in key.lower():
+                success = self.load_mask(key, str(full_path))
+                if self.debug:
+                    print(f"  {'✓' if success else '✗'} mask {key}: {full_path}")
+            else:
+                success = self.load_reference(key, str(full_path))
+                if self.debug:
+                    print(f"  {'✓' if success else '✗'} reference {key}: {full_path}")
+
+            results[key] = success
+
+        if self.debug:
+            loaded_count = sum(1 for v in results.values() if v)
+            print(f"Load summary: {loaded_count}/{len(results)} loaded")
+
+        return results
+
     def load_reference(self, name: str, source: Any) -> bool:
         """Load reference from file path or numpy array."""
         img = None
@@ -112,13 +164,15 @@ class AlgorithmEngine:
     # -------------------------
     # Modular detection helpers
     # -------------------------
-    def _register(self, ref: np.ndarray, frame: np.ndarray) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+    def _register(self,side, frame: np.ndarray) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """Register frame to ref (ref coordinate). Returns warped frame sized to ref and homography or None."""
         try:
+            ref=self.references.get(side)
             ref_gray = cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY)
             frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            k1, d1 = self._orb.detectAndCompute(ref_gray, None)
-            k2, d2 = self._orb.detectAndCompute(frame_gray, None)
+            orb_side = self._orb[side] 
+            k1, d1 = orb_side.detectAndCompute(ref_gray, None)
+            k2, d2 = orb_side.etectAndCompute(frame_gray, None)
             if d1 is None or d2 is None or len(d1) < self.reg_cfg.min_match_count or len(d2) < self.reg_cfg.min_match_count:
                 # fallback: resize
                 warped = cv2.resize(frame, (ref.shape[1], ref.shape[0]))
@@ -181,11 +235,11 @@ class AlgorithmEngine:
         circularity and area coverage compared to the ideal circle. This rejects
         strongly elliptical / non-round shapes with minimal computation.
         """
-        dp = dp or self.hough_cfg.dp
-        minDist = minDist or self.hough_cfg.minDist
-        param1 = param1 or self.hough_cfg.param1
-        param2 = param2 or self.hough_cfg.param2
-        minRadius = minRadius or self.hough_cfg.minRadius
+        dp = dp or self.hough_cfg.get("dp", 1.2)
+        minDist = minDist or self.hough_cfg.get("minDist", 20)
+        param1 = param1 or self.hough_cfg.get("param1", 100)
+        param2 = param2 or self.hough_cfg.get("param2", 30)
+        minRadius = minRadius or self.hough_cfg.get("minRadius", 5)
 
         if maxRadius is None:
             maxRadius = self.hough_cfg.maxRadius or int(min(img.shape[:2]) / 2)
@@ -281,12 +335,14 @@ class AlgorithmEngine:
         return equalized
 
 
-    def inspect_image(self,gold_img, gold_mask, new_img, position_hint):
+    def inspect_image(self, new_img, position_hint,side):
         """
         Compare new image with gold standard inside ROI after registration + histogram equalization.
         """
         try:
             # --- Step 0: Validate inputs ---
+            gold_img=self.references.get(side)
+            gold_mask=self.masks.get(side)
             if gold_img is None or new_img is None or gold_mask is None:
                 return {"Status": 0, "Message": "One or more input images are missing."}
 
@@ -298,15 +354,15 @@ class AlgorithmEngine:
             gray_gold = cv2.cvtColor(gold_img_eq, cv2.COLOR_BGR2GRAY)
             gray_new = cv2.cvtColor(new_img_eq, cv2.COLOR_BGR2GRAY)
 
-            orb = cv2.ORB_create(5000)
-            kp1, des1 = orb.detectAndCompute(gray_gold, None)
-            kp2, des2 = orb.detectAndCompute(gray_new, None)
+            
+            kp1, des1 = self._orb[side].detectAndCompute(gray_gold, None)
+            kp2, des2 = self._orb[side].detectAndCompute(gray_new, None)
 
             if des1 is None or des2 is None:
                 return {"Status": 0, "Message": f"Please keep the inspection object in {position_hint}"}
 
-            bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-            matches = bf.match(des1, des2)
+            
+            matches = self._bf.match(des1, des2)
             matches = sorted(matches, key=lambda x: x.distance)
 
             if len(matches) < 100:
@@ -377,6 +433,7 @@ class AlgorithmEngine:
         Single-frame processing. Returns OrderedDict with keys:
         ['original_frame', 'processed_annotated', 'status', 'results']
         """
+        rois = self.config.get("ROIS",{})
         original = np.array(frame, copy=True)
         annotated = original.copy()
         status = _InternalStatus(0, "OK")
@@ -389,6 +446,7 @@ class AlgorithmEngine:
                     status = _InternalStatus(1, "EOLT requires 'side' parameter")
                     return self._make_output(original, annotated, status, results)
                 side_key = side.lower()
+               
                 if side_key not in ('front', 'rear', 'left', 'right'):
                     status = _InternalStatus(1, f"EOLT invalid side '{side}'")
                     return self._make_output(original, annotated, status, results)
@@ -411,7 +469,7 @@ class AlgorithmEngine:
                 mask_arr = self.masks.get(mask_key_for_side) if mask_key_for_side else None
 
                 # ---- Gold vs Reference comparison ----
-                result = self.inspect_image(ref_img, mask_arr, original, f"{side_key} side")
+                result = self.inspect_image(ref_img, mask_arr, original, side_key)
 
                 if result["Status"] == 0:
                     status = _InternalStatus(1, result["Message"])
@@ -448,15 +506,16 @@ class AlgorithmEngine:
                 return self._make_output(original, processed, status, results)
             
             elif mode.lower() == 'inline':
+                
                 if submode not in ('top','bottom'):
                     status = _InternalStatus(1, "INLINE requires submode 'top' or 'bottom'")
                     return self._make_output(original, annotated, status, results)
                 if not ref or ref not in self.references:
                     status = _InternalStatus(1, f"INLINE missing reference '{ref}'")
                     return self._make_output(original, annotated, status, results)
-
+                
                 ref_img = self.references[ref]
-                warped, H = self._register(ref_img, original)
+                warped, H = self._register(submode,original)
                 annotated = warped.copy()
 
                 def crop_roi(img, r):
@@ -482,60 +541,50 @@ class AlgorithmEngine:
                     processed = self._make_side_by_side(warped, annotated)
                     return self._make_output(original, processed, status, results)
 
-                # bottom
-                antenna_roi = rois.get('antenna') if rois else None
-                speaker_roi = rois.get('speaker') if rois else None
-                plate_roi = rois.get('plate') if rois else None
-                capacitor_roi = rois.get('capacitor') if rois else None
+                elif submode == 'bottom':
+                    antenna_roi = rois.get('antenna') if rois else None
+                    speaker_roi = rois.get('speaker') if rois else None
+                    plate_roi = rois.get('plate') if rois else None
+                    capacitor_roi = rois.get('capacitor') if rois else None
 
-                antenna_present = 0
-                speaker_present = 0
-                capacitor_present = 0
+                    antenna_present = 0
+                    speaker_present = 0
+                    capacitor_present = 0
 
-                if antenna_roi is not None:
-                    crop = crop_roi(warped, antenna_roi)
-                    antenna_present = 1 if self.detect_text_presence(crop) else 0
-                    color = (0,255,0) if antenna_present else (0,0,255)
-                    x,y,w,h = antenna_roi
-                    cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
-                    if antenna_present:
-                        cv2.putText(annotated, "antenna", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                    if antenna_roi is not None:
+                        crop = crop_roi(warped, antenna_roi)
+                        antenna_present = 1 if self.detect_text_presence(crop) else 0
+                        color = (0,255,0) if antenna_present else (0,0,255)
+                        x,y,w,h = antenna_roi
+                        cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
+                        if antenna_present:
+                            cv2.putText(annotated, "antenna", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-                if speaker_roi is not None:
-                    crop = crop_roi(warped, speaker_roi)
-                    ocr_present = 1 if self.detect_text_presence(crop) else 0
-                    circles = self.detect_circles(crop, maxRadius=int(min(crop.shape[:2])/2))
-                    circle_detected = 1 if len(circles) > 0 else 0
-                    speaker_present = 1 if (ocr_present or circle_detected) else 0
-                    color = (0,255,0) if speaker_present else (0,0,255)
-                    x,y,w,h = speaker_roi
-                    cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
-                    if speaker_present:
-                        cv2.putText(annotated, "speaker", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-                    if circles:
-                        for (cx,cy,r) in circles:
-                            cv2.circle(annotated, (x+cx, y+cy), r, (0,255,0), 2)
+                    if speaker_roi is not None:
+                        crop = crop_roi(warped, speaker_roi)
+                        ocr_present = 1 if self.detect_text_presence(crop) else 0
+                        circles = self.detect_circles(crop, maxRadius=int(min(crop.shape[:2])/2))
+                        circle_detected = 1 if len(circles) > 0 else 0
+                        speaker_present = 1 if (ocr_present or circle_detected) else 0
+                        color = (0,255,0) if speaker_present else (0,0,255)
+                        x,y,w,h = speaker_roi
+                        cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
+                        if speaker_present:
+                            cv2.putText(annotated, "speaker", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                        if circles:
+                            for (cx,cy,r) in circles:
+                                cv2.circle(annotated, (x+cx, y+cy), r, (0,255,0), 2)
 
-                if capacitor_roi is not None:
-                    crop = crop_roi(warped, capacitor_roi)
-                    capacitor_present = 1 if self.detect_text_presence(crop) else 0
-                    color = (0,255,0) if capacitor_present else (0,0,255)
-                    x,y,w,h = capacitor_roi
-                    cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
-                    if capacitor_present:
-                        cv2.putText(annotated, "capacitor", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+                    if capacitor_roi is not None:
+                        crop = crop_roi(warped, capacitor_roi)
+                        capacitor_present = 1 if self.detect_text_presence(crop) else 0
+                        color = (0,255,0) if capacitor_present else (0,0,255)
+                        x,y,w,h = capacitor_roi
+                        cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
+                        if capacitor_present:
+                            cv2.putText(annotated, "capacitor", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-                if plate_roi is not None:
-                    crop = crop_roi(warped, plate_roi)
-                    plate_det, ratio = self.detect_gradient_presence(crop)
-                    lap = cv2.Laplacian(cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY), cv2.CV_32F)
-                    screw_px = (np.abs(lap) > (self.gradient_threshold/2)).sum()
-                    screw_det = 1 if (screw_px / lap.size) > self.screw_ratio_thresh else 0
-                    color = (0,255,0) if (plate_det and screw_det) else (0,0,255)
-                    x,y,w,h = plate_roi
-                    cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
-                    cv2.putText(annotated, f"plate:{int(plate_det)} screw:{int(screw_det)}", (x,y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
+            
                 results = {
                     'antenna_present': int(antenna_present),
                     'speaker_present': int(speaker_present),
