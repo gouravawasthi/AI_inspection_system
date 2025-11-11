@@ -16,8 +16,53 @@
     "base_url": "http://127.0.0.1:5001/api",
     "timeout": 30,
     "retry_attempts": 3,
-    "retry_delay": 1
+    "retry_delay": 1,
+    "endpoints": {
+      "CHIPINSPECTION": "/CHIPINSPECTION",
+      "INLINEINSPECTIONBOTTOM": "/INLINEINSPECTIONBOTTOM", 
+      "INLINEINSPECTIONTOP": "/INLINEINSPECTIONTOP",
+      "EOLTINSPECTION": "/EOLTINSPECTION"
+    },
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    }
+  },
+  "inspection": {
+    "process_ids": {
+      "INLINE_BOTTOM": "INLINE_BOTTOM_PROC_001",
+      "INLINE_TOP": "INLINE_TOP_PROC_001",
+      "EOLT": "EOLT_PROC_001",
+      "CHIP": "CHIP_PROC_001"
+    },
+    "station_ids": {
+      "INLINE_BOTTOM": "INLINE_BOTTOM_STATION_01",
+      "INLINE_TOP": "INLINE_TOP_STATION_01", 
+      "EOLT": "EOLT_STATION_01",
+      "CHIP": "CHIP_STATION_01"
+    },
+    "default_pass_rates": {
+      "ANTENNA": 0.92,
+      "CAPACITOR": 0.88,
+      "SPEAKER": 0.94,
+      "SCREW": 0.90,
+      "PLATE": 0.95,
+      "UPPER": 0.90,
+      "LOWER": 0.85,
+      "LEFT": 0.88,
+      "RIGHT": 0.92
+    }
+  },
+  "ui": {
+    "component_display": {
+      "show_individual_results": true,
+      "result_colors": {
+        "pass": "#27ae60",
+        "fail": "#e74c3c"
+      },
+      "update_interval": 100
+    }
   },
   "app_version": "1.0.0",
-  "config_version": "1.0"
+  "config_version": "1.1"
 }

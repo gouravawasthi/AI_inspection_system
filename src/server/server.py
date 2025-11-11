@@ -4,8 +4,12 @@ import sqlite3
 import os
 from flask import Flask, jsonify, request
 import threading
+import sys
 
-# --- Global Configuration (will be set by main.py) ---
+# Add src to path for config imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# --- Global Configuration (will be set by main.py or configuration manager) ---
 DB_FILE = None
 DATA_DIR = None
 
@@ -213,10 +217,35 @@ def dynamic_handler(table_name):
 
 # --- New Function for Threading ---
 
-def start_server(host='127.0.0.1', port=5001, debug=False, threaded=True):
+def start_server(host=None, port=None, debug=None, threaded=None):
     """Function to run the Flask app with configurable parameters."""
     if DB_FILE is None:
         raise ValueError("Database not configured. Call configure_database() first.")
+    
+    # Use configuration manager for default values if not provided
+    try:
+        from config.config_manager import get_config_manager
+        config = get_config_manager()
+        
+        if host is None:
+            host = config.get_server_host()
+        if port is None:
+            port = config.get_server_port()
+        if debug is None:
+            debug = config.get_server_config().get("debug", False)
+        if threaded is None:
+            threaded = config.get_server_config().get("threaded", True)
+            
+    except ImportError:
+        # Fallback to default values if config manager not available
+        if host is None:
+            host = '127.0.0.1'
+        if port is None:
+            port = 5001
+        if debug is None:
+            debug = False
+        if threaded is None:
+            threaded = True
     
     # Ensure the DB data directory exists before running
     if not os.path.exists(DATA_DIR):

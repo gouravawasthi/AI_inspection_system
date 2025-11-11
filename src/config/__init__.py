@@ -298,8 +298,9 @@ class ConfigManager:
             workflows=self._get_default_workflows()
         )
         
-        # Save default config
-        self.save_config(config, "json")
+        # NOTE: Removed automatic config save to prevent overwriting manual configurations
+        # If you need to generate default config files, call save_config() manually
+        # self.save_config(config, "json")
         return config
     
     def _get_default_schemas(self) -> List[TableSchema]:
