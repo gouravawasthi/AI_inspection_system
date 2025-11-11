@@ -1,0 +1,11 @@
+{
+  "camera_id": 0,
+  "frame_width": 480,
+  "frame_height": 640,
+  "fps": 25,
+  "save_path": "inspection_images",
+  "flip_horizontal": false,
+  "flip_vertical": false,
+  "exposure": 0,
+  "logging_level": "INFO"
+}
