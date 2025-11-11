@@ -16,9 +16,10 @@ try:
 except ImportError:
     from base_inspection_window import BaseInspectionWindow
 
-# Add parent directory to path for API imports
+# Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.api_manager import APIManager
+from config.config_manager import get_config_manager
 
 
 class INLINEInspectionWindow(BaseInspectionWindow):
@@ -30,52 +31,43 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         self.bottom_inspection_complete = False
         self.top_api_manager = None
         self.bottom_api_manager = None
+        
+        # Initialize API managers for INLINE workflow
+        self.init_api_manager()
+        
+        # Override submit button connection to use INLINE custom method
+        if hasattr(self, 'submit_data_button') and self.submit_data_button:
+            # Disconnect base class connection
+            self.submit_data_button.clicked.disconnect()
+            # Connect to INLINE custom submit method
+            self.submit_data_button.clicked.connect(self.submit_data)
     
     def get_inspection_steps(self) -> List[str]:
-        """Return INLINE inspection steps"""
+        """Return INLINE inspection steps - simplified to match capture requirements"""
         return [
-            # TOP inspection steps
-            "TOP: Setup", "TOP: Screw", "TOP: Plate", 
-            # BOTTOM inspection steps  
-            "BOTTOM: Setup", "BOTTOM: Antenna", "BOTTOM: Capacitor", "BOTTOM: Speaker"
+            # BOTTOM inspection - single capture for all components
+            "BOTTOM: Capture",  # Captures Antenna, Capacitor, Speaker in one step
+            # TOP inspection - single capture for all components  
+            "TOP: Capture"      # Captures Screw, Plate in one step
         ]
     
     def init_api_manager(self):
-        """Initialize API managers for both INLINE BOTTOM and TOP"""
+        """Initialize API managers for both INLINE BOTTOM and TOP using configuration"""
         try:
             print("🔧 Initializing INLINE API managers...")
             
-            # Load workflow configuration directly from JSON file
-            import json
-            import os
+            # Get configuration manager
+            config = get_config_manager()
             
-            workflow_file = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                'configs', 
-                'inspection_workflows.json'
-            )
-            
-            workflows = []
-            if os.path.exists(workflow_file):
-                with open(workflow_file, 'r') as f:
-                    workflows = json.load(f)
-            else:
-                print(f"❌ Workflow file not found: {workflow_file}")
-                return
-            
-            # Base API URL
-            api_base_url = "http://127.0.0.1:5001/api"
+            # Get all available workflows
+            workflows = config.get_enabled_workflows()
             
             # Initialize BOTTOM inspection API manager (CHIP -> INLINE_BOTTOM)
-            bottom_workflow = None
-            for wf in workflows:
-                if wf.get('name') == "CHIP_TO_INLINE_BOTTOM":
-                    bottom_workflow = wf
-                    break
+            bottom_workflow = config.get_workflow_by_name("CHIP_TO_INLINE_BOTTOM")
             
             if bottom_workflow:
-                api1_url = f"{api_base_url}/{bottom_workflow['api1_table']}"
-                api2_url = f"{api_base_url}/{bottom_workflow['api2_table']}"
+                api1_url = config.get_api_endpoint_url(bottom_workflow['api1_table'])
+                api2_url = config.get_api_endpoint_url(bottom_workflow['api2_table'])
                 
                 self.bottom_api_manager = APIManager(
                     api1_url=api1_url,
@@ -86,18 +78,14 @@ class INLINEInspectionWindow(BaseInspectionWindow):
                 print(f"   📡 API1: {api1_url} ({bottom_workflow['api1_table']})")
                 print(f"   📡 API2: {api2_url} ({bottom_workflow['api2_table']})")
             else:
-                print("❌ CHIP_TO_INLINE_BOTTOM workflow not found")
+                print("❌ CHIP_TO_INLINE_BOTTOM workflow not found in configuration")
             
             # Initialize TOP inspection API manager (INLINE_BOTTOM -> INLINE_TOP)
-            top_workflow = None
-            for wf in workflows:
-                if wf.get('name') == "INLINE_BOTTOM_TO_INLINE_TOP":
-                    top_workflow = wf
-                    break
+            top_workflow = config.get_workflow_by_name("INLINE_BOTTOM_TO_INLINE_TOP")
             
             if top_workflow:
-                api1_url = f"{api_base_url}/{top_workflow['api1_table']}"
-                api2_url = f"{api_base_url}/{top_workflow['api2_table']}"
+                api1_url = config.get_api_endpoint_url(top_workflow['api1_table'])
+                api2_url = config.get_api_endpoint_url(top_workflow['api2_table'])
                 
                 self.top_api_manager = APIManager(
                     api1_url=api1_url,
@@ -108,7 +96,7 @@ class INLINEInspectionWindow(BaseInspectionWindow):
                 print(f"   📡 API1: {api1_url} ({top_workflow['api1_table']})")
                 print(f"   📡 API2: {api2_url} ({top_workflow['api2_table']})")
             else:
-                print("❌ INLINE_BOTTOM_TO_INLINE_TOP workflow not found")
+                print("❌ INLINE_BOTTOM_TO_INLINE_TOP workflow not found in configuration")
                 
             
             # Set the primary API manager for barcode validation
@@ -120,11 +108,10 @@ class INLINEInspectionWindow(BaseInspectionWindow):
                 self.api_manager = self.top_api_manager
                 print(f"🔧 Primary API manager set to TOP for barcode validation")
             else:
-                # Fallback: Create a basic API manager for barcode validation
+                # Fallback: Create a basic API manager for barcode validation using config
                 print("⚠️ Creating fallback API manager for INLINE validation")
-                api_base_url = "http://127.0.0.1:5001/api"
-                fallback_api1 = f"{api_base_url}/INLINEINSPECTIONBOTTOM"
-                fallback_api2 = f"{api_base_url}/INLINEINSPECTIONTOP"
+                fallback_api1 = config.get_api_endpoint_url("INLINEINSPECTIONBOTTOM")
+                fallback_api2 = config.get_api_endpoint_url("INLINEINSPECTIONTOP")
                 
                 self.api_manager = APIManager(
                     api1_url=fallback_api1,
@@ -146,15 +133,129 @@ class INLINEInspectionWindow(BaseInspectionWindow):
     def collect_inspection_data(self, step: str) -> Dict[str, Any]:
         """Collect inspection data for INLINE step"""
         import random
+        from datetime import datetime
         
-        if "TOP:" in step:
-            step_name = step.replace("TOP: ", "")
-            return self.collect_top_inspection_data(step_name)
-        elif "BOTTOM:" in step:
-            step_name = step.replace("BOTTOM: ", "")
-            return self.collect_bottom_inspection_data(step_name)
+        if step == "TOP: Capture":
+            return self.collect_top_capture_data()
+        elif step == "BOTTOM: Capture":
+            return self.collect_bottom_capture_data()
         
         return {}
+    
+    def collect_top_capture_data(self) -> Dict[str, Any]:
+        """Collect data for TOP inspection capture - Screw and Plate"""
+        import random
+        from datetime import datetime
+        
+        # Get configuration
+        config = get_config_manager()
+        
+        # Get pass rates from configuration
+        screw_pass_rate = config.get_component_pass_rate("SCREW")
+        plate_pass_rate = config.get_component_pass_rate("PLATE")
+        
+        # Simulate algorithm results for components (1=PASS, 0=FAIL)
+        screw_value = 1 if random.random() <= screw_pass_rate else 0
+        plate_value = 1 if random.random() <= plate_pass_rate else 0
+        
+        # Get process and station IDs from configuration
+        process_id = config.get_process_id("INLINE_TOP")
+        station_id = config.get_station_id("INLINE_TOP")
+        
+        # Initialize data with None values (as per requirement d)
+        data = {
+            # Required fields
+            "Barcode": None,  # Will be set during API submission
+            "DT": datetime.now().isoformat(),
+            "Process_id": process_id,
+            "Station_ID": station_id,
+            
+            # Algorithm results (1/0 for database)
+            "Screw": screw_value,
+            "Plate": plate_value,
+            "Result": None,  # Will be calculated
+            
+            # Manual fields (copied from algorithm results)
+            "ManualScrew": screw_value,  # Copy algorithm result
+            "ManualPlate": plate_value,  # Copy algorithm result
+            "ManualResult": None  # Will be calculated
+        }
+        
+        # Calculate overall result (requirement d: ManualResult = 1 only if all manual fields = 1)
+        manual_result = 1 if (screw_value == 1 and plate_value == 1) else 0
+        overall_result = 1 if manual_result == 1 else 0  # Store as 1/0 for database
+        
+        data["Result"] = overall_result
+        data["ManualResult"] = manual_result
+        
+        # Store display-friendly versions for UI (keep the numeric values for API)
+        data["_display"] = {
+            "Screw": "PASS" if screw_value == 1 else "FAIL",
+            "Plate": "PASS" if plate_value == 1 else "FAIL",
+            "Result": "PASS" if overall_result == 1 else "FAIL"
+        }
+        
+        return data
+    
+    def collect_bottom_capture_data(self) -> Dict[str, Any]:
+        """Collect data for BOTTOM inspection capture step"""
+        import random
+        from datetime import datetime
+        
+        # Get configuration
+        config = get_config_manager()
+        
+        # Get pass rates from configuration  
+        antenna_pass_rate = config.get_component_pass_rate("ANTENNA")
+        capacitor_pass_rate = config.get_component_pass_rate("CAPACITOR")
+        speaker_pass_rate = config.get_component_pass_rate("SPEAKER")
+        
+        # Simulate algorithm results for components (1=PASS, 0=FAIL)
+        antenna_value = 1 if random.random() <= antenna_pass_rate else 0
+        capacitor_value = 1 if random.random() <= capacitor_pass_rate else 0
+        speaker_value = 1 if random.random() <= speaker_pass_rate else 0
+        
+        # Get process and station IDs from configuration
+        process_id = config.get_process_id("INLINE_BOTTOM")
+        station_id = config.get_station_id("INLINE_BOTTOM")
+        
+        # Initialize data with None values (as per requirement d)
+        data = {
+            # Required fields
+            "Barcode": None,  # Will be set during API submission
+            "DT": datetime.now().isoformat(),
+            "Process_id": process_id,
+            "Station_ID": station_id,
+            
+            # Algorithm results (1/0 for database)
+            "Antenna": antenna_value,
+            "Capacitor": capacitor_value,
+            "Speaker": speaker_value,
+            "Result": None,  # Will be calculated
+            
+            # Manual fields (copied from algorithm results)
+            "ManualAntenna": antenna_value,  # Copy algorithm result
+            "ManualCapacitor": capacitor_value,  # Copy algorithm result
+            "ManualSpeaker": speaker_value,  # Copy algorithm result
+            "ManualResult": None  # Will be calculated
+        }
+        
+        # Calculate overall result (requirement d: ManualResult = 1 only if all manual fields = 1)
+        manual_result = 1 if (antenna_value == 1 and capacitor_value == 1 and speaker_value == 1) else 0
+        overall_result = 1 if manual_result == 1 else 0  # Store as 1/0 for database
+        
+        data["Result"] = overall_result
+        data["ManualResult"] = manual_result
+        
+        # Store display-friendly versions for UI (keep the numeric values for API)
+        data["_display"] = {
+            "Antenna": "PASS" if antenna_value == 1 else "FAIL",
+            "Capacitor": "PASS" if capacitor_value == 1 else "FAIL", 
+            "Speaker": "PASS" if speaker_value == 1 else "FAIL",
+            "Result": "PASS" if overall_result == 1 else "FAIL"
+        }
+        
+        return data
     
     def collect_top_inspection_data(self, step: str) -> Dict[str, Any]:
         """Collect data for TOP inspection steps"""
@@ -237,18 +338,15 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         if not data:
             return False
         
-        if "Setup" in step:
-            return data.get("setup_complete", False)
+        if step == "TOP: Capture":
+            # Validate that TOP capture has Screw and Plate data
+            required_fields = ["Screw", "Plate", "ManualScrew", "ManualPlate", "Result", "ManualResult"]
+            return all(field in data for field in required_fields)
         
-        if "TOP:" in step:
-            step_name = step.replace("TOP: ", "")
-            if step_name in ["Screw", "Plate"]:
-                return f"Manual{step_name}" in data and step_name in data
-        
-        if "BOTTOM:" in step:
-            step_name = step.replace("BOTTOM: ", "")
-            if step_name in ["Antenna", "Capacitor", "Speaker"]:
-                return f"Manual{step_name}" in data and step_name in data
+        elif step == "BOTTOM: Capture":
+            # Validate that BOTTOM capture has Antenna, Capacitor, Speaker data
+            required_fields = ["Antenna", "Capacitor", "Speaker", "ManualAntenna", "ManualCapacitor", "ManualSpeaker", "Result", "ManualResult"]
+            return all(field in data for field in required_fields)
         
         return True
     
@@ -290,23 +388,39 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         return True
     
     def complete_inspection(self):
-        """Override to handle two-phase completion"""
-        super().complete_inspection()
+        """Override to handle two-phase completion - only complete when both stages are submitted"""
+        # Check if both stages have been submitted to API  
+        bottom_submitted = hasattr(self, 'bottom_submitted') and self.bottom_submitted
+        top_submitted = hasattr(self, 'top_submitted') and self.top_submitted
         
-        # Determine which inspections are complete
-        self.top_inspection_complete = self.check_top_inspection_complete()
-        self.bottom_inspection_complete = self.check_bottom_inspection_complete()
-        
-        # Update API data display with both phases
-        api_text = f"INLINE Inspection Status:\n"
-        api_text += f"TOP: {'✅ Complete' if self.top_inspection_complete else '❌ Incomplete'}\n"
-        api_text += f"BOTTOM: {'✅ Complete' if self.bottom_inspection_complete else '❌ Incomplete'}\n"
-        api_text += f"Overall: {self.determine_overall_result()}\n"
-        
-        if self.top_inspection_complete and self.bottom_inspection_complete:
-            api_text += "\nReady for sequential API submission"
-        
-        self.api_data_display.setPlainText(api_text)
+        # Only allow completion if both stages have been submitted
+        if bottom_submitted and top_submitted:
+            print("🎉 INLINE inspection complete - both stages submitted to API")
+            super().complete_inspection()
+        else:
+            print("⏸️ INLINE inspection not completing automatically - waiting for API submissions")
+            print(f"   BOTTOM submitted: {bottom_submitted}")
+            print(f"   TOP submitted: {top_submitted}")
+            
+            # Just update the display without completing the inspection
+            self.top_inspection_complete = self.check_top_inspection_complete()
+            self.bottom_inspection_complete = self.check_bottom_inspection_complete()
+            
+            # Update API data display with both phases
+            api_text = f"INLINE Inspection Status:\n"
+            api_text += f"TOP: {'✅ Complete' if self.top_inspection_complete else '❌ Incomplete'}\n"
+            api_text += f"BOTTOM: {'✅ Complete' if self.bottom_inspection_complete else '❌ Incomplete'}\n"
+            api_text += f"Overall: {self.determine_overall_result()}\n"
+            
+            if self.top_inspection_complete and self.bottom_inspection_complete:
+                api_text += "\nReady for sequential API submission\nClick Submit to API to proceed"
+            
+            self.api_data_display.setPlainText(api_text)
+            
+            # Enable submit button for the appropriate stage
+            submit_enabled = self._should_enable_submit_for_inline()
+            if hasattr(self, 'submit_data_button') and self.submit_data_button:
+                self.submit_data_button.setEnabled(submit_enabled)
     
     def check_top_inspection_complete(self) -> bool:
         """Check if TOP inspection is complete"""
@@ -316,180 +430,336 @@ class INLINEInspectionWindow(BaseInspectionWindow):
     def check_bottom_inspection_complete(self) -> bool:
         """Check if BOTTOM inspection is complete"""
         bottom_steps = ["BOTTOM: Setup", "BOTTOM: Antenna", "BOTTOM: Capacitor", "BOTTOM: Speaker"]
-        return all(step in self.inspection_results for step in bottom_steps)
+        
+        # Debug: Print what we have vs what we expect
+        print(f"\n🔍 DEBUG: Checking bottom inspection completion")
+        print(f"Expected steps: {bottom_steps}")
+        print(f"Available inspection results: {list(self.inspection_results.keys())}")
+        
+        for step in bottom_steps:
+            is_present = step in self.inspection_results
+            print(f"  Step '{step}': {'✅ Found' if is_present else '❌ Missing'}")
+        
+        result = all(step in self.inspection_results for step in bottom_steps)
+        print(f"Bottom inspection complete: {result}")
+        return result
     
     def perform_api_submissions(self) -> bool:
-        """Perform INLINE API submissions - two sequential submissions"""
+        """Perform INLINE API submissions - ONE stage per call for two-stage submission process"""
         try:
             print("\n🚀 Starting INLINE API Submissions...")
             print("="*50)
             
-            success_count = 0
-            total_submissions = 2
+            # Determine which stage we're in
+            bottom_complete = "BOTTOM: Capture" in self.inspection_results
+            top_complete = "TOP: Capture" in self.inspection_results
+            bottom_submitted = hasattr(self, 'bottom_submitted') and self.bottom_submitted
+            top_submitted = hasattr(self, 'top_submitted') and self.top_submitted
             
-            # Step 1: Submit BOTTOM inspection data (CHIP -> INLINE_BOTTOM)
-            print(f"📤 Step 1/2: CHIP_TO_INLINE_BOTTOM submission")
-            print(f"   Barcode: {self.barcode}")
-            
-            if self.bottom_inspection_complete and self.bottom_api_manager:
-                bottom_data = self.prepare_bottom_api_data()
-                print(f"🎯 BOTTOM Data prepared:")
-                for key, value in bottom_data.items():
-                    print(f"   {key}: {value}")
-                
-                print(f"📡 API Call: {self.bottom_api_manager.api2_url}")
-                print(f"   Method: POST")
-                print(f"   Payload: {bottom_data}")
-                
-                # Simulate API call with debugging
-                try:
-                    # In real implementation, this would be:
-                    # bottom_result = self.bottom_api_manager.submit_data(bottom_data)
-                    
-                    # Mock successful BOTTOM submission for now
-                    bottom_result = {
-                        'success': True,
-                        'message': 'INLINE BOTTOM data submitted successfully',
-                        'endpoint': self.bottom_api_manager.api2_url,
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    
-                    if bottom_result['success']:
-                        success_count += 1
-                        print("✅ BOTTOM submission successful")
-                        print(f"   Response: {bottom_result['message']}")
-                    else:
-                        print(f"❌ BOTTOM submission failed: {bottom_result.get('message', 'Unknown error')}")
-                        return False
-                        
-                except Exception as e:
-                    print(f"❌ BOTTOM API call failed: {e}")
+            # Stage 1: BOTTOM inspection data submission to INLINEINSPECTIONBOTTOM
+            if bottom_complete and not bottom_submitted:
+                print(f"📤 Stage 1: INLINEINSPECTIONBOTTOM submission")
+                success = self.submit_bottom_inspection()
+                if success:
+                    self.bottom_submitted = True
+                    print("✅ BOTTOM inspection submitted successfully")
+                    print("ℹ️ BOTTOM submitted successfully. Click Submit again for TOP when ready.")
+                    return True  # Success - BOTTOM done, stop here for user to click again
+                else:
+                    print("❌ BOTTOM inspection submission failed")
                     return False
-            else:
-                print("⚠️ BOTTOM inspection not complete or API manager not available")
-                return False
             
-            print("\n" + "-"*50)
-            
-            # Step 2: Submit TOP inspection data (INLINE_BOTTOM -> INLINE_TOP)
-            print(f"📤 Step 2/2: INLINE_BOTTOM_TO_INLINE_TOP submission")
-            
-            if self.top_inspection_complete and self.top_api_manager:
-                top_data = self.prepare_top_api_data()
-                print(f"🎯 TOP Data prepared:")
-                for key, value in top_data.items():
-                    print(f"   {key}: {value}")
-                
-                print(f"📡 API Call: {self.top_api_manager.api2_url}")
-                print(f"   Method: POST")
-                print(f"   Payload: {top_data}")
-                
-                # Simulate API call with debugging
-                try:
-                    # In real implementation, this would be:
-                    # top_result = self.top_api_manager.submit_data(top_data)
-                    
-                    # Mock successful TOP submission for now
-                    top_result = {
-                        'success': True,
-                        'message': 'INLINE TOP data submitted successfully',
-                        'endpoint': self.top_api_manager.api2_url,
-                        'timestamp': datetime.now().isoformat()
-                    }
-                    
-                    if top_result['success']:
-                        success_count += 1
-                        print("✅ TOP submission successful")
-                        print(f"   Response: {top_result['message']}")
-                    else:
-                        print(f"❌ TOP submission failed: {top_result.get('message', 'Unknown error')}")
-                        return False
-                        
-                except Exception as e:
-                    print(f"❌ TOP API call failed: {e}")
+            # Stage 2: TOP inspection data submission to INLINEINSPECTIONTOP  
+            elif top_complete and bottom_submitted and not top_submitted:
+                print(f"📤 Stage 2: INLINEINSPECTIONTOP submission")
+                success = self.submit_top_inspection()
+                if success:
+                    self.top_submitted = True
+                    print("✅ TOP inspection submitted successfully")
+                    print("🎉 All INLINE inspections completed!")
+                    return True
+                else:
+                    print("❌ TOP inspection submission failed")
                     return False
-            else:
-                print("⚠️ TOP inspection not complete or API manager not available")
-                return False
             
-            print("\n" + "="*50)
-            print(f"🎉 INLINE API Submissions Complete: {success_count}/{total_submissions}")
-            
-            # Update API data display with submission results
-            if success_count == total_submissions:
-                api_text = f"✅ INLINE Submission Complete\n"
-                api_text += f"✅ TOP: INLINEINSPECTIONTOP\n"
-                api_text += f"✅ BOTTOM: INLINEINSPECTIONBOTTOM\n"
-                api_text += f"Barcode: {self.barcode}\n"
-                api_text += f"Sequential submissions: {success_count}/{total_submissions}\n"
-                api_text += f"Time: {datetime.now().isoformat()}"
-                
-                self.api_data_display.setPlainText(api_text)
+            # Check if both are already submitted (complete success)
+            elif bottom_submitted and top_submitted:
+                print("✅ Both BOTTOM and TOP inspections already submitted")
                 return True
-            else:
+            
+            # Handle waiting states (not failures)
+            elif bottom_submitted and not top_complete:
+                print("ℹ️ BOTTOM already submitted. Waiting for TOP inspection to complete.")
+                return True  # Not a failure, just waiting
+            
+            if not bottom_complete and not top_complete:
+                print("⚠️ No inspections complete yet")
+                return False
+            elif not bottom_complete:
+                print("⚠️ Waiting for BOTTOM inspection to complete")
                 return False
                 
+            print("⚠️ Unexpected submission state")
+            return False
+            
         except Exception as e:
             print(f"❌ Error in INLINE API submission: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def submit_bottom_inspection(self) -> bool:
+        """Submit BOTTOM inspection data to INLINEINSPECTIONBOTTOM table using CHIP_TO_INLINE_BOTTOM workflow"""
+        try:
+            # Prepare BOTTOM inspection data
+            bottom_data = self.prepare_bottom_api_data()
+            print(f"🎯 BOTTOM Data for INLINEINSPECTIONBOTTOM:")
+            for key, value in bottom_data.items():
+                print(f"   {key}: {value}")
+            
+            # Use bottom_api_manager with CHIP_TO_INLINE_BOTTOM workflow
+            if self.bottom_api_manager:
+                print(f"📡 Submitting to: {self.bottom_api_manager.api2_url} (INLINEINSPECTIONBOTTOM)")
+                # Direct API call using the _call_api method to avoid data wrapping
+                success, response = self.bottom_api_manager._call_api("post", self.bottom_api_manager.api2_url, bottom_data)
+                
+                if success:
+                    print(f"✅ BOTTOM data successfully submitted to INLINEINSPECTIONBOTTOM table")
+                else:
+                    print(f"❌ BOTTOM data submission failed: {response}")
+            else:
+                print(f"❌ No BOTTOM API manager available for CHIP_TO_INLINE_BOTTOM workflow")
+                success = False
+            
+            if success:
+                # Update API display to show BOTTOM submission with display-friendly values
+                antenna_display = "PASS" if bottom_data.get('Antenna', 0) == 1 else "FAIL"
+                capacitor_display = "PASS" if bottom_data.get('Capacitor', 0) == 1 else "FAIL"
+                speaker_display = "PASS" if bottom_data.get('Speaker', 0) == 1 else "FAIL"
+                result_display = "PASS" if bottom_data.get('Result', 0) == 1 else "FAIL"
+                
+                self._update_api_display(f"✅ BOTTOM Submitted (INLINEINSPECTIONBOTTOM)\nAntenna: {antenna_display}\nCapacitor: {capacitor_display}\nSpeaker: {speaker_display}\nResult: {result_display}")
+                
+                # Set the BOTTOM submitted flag
+                self.bottom_submitted = True
+                
+                # Update submit button state after successful BOTTOM submission
+                self._set_submit_button_enabled(self._should_enable_submit_for_inline())
+            
+            return success
+            
+        except Exception as e:
+            print(f"❌ BOTTOM submission error: {e}")
+            return False
+    
+    def submit_top_inspection(self) -> bool:
+        """Submit TOP inspection data to INLINEINSPECTIONTOP table using INLINE_BOTTOM_TO_INLINE_TOP workflow"""
+        try:
+            # Prepare TOP inspection data
+            top_data = self.prepare_top_api_data()
+            print(f"🎯 TOP Data for INLINEINSPECTIONTOP:")
+            for key, value in top_data.items():
+                print(f"   {key}: {value}")
+            
+            # Use top_api_manager with INLINE_BOTTOM_TO_INLINE_TOP workflow
+            if self.top_api_manager:
+                print(f"📡 Submitting to: {self.top_api_manager.api2_url} (INLINEINSPECTIONTOP)")
+                # Direct API call using the _call_api method to avoid data wrapping
+                success, response = self.top_api_manager._call_api("post", self.top_api_manager.api2_url, top_data)
+                
+                if success:
+                    print(f"✅ TOP data successfully submitted to INLINEINSPECTIONTOP table")
+                else:
+                    print(f"❌ TOP data submission failed: {response}")
+            else:
+                print(f"❌ No TOP API manager available for INLINE_BOTTOM_TO_INLINE_TOP workflow")
+                success = False
+            
+            if success:
+                # Update API display to show both submissions complete with display-friendly values
+                result_display = "PASS" if top_data.get('Result', 0) == 1 else "FAIL"
+                self._update_api_display(f"✅ INLINE Complete\nBOTTOM: INLINEINSPECTIONBOTTOM ✓\nTOP: INLINEINSPECTIONTOP ✓\nOverall: {result_display}")
+                
+                # Set the TOP submitted flag
+                self.top_submitted = True
+                
+                # Update submit button state after successful TOP submission
+                self._set_submit_button_enabled(self._should_enable_submit_for_inline())
+            
+            return success
+            
+        except Exception as e:
+            print(f"❌ TOP submission error: {e}")
             return False
     
     def prepare_top_api_data(self) -> Dict[str, Any]:
-        """Prepare data for TOP API submission"""
-        api_data = {
-            'Barcode': self.barcode,
-            'DT': datetime.now().isoformat(),
-            'Process_id': 'INLINE_TOP_PROC_001',
-            'Station_ID': 'INLINE_TOP_STATION_01'
-        }
+        """Prepare data for TOP API submission to INLINEINSPECTIONTOP table"""
+        # Get the capture data from TOP inspection
+        capture_step = "TOP: Capture"
+        if capture_step not in self.inspection_results:
+            raise ValueError("TOP inspection data not found")
         
-        # Add TOP inspection results
-        for component in ["Screw", "Plate"]:
-            step_key = f"TOP: {component}"
-            if step_key in self.inspection_results:
-                step_data = self.inspection_results[step_key]['data']
-                
-                # Add automatic result
-                api_data[component] = step_data.get(component, 'UNKNOWN')
-                
-                # Add manual result (1/0)
-                manual_key = f'Manual{component}'
-                api_data[manual_key] = step_data.get(manual_key, 0)
+        capture_data = self.inspection_results[capture_step]['data']
         
-        # Add overall TOP result
-        top_result = "PASS" if self.check_top_results() else "FAIL"
-        api_data['Result'] = top_result
-        api_data['ManualResult'] = 1 if top_result == "PASS" else 0
+        # Prepare API data with barcode from current inspection
+        api_data = capture_data.copy()  # Start with capture data
+        api_data['Barcode'] = self.barcode  # Override with current barcode
         
         return api_data
     
     def prepare_bottom_api_data(self) -> Dict[str, Any]:
-        """Prepare data for BOTTOM API submission"""
-        api_data = {
-            'Barcode': self.barcode,
-            'DT': datetime.now().isoformat(),
-            'Process_id': 'INLINE_BOTTOM_PROC_001',
-            'Station_ID': 'INLINE_BOTTOM_STATION_01'
-        }
+        """Prepare data for BOTTOM API submission to INLINEINSPECTIONBOTTOM table"""
+        # Get the capture data from BOTTOM inspection
+        capture_step = "BOTTOM: Capture"
+        if capture_step not in self.inspection_results:
+            raise ValueError("BOTTOM inspection data not found")
         
-        # Add BOTTOM inspection results
-        for component in ["Antenna", "Capacitor", "Speaker"]:
-            step_key = f"BOTTOM: {component}"
-            if step_key in self.inspection_results:
-                step_data = self.inspection_results[step_key]['data']
-                
-                # Add automatic result
-                api_data[component] = step_data.get(component, 'UNKNOWN')
-                
-                # Add manual result (1/0)
-                manual_key = f'Manual{component}'
-                api_data[manual_key] = step_data.get(manual_key, 0)
+        capture_data = self.inspection_results[capture_step]['data']
         
-        # Add overall BOTTOM result
-        bottom_result = "PASS" if self.check_bottom_results() else "FAIL"
-        api_data['Result'] = bottom_result
-        api_data['ManualResult'] = 1 if bottom_result == "PASS" else 0
+        # Prepare API data with barcode from current inspection
+        api_data = capture_data.copy()  # Start with capture data
+        api_data['Barcode'] = self.barcode  # Override with current barcode
         
         return api_data
+
+    def submit_data(self):
+        """Custom submission method for INLINE inspection - handles two-stage submission"""
+        try:
+            if not self.api_manager:
+                QMessageBox.warning(self, "API Error", "API Manager not available")
+                return
+            
+            success = self.perform_api_submissions()
+            bottom_complete = "BOTTOM: Capture" in self.inspection_results
+            top_complete = "TOP: Capture" in self.inspection_results
+            bottom_submitted = hasattr(self, 'bottom_submitted') and self.bottom_submitted
+            top_submitted = hasattr(self, 'top_submitted') and self.top_submitted
+            
+            # Determine the submission status and show appropriate message
+            if success:
+                if bottom_submitted and top_submitted:
+                    # Both stages completed
+                    QMessageBox.information(self, "INLINE Submission Complete", 
+                                          f"✅ Both INLINE inspection stages successfully submitted!\n\n"
+                                          f"BOTTOM → INLINEINSPECTIONBOTTOM: ✅\n"
+                                          f"TOP → INLINEINSPECTIONTOP: ✅\n\n"
+                                          f"Barcode: {self.barcode}\n"
+                                          f"Type: INLINE (Two-Stage)")
+                    self.log_inspection_results()
+                    self.reset_for_new_inspection()
+                elif bottom_submitted and not top_complete:
+                    # BOTTOM submitted, waiting for TOP inspection
+                    QMessageBox.information(self, "BOTTOM Submitted - Stage 1/2 Complete", 
+                                          f"✅ BOTTOM inspection data submitted to INLINEINSPECTIONBOTTOM!\n\n"
+                                          f"📋 Status: Stage 1 of 2 Complete\n"
+                                          f"⏳ Next: Complete TOP inspection, then click Submit again\n\n"
+                                          f"🔄 The Submit button will re-enable for Stage 2\n"
+                                          f"Barcode: {self.barcode}")
+                elif bottom_submitted and top_complete and not top_submitted:
+                    # TOP just submitted
+                    QMessageBox.information(self, "TOP Submitted - Stage 2/2 Complete", 
+                                          f"✅ TOP inspection data submitted to INLINEINSPECTIONTOP!\n\n"
+                                          f"🎉 Both stages now complete!\n"
+                                          f"BOTTOM → INLINEINSPECTIONBOTTOM: ✅\n"
+                                          f"TOP → INLINEINSPECTIONTOP: ✅\n\n"
+                                          f"Barcode: {self.barcode}")
+                else:
+                    # Some other success case
+                    QMessageBox.information(self, "Data Submitted", 
+                                          f"INLINE inspection data submitted successfully\n\n"
+                                          f"Barcode: {self.barcode}\n"
+                                          f"Type: INLINE")
+            else:
+                # Actual failure occurred
+                QMessageBox.critical(self, "Submission Failed", 
+                                   f"❌ Failed to submit INLINE inspection data\n\n"
+                                   f"BOTTOM complete: {'✅' if bottom_complete else '❌'}\n"
+                                   f"TOP complete: {'✅' if top_complete else '❌'}\n"
+                                   f"BOTTOM submitted: {'✅' if bottom_submitted else '❌'}\n"
+                                   f"TOP submitted: {'✅' if top_submitted else '❌'}\n\n"
+                                   f"Please check the API connections and try again.")
+            
+            # Always update submit button state after any submission attempt
+            self._set_submit_button_enabled(self._should_enable_submit_for_inline())
+                
+        except Exception as e:
+            QMessageBox.critical(self, "Submission Error", f"Error submitting INLINE data: {e}")
+            # Update submit button state even after errors
+            self._set_submit_button_enabled(self._should_enable_submit_for_inline())
+    
+    def _should_enable_submit_for_inline(self) -> bool:
+        """Custom INLINE submit button logic for two-stage submission"""
+        bottom_complete = "BOTTOM: Capture" in self.inspection_results
+        top_complete = "TOP: Capture" in self.inspection_results
+        bottom_submitted = hasattr(self, 'bottom_submitted') and self.bottom_submitted
+        top_submitted = hasattr(self, 'top_submitted') and self.top_submitted
+        
+        # Debug information
+        print(f"🔍 INLINE Submit Button Check:")
+        print(f"   BOTTOM complete: {bottom_complete}")
+        print(f"   TOP complete: {top_complete}")
+        print(f"   BOTTOM submitted: {bottom_submitted}")
+        print(f"   TOP submitted: {top_submitted}")
+        
+        # Enable submit button for:
+        # 1. First submission: BOTTOM complete but not yet submitted
+        # 2. Second submission: BOTTOM submitted AND TOP complete but not yet submitted
+        # 3. Failure cases: any component has failures (for manual override)
+        
+        # Check for failures (always enable submit for manual override)
+        bottom_failures = self._inline_bottom_has_failures()
+        top_failures = self._inline_top_has_failures()
+        
+        if bottom_failures or top_failures:
+            print(f"   Submit enabled: True (failures detected)")
+            return True
+        
+        # Stage 1: BOTTOM complete, not yet submitted
+        if bottom_complete and not bottom_submitted:
+            print(f"   Submit enabled: True (BOTTOM ready for first submission)")
+            return True
+            
+        # Stage 2: BOTTOM submitted, TOP complete, not yet submitted
+        if bottom_submitted and top_complete and not top_submitted:
+            print(f"   Submit enabled: True (TOP ready for second submission)")
+            return True
+        
+        # Both stages completed
+        if bottom_submitted and top_submitted:
+            print(f"   Submit enabled: False (both stages already submitted)")
+            return False
+        
+        # Waiting for inspections to complete
+        if not bottom_complete:
+            print(f"   Submit enabled: False (waiting for BOTTOM inspection)")
+        elif bottom_submitted and not top_complete:
+            print(f"   Submit enabled: False (waiting for TOP inspection)")
+        else:
+            print(f"   Submit enabled: False (unexpected state)")
+        
+        return False
+    
+    def _inline_bottom_has_failures(self) -> bool:
+        """Check if BOTTOM inspection has any failures"""
+        for step_name, result in self.inspection_results.items():
+            if "BOTTOM:" in step_name:
+                step_data = result.get('data', {})
+                # Check if any component failed (value is 0)
+                for field in ['Antenna', 'Capacitor', 'Speaker']:
+                    if step_data.get(field, 0) == 0:
+                        return True
+        return False
+
+    def _inline_top_has_failures(self) -> bool:
+        """Check if TOP inspection has any failures"""
+        for step_name, result in self.inspection_results.items():
+            if "TOP:" in step_name:
+                step_data = result.get('data', {})
+                # Check if any component failed (value is 0)
+                for field in ['Screw', 'Plate']:
+                    if step_data.get(field, 0) == 0:
+                        return True
+        return False
     
     def show_completion_message(self, result, total_time):
         """Show INLINE-specific completion message"""

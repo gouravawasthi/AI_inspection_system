@@ -18,6 +18,11 @@ from PyQt5.QtGui import QPixmap, QFont
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.api_manager import APIManager
+try:
+    from config.config_manager import get_config_manager
+except ImportError:
+    print("⚠️ Configuration manager not available, using default colors")
+    get_config_manager = None
 
 
 class BaseInspectionWindow(QWidget):
@@ -79,6 +84,21 @@ class BaseInspectionWindow(QWidget):
     def validate_step_data(self, step: str, data: Dict[str, Any]) -> bool:
         """Validate collected data for a step - override in child classes"""
         raise NotImplementedError("Child classes must implement validate_step_data()")
+    
+    def get_ui_colors(self) -> Dict[str, str]:
+        """Get UI colors from configuration or use defaults"""
+        try:
+            if get_config_manager:
+                config = get_config_manager()
+                return config.get_ui_colors()
+        except Exception:
+            pass
+        
+        # Default colors if configuration not available
+        return {
+            "pass": "#27ae60",
+            "fail": "#e74c3c"
+        }
     
     def init_ui(self):
         """Initialize the inspection interface"""
@@ -369,6 +389,34 @@ class BaseInspectionWindow(QWidget):
         self.manual_override_button.setEnabled(False)
         control_layout.addWidget(self.manual_override_button)
         
+        # Add submit button for INLINE inspection (below manual override)
+        if self.inspection_type == "INLINE":
+            self.submit_data_button = QPushButton("Submit to API")
+            self.submit_data_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: 1px solid #333;
+                    padding: 8px 16px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    border-radius: 4px;
+                    margin: 2px 0px;
+                    min-height: 40px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+                QPushButton:disabled {
+                    background-color: #A8D8A8;
+                    color: #888888;
+                    border: 1px solid #BBBBBB;
+                }
+            """)
+            self.submit_data_button.clicked.connect(self.submit_inspection_data)
+            self.submit_data_button.setEnabled(False)  # Initially disabled
+            control_layout.addWidget(self.submit_data_button)
+        
         # Add some spacing
         control_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
         
@@ -635,6 +683,10 @@ class BaseInspectionWindow(QWidget):
             'Repeat Step': self.repeat_step_button.isEnabled(),
             'Manual Override': self.manual_override_button.isEnabled()
         }
+        
+        # Include Submit button if it exists
+        if hasattr(self, 'submit_data_button') and self.submit_data_button:
+            button_states['Submit to API'] = self.submit_data_button.isEnabled()
         
         enabled_buttons = [name for name, enabled in button_states.items() if enabled]
         disabled_buttons = [name for name, enabled in button_states.items() if not enabled]
@@ -949,45 +1001,53 @@ class BaseInspectionWindow(QWidget):
         
         api_layout.addWidget(camera_settings_subgroup)
         
-        # API data display
-        api_data_subgroup = QGroupBox("API Data")
-        api_data_layout = QVBoxLayout()
-        api_data_subgroup.setLayout(api_data_layout)
-        
-        self.api_data_display = QTextEdit()
-        self.api_data_display.setMaximumHeight(80)
-        self.api_data_display.setStyleSheet("font-size: 10px; background-color: #f8f9fa;")
-        self.api_data_display.setPlainText("No data collected yet")
-        api_data_layout.addWidget(self.api_data_display)
-        
-        # Submit data button
-        self.submit_data_button = QPushButton("Submit to API")
-        self.submit_data_button.setStyleSheet("""
-            QPushButton {
-                background-color: #4CAF50;
-                color: white;
-                border: 1px solid #333;
-                padding: 8px 16px;
-                font-size: 14px;
-                font-weight: bold;
-                border-radius: 4px;
-                margin: 2px 0px;
-                min-height: 40px;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
-            }
-            QPushButton:disabled {
-                background-color: #A8D8A8;
-                color: #888888;
-                border: 1px solid #BBBBBB;
-            }
-        """)
-        self.submit_data_button.clicked.connect(self.submit_inspection_data)
-        self.submit_data_button.setEnabled(False)
-        api_data_layout.addWidget(self.submit_data_button)
-        
-        api_layout.addWidget(api_data_subgroup)
+        # API data display - Hidden for INLINE inspection
+        if self.inspection_type != "INLINE":
+            api_data_subgroup = QGroupBox("API Data")
+            api_data_layout = QVBoxLayout()
+            api_data_subgroup.setLayout(api_data_layout)
+            
+            self.api_data_display = QTextEdit()
+            self.api_data_display.setMaximumHeight(80)
+            self.api_data_display.setStyleSheet("font-size: 10px; background-color: #f8f9fa;")
+            self.api_data_display.setPlainText("No data collected yet")
+            api_data_layout.addWidget(self.api_data_display)
+            
+            # Submit data button (for non-INLINE inspections)
+            self.submit_data_button = QPushButton("Submit to API")
+            self.submit_data_button.setStyleSheet("""
+                QPushButton {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: 1px solid #333;
+                    padding: 8px 16px;
+                    font-size: 14px;
+                    font-weight: bold;
+                    border-radius: 4px;
+                    margin: 2px 0px;
+                    min-height: 40px;
+                }
+                QPushButton:hover {
+                    background-color: #45a049;
+                }
+                QPushButton:disabled {
+                    background-color: #A8D8A8;
+                    color: #888888;
+                    border: 1px solid #BBBBBB;
+                }
+            """)
+            self.submit_data_button.clicked.connect(self.submit_inspection_data)
+            self.submit_data_button.setEnabled(False)
+            api_data_layout.addWidget(self.submit_data_button)
+            
+            api_layout.addWidget(api_data_subgroup)
+        else:
+            # For INLINE inspection, create minimal API display without groupbox
+            self.api_data_display = QTextEdit()
+            self.api_data_display.setMaximumHeight(60)
+            self.api_data_display.setStyleSheet("font-size: 10px; background-color: #f8f9fa; border: 1px solid #ddd;")
+            self.api_data_display.setPlainText("INLINE inspection: Sequential API submission enabled")
+            self.api_data_display.hide()  # Hidden by default for INLINE
         
         layout.addWidget(api_group)
     
@@ -1098,8 +1158,11 @@ class BaseInspectionWindow(QWidget):
             self.update_barcode_status("Invalid barcode - validation failed", "error")
             self.update_camera_display("❌ Barcode Validation Failed\n\nCannot proceed with inspection")
             
-            # Re-enable submit button for retry
-            self.submit_barcode_button.setEnabled(True)
+            # Re-enable submit button for retry only if there's still text in the input
+            # (if input was cleared by duplicate rejection, button should stay disabled)
+            if self.barcode_input.text().strip():
+                self.submit_barcode_button.setEnabled(True)
+            # If input is empty, let on_barcode_input_changed() manage the button state
     
     def validate_barcode_with_api(self, barcode):
         """Validate barcode using API manager"""
@@ -1122,51 +1185,23 @@ class BaseInspectionWindow(QWidget):
                     # Show dialog for duplicate handling
                     return self.handle_duplicate_barcode(result)
                 elif result['status'] == 'error':
-                    # Check if it's a "no previous inspection" error and offer to proceed anyway
-                    if "was not tested in previous" in result['message']:
-                        reply = QMessageBox.question(
-                            self, 
-                            "No Previous Inspection", 
-                            f"No previous inspection found for this barcode.\n\n{result['message']}\n\nDo you want to proceed with inspection anyway?\n\n(This will create a new inspection record)",
-                            QMessageBox.Yes | QMessageBox.No
-                        )
-                        if reply == QMessageBox.Yes:
-                            # Update status display to show override
-                            status_text += "✅ User override: Proceeding without previous inspection\n"
-                            self.api_data_display.setPlainText(status_text)
-                            return True
-                        return False
+                    # STRICT VALIDATION: No inspection can proceed if API1 fails
+                    self._show_validation_failure_message(result['message'])
                     return False
                 else:
+                    self._show_validation_failure_message("Unexpected API response - cannot proceed")
                     return False
             else:
-                # Mock validation if no API manager - for testing purposes
-                print(f"⚠️ No API manager - using mock validation for barcode: {barcode}")
-                mock_result = {
-                    'status': 'success',
-                    'message': 'Mock validation - API manager not available'
-                }
-                status_text = f"API Response: {mock_result['status']}\n"
-                status_text += f"Message: {mock_result['message']}\n"
-                status_text += "⚠️ Using mock validation for testing\n"
-                self.api_data_display.setPlainText(status_text)
-                return len(barcode) >= 3  # Simple mock validation
+                # STRICT VALIDATION: No API manager means no inspection allowed
+                error_message = "API Manager not initialized - cannot validate barcode"
+                self._show_validation_failure_message(error_message)
+                return False
                 
         except Exception as e:
             print(f"API validation error: {e}")
-            # Show error with option to proceed anyway
-            reply = QMessageBox.question(
-                self, 
-                "API Validation Error", 
-                f"Could not validate barcode with API:\n\n{e}\n\nDo you want to proceed anyway?\n\n(This will use mock validation)",
-                QMessageBox.Yes | QMessageBox.No
-            )
-            if reply == QMessageBox.Yes:
-                # Use mock validation
-                status_text = f"API Error: {e}\n"
-                status_text += "✅ User override: Using mock validation\n"
-                self.api_data_display.setPlainText(status_text)
-                return len(barcode) >= 3
+            # STRICT VALIDATION: API connection failures prevent inspection
+            error_message = f"API connection failed: {str(e)}"
+            self._show_validation_failure_message(error_message)
             return False
     
     def handle_duplicate_barcode(self, api_result):
@@ -1174,7 +1209,101 @@ class BaseInspectionWindow(QWidget):
         msg = f"Duplicate barcode detected!\n\n{api_result['message']}\n\nDo you want to proceed anyway?"
         reply = QMessageBox.question(self, "Duplicate Barcode", msg,
                                    QMessageBox.Yes | QMessageBox.No)
-        return reply == QMessageBox.Yes
+        
+        if reply == QMessageBox.Yes:
+            return True
+        else:
+            # User chose not to proceed with duplicate - stop inspection and return to barcode entry
+            self._show_duplicate_rejection_message()
+            self._return_to_barcode_entry()
+            return False
+    
+    def _show_duplicate_rejection_message(self):
+        """Show message when user rejects duplicate barcode"""
+        QMessageBox.information(
+            self, 
+            "Inspection Stopped", 
+            "❌ INSPECTION STOPPED\n\n"
+            "Duplicate barcode rejected by user.\n\n"
+            "🔄 Returning to barcode entry\n\n"
+            "Please enter a different barcode to begin a new inspection."
+        )
+    
+    def _show_validation_failure_message(self, error_message):
+        """Show validation failure message and ensure user returns to barcode entry"""
+        # Categorize different types of validation failures
+        if "was not tested in previous" in error_message:
+            title = "Barcode Not Found"
+            detailed_message = (
+                f"❌ VALIDATION FAILED\n\n"
+                f"The barcode was not found in the previous inspection stage.\n\n"
+                f"Reason: {error_message}\n\n"
+                f"✋ INSPECTION CANNOT PROCEED\n\n"
+                f"Please verify the barcode and try again with a valid barcode that "
+                f"has completed the previous inspection stage."
+            )
+        elif "failed previous" in error_message:
+            title = "Previous Inspection Failed"
+            detailed_message = (
+                f"❌ VALIDATION FAILED\n\n"
+                f"The barcode failed a previous inspection stage.\n\n"
+                f"Reason: {error_message}\n\n"
+                f"✋ INSPECTION CANNOT PROCEED\n\n"
+                f"Products that fail previous inspections cannot proceed to this stage. "
+                f"Please use a different barcode with passing inspection results."
+            )
+        else:
+            title = "Validation Error"
+            detailed_message = (
+                f"❌ VALIDATION FAILED\n\n"
+                f"Barcode validation encountered an error.\n\n"
+                f"Reason: {error_message}\n\n"
+                f"✋ INSPECTION CANNOT PROCEED\n\n"
+                f"Please check the barcode and try again."
+            )
+        
+        # Show critical error message
+        QMessageBox.critical(self, title, detailed_message)
+        
+        # Force return to barcode entry state
+        self._return_to_barcode_entry()
+    
+    def _return_to_barcode_entry(self):
+        """Force return to barcode entry state after validation failure"""
+        # Clear current barcode
+        self.barcode = None
+        self.barcode_input.clear()
+        
+        # Reset barcode display
+        self.barcode_display.setText("No Barcode Entered")
+        self.barcode_display.setStyleSheet("background-color: #f8f9fa; padding: 10px; border: 2px solid #dee2e6; border-radius: 5px; font-size: 14px; color: #6c757d;")
+        
+        # Update status to show ready for new barcode
+        self.update_barcode_status("Enter a valid barcode to begin", "waiting")
+        
+        # Clear any inspection data
+        self.inspection_results.clear()
+        self.current_step = 0
+        self.step_data_collected = False
+        
+        # Return to idle state
+        self.set_inspection_state(self.InspectionState.IDLE)
+        
+        # Clear API data display
+        self._update_api_display("API validation required")
+        
+        # Update camera display
+        self.update_camera_display("❌ Validation Failed - Enter New Barcode\n\nPlease enter a valid barcode that has passed previous inspection stages")
+        
+        # Re-enable barcode input but keep submit button disabled until text is entered
+        self.barcode_input.setEnabled(True)
+        # Note: submit button state is managed by on_barcode_input_changed()
+        
+        # Focus on barcode input for immediate retry
+        self.barcode_input.setFocus()
+        
+        # Update button states based on current input (should disable submit button)
+        self.on_barcode_input_changed()
     
     def test_api_connections(self):
         """Test API connections"""
@@ -1203,6 +1332,13 @@ class BaseInspectionWindow(QWidget):
     
     def start_inspection(self):
         """Start the inspection process"""
+        # STRICT VALIDATION: Ensure valid barcode before starting inspection
+        if not self.barcode:
+            self._show_validation_failure_message("No valid barcode - cannot start inspection")
+            return
+        
+        # Note: Barcode was already validated during submit_barcode() - no need to re-validate
+        
         self.inspection_start_time = datetime.now()
         self.current_step = 0
         self.inspection_results = {}
@@ -1271,8 +1407,20 @@ class BaseInspectionWindow(QWidget):
                 # Store data for API submission
                 self.api_data_collected.update(step_data)
                 
+                # Update submit button after each step based on inspection state
+                if self.inspection_type == "INLINE":
+                    self._update_submit_button_for_inline()
+                else:
+                    submit_enabled = self._should_enable_submit_button()
+                    self._set_submit_button_enabled(submit_enabled)
+                
                 # Update UI
                 self.update_step_status(self.current_step, "COMPLETED")
+                
+                # Update camera display with detailed results for INLINE inspection
+                if self.inspection_type == "INLINE":
+                    self._update_camera_with_inline_results(step_name, step_data)
+                
                 self.current_step += 1
                 self.progress_bar.setValue(self.current_step)
                 
@@ -1306,13 +1454,73 @@ class BaseInspectionWindow(QWidget):
             label = self.step_status_layout.itemAt(step_index).widget()
             if label:
                 step_name = self.inspection_steps[step_index]
-                label.setText(f"{step_name}: {status}")
-                if status == "COMPLETED":
-                    label.setStyleSheet("color: #27ae60; font-weight: bold; padding: 3px; font-size: 11px;")
-                elif status == "FAILED":
-                    label.setStyleSheet("color: #e74c3c; font-weight: bold; padding: 3px; font-size: 11px;")
+                
+                # For INLINE inspection, show individual component results
+                if self.inspection_type == "INLINE" and status == "COMPLETED" and step_name in self.inspection_results:
+                    step_data = self.inspection_results[step_name]['data']
+                    
+                    if step_name == "BOTTOM: Capture":
+                        # Show BOTTOM component results: Antenna, Capacitor, Speaker
+                        # Use display values if available, otherwise convert from 1/0
+                        if '_display' in step_data:
+                            antenna = step_data['_display'].get('Antenna', 'UNKNOWN')
+                            capacitor = step_data['_display'].get('Capacitor', 'UNKNOWN')
+                            speaker = step_data['_display'].get('Speaker', 'UNKNOWN')
+                            overall_result = step_data['_display'].get('Result', 'UNKNOWN')
+                        else:
+                            # Fallback: convert 1/0 to PASS/FAIL for display
+                            antenna = "PASS" if step_data.get('Antenna', 0) == 1 else "FAIL"
+                            capacitor = "PASS" if step_data.get('Capacitor', 0) == 1 else "FAIL"
+                            speaker = "PASS" if step_data.get('Speaker', 0) == 1 else "FAIL"
+                            overall_result = "PASS" if step_data.get('Result', 0) == 1 else "FAIL"
+                        
+                        result_text = f"BOTTOM: Antenna={antenna}, Capacitor={capacitor}, Speaker={speaker}"
+                        
+                        # Set color based on overall result using configuration
+                        colors = self.get_ui_colors()
+                        if overall_result == "PASS":
+                            label.setStyleSheet(f"color: {colors['pass']}; font-weight: bold; padding: 3px; font-size: 10px;")
+                        else:
+                            label.setStyleSheet(f"color: {colors['fail']}; font-weight: bold; padding: 3px; font-size: 10px;")
+                            
+                    elif step_name == "TOP: Capture":
+                        # Show TOP component results: Screw, Plate
+                        # Use display values if available, otherwise convert from 1/0
+                        if '_display' in step_data:
+                            screw = step_data['_display'].get('Screw', 'UNKNOWN')
+                            plate = step_data['_display'].get('Plate', 'UNKNOWN')
+                            overall_result = step_data['_display'].get('Result', 'UNKNOWN')
+                        else:
+                            # Fallback: convert 1/0 to PASS/FAIL for display
+                            screw = "PASS" if step_data.get('Screw', 0) == 1 else "FAIL"
+                            plate = "PASS" if step_data.get('Plate', 0) == 1 else "FAIL"
+                            overall_result = "PASS" if step_data.get('Result', 0) == 1 else "FAIL"
+                        
+                        result_text = f"TOP: Screw={screw}, Plate={plate}"
+                        
+                        # Set color based on overall result using configuration
+                        colors = self.get_ui_colors()
+                        if overall_result == "PASS":
+                            label.setStyleSheet(f"color: {colors['pass']}; font-weight: bold; padding: 3px; font-size: 10px;")
+                        else:
+                            label.setStyleSheet(f"color: {colors['fail']}; font-weight: bold; padding: 3px; font-size: 10px;")
+                    else:
+                        result_text = f"{step_name}: {status}"
+                        colors = self.get_ui_colors()
+                        label.setStyleSheet(f"color: {colors['pass']}; font-weight: bold; padding: 3px; font-size: 11px;")
+                        
+                    label.setText(result_text)
+                
                 else:
-                    label.setStyleSheet("color: #f39c12; font-weight: bold; padding: 3px; font-size: 11px;")
+                    # Standard status display for non-INLINE or non-completed steps
+                    label.setText(f"{step_name}: {status}")
+                    colors = self.get_ui_colors()
+                    if status == "COMPLETED":
+                        label.setStyleSheet(f"color: {colors['pass']}; font-weight: bold; padding: 3px; font-size: 11px;")
+                    elif status == "FAILED":
+                        label.setStyleSheet("color: #e74c3c; font-weight: bold; padding: 3px; font-size: 11px;")
+                    else:
+                        label.setStyleSheet("color: #f39c12; font-weight: bold; padding: 3px; font-size: 11px;")
     
     def complete_inspection(self):
         """Complete the inspection process"""
@@ -1335,14 +1543,19 @@ class BaseInspectionWindow(QWidget):
         # Enter inspection completed state
         self.enter_inspection_completed_state()
         
-        # Enable data submission
-        self.submit_data_button.setEnabled(True)
+        # Enable data submission based on inspection state
+        if self.inspection_type == "INLINE":
+            self._update_submit_button_for_inline()
+        else:
+            # For other inspection types, check completion or failure
+            submit_enabled = self._should_enable_submit_button()
+            self._set_submit_button_enabled(submit_enabled)
         
         # Update API data display
         api_display_text = f"Inspection Complete - {overall_result}\n"
         api_display_text += f"Total Time: {total_time:.1f}s\n"
         api_display_text += f"Steps Completed: {len(self.inspection_results)}/{len(self.inspection_steps)}"
-        self.api_data_display.setPlainText(api_display_text)
+        self._update_api_display(api_display_text)
         
         # Show completion message
         self.show_completion_message(overall_result, total_time)
@@ -1432,8 +1645,13 @@ class BaseInspectionWindow(QWidget):
         # Log the override
         self.log_manual_override(override_time)
         
-        # Enable data submission
-        self.submit_data_button.setEnabled(True)
+        # Enable data submission based on inspection state
+        if self.inspection_type == "INLINE":
+            self._update_submit_button_for_inline()
+        else:
+            # For other inspection types, check completion or failure
+            submit_enabled = self._should_enable_submit_button()
+            self._set_submit_button_enabled(submit_enabled)
         
         QMessageBox.information(self, "Override Applied", 
                                "Manual override has been applied and logged.\n\n"
@@ -1487,10 +1705,10 @@ class BaseInspectionWindow(QWidget):
         self.on_barcode_input_changed()
         
         # Clear API data display
-        self.api_data_display.setPlainText("Ready for new inspection")
+        self._update_api_display("Ready for new inspection")
         
         # Disable data submission
-        self.submit_data_button.setEnabled(False)
+        self._set_submit_button_enabled(False)
     
     def reset_for_new_inspection(self):
         """Reset for a new inspection after successful submission"""
@@ -1601,6 +1819,190 @@ class BaseInspectionWindow(QWidget):
             
         except Exception as e:
             print(f"Error logging override: {e}")
+    
+    def _update_api_display(self, text: str):
+        """Safely update API data display (hidden for INLINE inspection)"""
+        try:
+            if hasattr(self, 'api_data_display') and self.api_data_display and self.api_data_display.isVisible():
+                self.api_data_display.setPlainText(text)
+        except Exception as e:
+            print(f"Warning: Could not update API display: {e}")
+    
+    def _set_submit_button_enabled(self, enabled: bool):
+        """Safely set submit button enabled state"""
+        try:
+            if hasattr(self, 'submit_data_button') and self.submit_data_button:
+                self.submit_data_button.setEnabled(enabled)
+        except Exception as e:
+            print(f"Warning: Could not update submit button: {e}")
+    
+    def _should_enable_submit_button(self) -> bool:
+        """Determine if submit button should be enabled based on inspection state"""
+        # Submit button is enabled when:
+        # 1. All inspections are complete, OR
+        # 2. Any inspection has failed (requiring manual override or restart)
+        
+        if self.inspection_type == "INLINE":
+            return self._should_enable_submit_for_inline()
+        else:
+            # For other inspection types (EOLT), check if complete or has failures
+            all_complete = len(self.inspection_results) == len(self.inspection_steps)
+            has_failures = self._has_any_failures()
+            
+            return all_complete or has_failures
+    
+    def _has_any_failures(self) -> bool:
+        """Check if any inspection step has failed"""
+        for step_name, result in self.inspection_results.items():
+            step_data = result.get('data', {})
+            
+            # Check for algorithm failures based on inspection type
+            if self.inspection_type == "EOLT":
+                # Check Upper, Lower, Left, Right results
+                for field in ['Upper', 'Lower', 'Left', 'Right']:
+                    if step_data.get(field) == "FAIL":
+                        return True
+            elif "TOP:" in step_name:
+                # Check Screw, Plate results
+                for field in ['Screw', 'Plate']:
+                    if step_data.get(field) == "FAIL":
+                        return True
+            elif "BOTTOM:" in step_name:
+                # Check Antenna, Capacitor, Speaker results
+                for field in ['Antenna', 'Capacitor', 'Speaker']:
+                    if step_data.get(field) == "FAIL":
+                        return True
+        
+        return False
+    
+    def _should_enable_submit_for_inline(self) -> bool:
+        """Special logic for INLINE inspection submit button"""
+        # For INLINE, we need to handle two-stage submission
+        # Stage 1: BOTTOM inspection complete -> enable first submit
+        # Stage 2: TOP inspection complete -> enable second submit
+        
+        bottom_complete = self._check_inline_bottom_complete()
+        top_complete = self._check_inline_top_complete()
+        bottom_has_failures = self._inline_bottom_has_failures()
+        top_has_failures = self._inline_top_has_failures()
+        
+        # Enable submit if BOTTOM is complete (success or failure) or TOP is complete
+        return (bottom_complete or bottom_has_failures) or (top_complete or top_has_failures)
+    
+    def _inline_bottom_has_failures(self) -> bool:
+        """Check if BOTTOM inspection has any failures"""
+        for step_name, result in self.inspection_results.items():
+            if "BOTTOM:" in step_name:
+                step_data = result.get('data', {})
+                # Check if any component failed (value is 0)
+                for field in ['Antenna', 'Capacitor', 'Speaker']:
+                    if step_data.get(field, 0) == 0:
+                        return True
+        return False
+    
+    def _inline_top_has_failures(self) -> bool:
+        """Check if TOP inspection has any failures"""
+        for step_name, result in self.inspection_results.items():
+            if "TOP:" in step_name:
+                step_data = result.get('data', {})
+                # Check if any component failed (value is 0)
+                for field in ['Screw', 'Plate']:
+                    if step_data.get(field, 0) == 0:
+                        return True
+        return False
+    
+    def _update_camera_with_inline_results(self, step_name: str, step_data: dict):
+        """Update camera display with detailed INLINE inspection results"""
+        try:
+            if step_name == "BOTTOM: Capture":
+                # Show BOTTOM component results - use display values if available
+                if '_display' in step_data:
+                    antenna = step_data['_display'].get('Antenna', 'UNKNOWN')
+                    capacitor = step_data['_display'].get('Capacitor', 'UNKNOWN')
+                    speaker = step_data['_display'].get('Speaker', 'UNKNOWN')
+                    overall_result = step_data['_display'].get('Result', 'UNKNOWN')
+                else:
+                    # Fallback: convert 1/0 to PASS/FAIL for display
+                    antenna = "PASS" if step_data.get('Antenna', 0) == 1 else "FAIL"
+                    capacitor = "PASS" if step_data.get('Capacitor', 0) == 1 else "FAIL"
+                    speaker = "PASS" if step_data.get('Speaker', 0) == 1 else "FAIL"
+                    overall_result = "PASS" if step_data.get('Result', 0) == 1 else "FAIL"
+                
+                camera_text = f"✅ BOTTOM Inspection Complete\n\n"
+                camera_text += f"📊 Component Results:\n"
+                camera_text += f"🔹 Antenna: {antenna}\n"
+                camera_text += f"🔹 Capacitor: {capacitor}\n"
+                camera_text += f"🔹 Speaker: {speaker}\n\n"
+                camera_text += f"Overall Result: {overall_result}\n\n"
+                
+                if overall_result == "PASS":
+                    camera_text += "Ready for TOP inspection"
+                else:
+                    camera_text += "⚠️ Review required or apply manual override"
+                    
+                self.update_camera_display(camera_text)
+                
+            elif step_name == "TOP: Capture":
+                # Show TOP component results - use display values if available
+                if '_display' in step_data:
+                    screw = step_data['_display'].get('Screw', 'UNKNOWN')
+                    plate = step_data['_display'].get('Plate', 'UNKNOWN')
+                    overall_result = step_data['_display'].get('Result', 'UNKNOWN')
+                else:
+                    # Fallback: convert 1/0 to PASS/FAIL for display
+                    screw = "PASS" if step_data.get('Screw', 0) == 1 else "FAIL"
+                    plate = "PASS" if step_data.get('Plate', 0) == 1 else "FAIL"
+                    overall_result = "PASS" if step_data.get('Result', 0) == 1 else "FAIL"
+                
+                camera_text = f"✅ TOP Inspection Complete\n\n"
+                camera_text += f"📊 Component Results:\n"
+                camera_text += f"🔹 Screw: {screw}\n"
+                camera_text += f"🔹 Plate: {plate}\n\n"
+                camera_text += f"Overall Result: {overall_result}\n\n"
+                
+                # Check if both inspections are complete
+                if self._check_inline_bottom_complete() and self._check_inline_top_complete():
+                    camera_text += "🎉 INLINE Inspection Complete!"
+                else:
+                    camera_text += "Awaiting additional inspections"
+                    
+                self.update_camera_display(camera_text)
+                
+        except Exception as e:
+            print(f"Error updating camera display for INLINE results: {e}")
+            # Fallback to generic display
+            self.update_camera_display(f"✅ {step_name} Complete\n\nResult: {step_data.get('Result', 'UNKNOWN')}")
+    
+    def _update_submit_button_for_inline(self):
+        """Update submit button state for INLINE inspection"""
+        try:
+            submit_enabled = self._should_enable_submit_for_inline()
+            self._set_submit_button_enabled(submit_enabled)
+            
+            # Debug information
+            bottom_complete = self._check_inline_bottom_complete()
+            top_complete = self._check_inline_top_complete()
+            bottom_failures = self._inline_bottom_has_failures()
+            top_failures = self._inline_top_has_failures()
+            
+            print(f"🔍 INLINE Submit Button Check:")
+            print(f"   BOTTOM complete: {bottom_complete}")
+            print(f"   TOP complete: {top_complete}")
+            print(f"   BOTTOM failures: {bottom_failures}")
+            print(f"   TOP failures: {top_failures}")
+            print(f"   Submit enabled: {submit_enabled}")
+            
+        except Exception as e:
+            print(f"Error updating INLINE submit button: {e}")
+            self._set_submit_button_enabled(False)
+    
+    def _check_inline_top_complete(self) -> bool:
+        """Check if TOP inspection is complete"""
+        return "TOP: Capture" in self.inspection_results
+    
+    def _check_inline_bottom_complete(self) -> bool:
+        """Check if BOTTOM inspection is complete"""  
+        return "BOTTOM: Capture" in self.inspection_results
     
     def closeEvent(self, event):
         """Handle window close event"""
