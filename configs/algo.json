@@ -91,17 +91,20 @@
   },
 
   "PATHS": {
-    "top_ref": "Data/INLine/top_reference.jpg",
-    "bottom_ref": "Data/INLine/bottom_reference.jpg",
-    "front_ref": "Data/Elot/front_reference.jpg",
-    "ear_ref": "Data/Elot/rear_reference.jpg",
-    "eft_ref": "Data/Elot/left_reference.jpg",
-    "right_ref": "Data/Elot/right_reference.jpg",
-    "front_mask": "Data/Elot/front_mask.png",
-    "rear_mask": "Data/Elot/rear_mask.png",
-    "left_mask": "Data/Elot/left_mask.png",
-    "right_mask": "Data/Elot/right_mask.png"
-  },
+  "top_ref": "data/referenceimages/inline_testing/top_reference.jpg",
+  "bottom_ref": "data/referenceimages/inline_testing/bottom_reference.jpg",
+
+  "front_ref": "data/referenceimages/elot_testing/front_reference.jpg",
+  "rear_ref": "data/referenceimages/elot_testing/rear_reference.jpg",
+  "left_ref": "data/referenceimages/elot_testing/left_reference.jpg",
+  "right_ref": "data/referenceimages/elot_testing/right_reference.jpg",
+
+  "front_mask": "data/referenceimages/elot_testing/front_mask.png",
+  "rear_mask": "data/referenceimages/elot_testing/rear_mask.png",
+  "left_mask": "data/referenceimages/elot_testing/left_mask.png",
+  "right_mask": "data/referenceimages/elot_testing/right_mask.png"
+}
+,
 
   "ROIS": {
     "capacitor": [100, 120, 400, 200],
