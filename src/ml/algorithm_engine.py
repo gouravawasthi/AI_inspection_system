@@ -108,44 +108,7 @@ class AlgorithmEngine:
         self.masks[name] = mb.astype(np.uint8)
         return True
 
-    def load_defaults_from_data(self, data_root: Optional[str] = None) -> Dict[str, Any]:
-        """Convenience: attempt to load references & masks using config.PATHS defaults."""
-        data_root = data_root or self.config.PATHS.data_root
-        summary = {'loaded_refs': [], 'loaded_masks': [], 'missing': []}
-        p = self.config.PATHS
-
-        # inline
-        candidates = [
-            ('inline_top', getattr(p, 'inline_top_ref', None)),
-            ('inline_bottom', getattr(p, 'inline_bottom_ref', None))
-        ]
-        for key, path in candidates:
-            if path and os.path.isfile(path):
-                if self.load_reference(key, path):
-                    summary['loaded_refs'].append((key, path))
-            else:
-                summary['missing'].append((key, path))
-
-        # elot sides
-        sides = ['front', 'rear', 'left', 'right']
-        for s in sides:
-            rpath = getattr(p, f'elot_{s}_ref', None) or getattr(p, f'elot_{s}_reference', None)
-            mpath = getattr(p, f'elot_{s}_mask', None)
-            keyr = f'elot_{s}'
-            keym = f'elot_{s}_mask'
-            if rpath and os.path.isfile(rpath):
-                if self.load_reference(keyr, rpath):
-                    summary['loaded_refs'].append((keyr, rpath))
-            else:
-                summary['missing'].append((keyr, rpath))
-            if mpath and os.path.isfile(mpath):
-                if self.load_mask(keym, mpath):
-                    summary['loaded_masks'].append((keym, mpath))
-            else:
-                summary['missing'].append((keym, mpath))
-
-        return summary
-
+   
     # -------------------------
     # Modular detection helpers
     # -------------------------
@@ -305,10 +268,100 @@ class AlgorithmEngine:
         if mask is not None:
             vis[mask == 0] = 0
         return float(mad), vis
+    def equalize_histogram_color(self,img):
+        """
+        Apply histogram equalization on a color image using YCrCb luminance channel.
+        """
+        if img is None or img.size == 0:
+            raise ValueError("Empty image for histogram equalization.")
+
+        ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+        ycrcb[:, :, 0] = cv2.equalizeHist(ycrcb[:, :, 0])  # Equalize Y (luminance)
+        equalized = cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2BGR)
+        return equalized
+
+
+    def inspect_image(self,gold_img, gold_mask, new_img, position_hint):
+        """
+        Compare new image with gold standard inside ROI after registration + histogram equalization.
+        """
+        try:
+            # --- Step 0: Validate inputs ---
+            if gold_img is None or new_img is None or gold_mask is None:
+                return {"Status": 0, "Message": "One or more input images are missing."}
+
+            # --- Step (a) Histogram Equalization (Preprocessing) ---
+            gold_img_eq = self.equalize_histogram_color(gold_img)
+            new_img_eq = self.equalize_histogram_color(new_img)
+
+            # --- Step (b) Register new image with gold image ---
+            gray_gold = cv2.cvtColor(gold_img_eq, cv2.COLOR_BGR2GRAY)
+            gray_new = cv2.cvtColor(new_img_eq, cv2.COLOR_BGR2GRAY)
+
+            orb = cv2.ORB_create(5000)
+            kp1, des1 = orb.detectAndCompute(gray_gold, None)
+            kp2, des2 = orb.detectAndCompute(gray_new, None)
+
+            if des1 is None or des2 is None:
+                return {"Status": 0, "Message": f"Please keep the inspection object in {position_hint}"}
+
+            bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+            matches = bf.match(des1, des2)
+            matches = sorted(matches, key=lambda x: x.distance)
+
+            if len(matches) < 100:
+                return {"Status": 0, "Message": f"Not enough feature matches — adjust position: {position_hint}"}
+
+            src_pts = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
+            dst_pts = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
+
+            H, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
+            if H is None:
+                return {"Status": 0, "Message": f"Registration failed — please keep the object in {position_hint}"}
+
+            h, w = gray_gold.shape
+            aligned_new = cv2.warpPerspective(new_img_eq, H, (w, h))
+
+            # --- Step (c) Apply ROI mask ---
+            roi_new = cv2.bitwise_and(aligned_new, aligned_new, mask=gold_mask)
+            roi_gold = cv2.bitwise_and(gold_img_eq, gold_img_eq, mask=gold_mask)
+
+            # --- Step (d) Gradient comparison ---
+            def get_edges(img):
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+                blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+                edges = cv2.Canny(blurred, 50, 150)
+                return edges
+
+            edges_gold = get_edges(roi_gold)
+            edges_new = get_edges(roi_new)
+
+            # --- Step (e) Identify differences ---
+            only_new = cv2.subtract(edges_new, edges_gold)
+            only_gold = cv2.subtract(edges_gold, edges_new)
+            common = cv2.bitwise_and(edges_gold, edges_new)
+
+            result = np.zeros_like(gold_img)
+            result[common > 0] = (255, 255, 255)  # white = matched edges
+            result[only_new > 0] = (0, 0, 255)    # red = new edges
+            result[only_gold > 0] = (255, 0, 0)   # blue = missing edges
+
+            result = cv2.bitwise_and(result, result, mask=gold_mask)
+
+            return {
+                "Status": 1,
+                "Message": "Inspection completed successfully (with histogram equalization)",
+                "OutputImage": result
+            }
+
+        except Exception as e:
+            return {"Status": 0, "Message": f"Exception: {str(e)}"}
 
     # -------------------------
     # Processing entrypoint
     # -------------------------
+  
+
     def process(self, frame: np.ndarray, mode: str,
                 # EOLT params (single side)
                 side: Optional[str] = None,
@@ -318,7 +371,7 @@ class AlgorithmEngine:
                 masks_map: Optional[Dict[str, str]] = None,
                 # INLINE params
                 submode: Optional[str] = None,
-                rois: Optional[Dict[str, Tuple[int,int,int,int]]] = None
+                rois: Optional[Dict[str, Tuple[int, int, int, int]]] = None
                 ) -> Dict[str, Any]:
         """
         Single-frame processing. Returns OrderedDict with keys:
@@ -331,15 +384,16 @@ class AlgorithmEngine:
 
         try:
             if mode.lower() == 'elot':
-                # single side processing
+                # ---- Input validation ----
                 if not side:
                     status = _InternalStatus(1, "EOLT requires 'side' parameter")
                     return self._make_output(original, annotated, status, results)
                 side_key = side.lower()
-                if side_key not in ('front','rear','left','right'):
+                if side_key not in ('front', 'rear', 'left', 'right'):
                     status = _InternalStatus(1, f"EOLT invalid side '{side}'")
                     return self._make_output(original, annotated, status, results)
-                # determine ref key
+
+                # ---- Reference + Mask selection ----
                 ref_key_for_side = ref or (views.get(side_key) if views else None)
                 if not ref_key_for_side:
                     status = _InternalStatus(1, f"EOLT missing reference for side '{side_key}'")
@@ -347,35 +401,52 @@ class AlgorithmEngine:
                 if ref_key_for_side not in self.references:
                     status = _InternalStatus(1, f"EOLT reference '{ref_key_for_side}' not loaded")
                     return self._make_output(original, annotated, status, results)
-                # determine mask key
+
                 mask_key_for_side = mask or (masks_map.get(side_key) if masks_map else None)
                 if mask_key_for_side and mask_key_for_side not in self.masks:
                     status = _InternalStatus(1, f"EOLT mask '{mask_key_for_side}' not loaded")
                     return self._make_output(original, annotated, status, results)
 
                 ref_img = self.references[ref_key_for_side]
-                warped, H = self._register(ref_img, original)
                 mask_arr = self.masks.get(mask_key_for_side) if mask_key_for_side else None
-                mad, vis = self.compare_gradient_diff(ref_img, warped, mask_arr)
-                normalized = mad / 255.0
-                passed = int(normalized <= self.diff_threshold)
-                # annotate
+
+                # ---- Gold vs Reference comparison ----
+                result = self.inspect_image(ref_img, mask_arr, original, f"{side_key} side")
+
+                if result["Status"] == 0:
+                    status = _InternalStatus(1, result["Message"])
+                    return self._make_output(original, annotated, status, results)
+
+                vis = result["OutputImage"]
+
+                # ---- Compute difference metric ----
+                red_pixels = np.sum(np.all(vis == (0, 0, 255), axis=-1))
+                white_pixels = np.sum(np.all(vis == (255, 255, 255), axis=-1))
+                total = red_pixels + white_pixels + 1e-6
+                diff_ratio = red_pixels / total
+
+                passed = int(diff_ratio <= self.diff_threshold)
+
+                # ---- Annotation ----
+                color = (0, 255, 0) if passed else (0, 0, 255)
                 if mask_arr is not None:
                     bbox = self._mask_bbox(mask_arr)
                     if bbox:
-                        x,y,w,h = bbox
-                        color = (0,255,0) if passed else (0,0,255)
-                        cv2.rectangle(annotated, (x,y), (x+w,y+h), color, 2)
-                        cv2.putText(annotated, f"{side_key}:{'PASS' if passed else 'FAIL'}", (x,y-6),
+                        x, y, w, h = bbox
+                        cv2.rectangle(annotated, (x, y), (x + w, y + h), color, 2)
+                        cv2.putText(annotated, f"{side_key}:{'PASS' if passed else 'FAIL'}", (x, y - 6),
                                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
                 else:
-                    cv2.putText(annotated, f"{side_key}:{'PASS' if passed else 'FAIL'}", (10,30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,0) if passed else (0,0,255), 2)
-                processed = self._make_side_by_side(warped, vis)
-                results[side_key] = passed
-                status = _InternalStatus(0, f"EOLT side '{side_key}' processed")
-                return self._make_output(original, processed, status, results)
+                    cv2.putText(annotated, f"{side_key}:{'PASS' if passed else 'FAIL'}", (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
+                # ---- Prepare final output ----
+                processed = self._make_side_by_side(original, vis)
+                results[side_key] = passed
+                status = _InternalStatus(0, f"EOLT side '{side_key}' processed via goldvsref")
+
+                return self._make_output(original, processed, status, results)
+            
             elif mode.lower() == 'inline':
                 if submode not in ('top','bottom'):
                     status = _InternalStatus(1, "INLINE requires submode 'top' or 'bottom'")
