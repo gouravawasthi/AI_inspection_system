@@ -241,8 +241,7 @@ class AlgorithmEngine:
             if self.debug:
                 overlay = cv2.addWeighted(ref, 0.5, warped, 0.5, 0)
                 print(f"[INFO] Registered '{side}' — good matches: {len(good_matches)}")
-                cv2.imshow(f"Registration_{side}", overlay)
-                cv2.waitKey(1)
+                
 
             return warped, H
 
