@@ -189,6 +189,28 @@ class EOLTInspectionWindow(BaseInspectionWindow):
             "Barcodetext Capture"
         ]
     
+    def get_camera_inspection_params(self) -> dict:
+        """Get camera parameters for EOLT inspection"""
+        current_step_name = self.inspection_steps[self.current_step] if self.current_step < len(self.inspection_steps) else "Upper Capture"
+        
+        # Map step names to inspection parameters
+        side_mapping = {
+            "Upper Capture": "front",
+            "Lower Capture": "back", 
+            "Left Capture": "left",
+            "Right Capture": "right",
+            "Printtext Capture": "text",
+            "Barcodetext Capture": "barcode"
+        }
+        
+        side = side_mapping.get(current_step_name, "front")
+        
+        return {
+            'side': side,
+            'reference': f'{side}_ref',
+            'mask': f'{side}_mask'
+        }
+    
     def init_api_manager(self):
         """Initialize API manager for EOLT inspection"""
         try:

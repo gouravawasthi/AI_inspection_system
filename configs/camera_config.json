@@ -1,0 +1,43 @@
+{
+  "camera_settings": {
+    "camera_id": 0,
+    "simulation_mode": false,
+    "frame_width": 640,
+    "frame_height": 480,
+    "fps": 30,
+    "exposure": 0,
+    "flip_horizontal": false,
+    "flip_vertical": false,
+    "auto_white_balance": true,
+    "brightness": 0,
+    "contrast": 0,
+    "saturation": 0,
+    "capture_frames_for_averaging": 5,
+    "save_path": "inspection_images"
+  },
+  "display_settings": {
+    "preview_enabled": true,
+    "show_roi_overlay": true,
+    "roi_overlay_color": [
+      0,
+      255,
+      0
+    ],
+    "roi_overlay_thickness": 2,
+    "status_text_color": [
+      255,
+      255,
+      255
+    ],
+    "status_text_size": 0.7
+  },
+  "capture_settings": {
+    "freeze_duration_ms": 1000,
+    "averaging_method": "mean",
+    "preprocessing": {
+      "gaussian_blur_kernel": 3,
+      "histogram_equalization": true,
+      "noise_reduction": true
+    }
+  }
+}

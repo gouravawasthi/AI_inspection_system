@@ -51,6 +51,27 @@ class INLINEInspectionWindow(BaseInspectionWindow):
             "TOP: Capture"      # Captures Screw, Plate in one step
         ]
     
+    def get_camera_inspection_params(self) -> dict:
+        """Get camera parameters for INLINE inspection"""
+        current_step_name = self.inspection_steps[self.current_step] if self.current_step < len(self.inspection_steps) else "BOTTOM: Capture"
+        
+        if "BOTTOM" in current_step_name:
+            return {
+                'submode': 'bottom',
+                'reference': 'bottom_ref'
+            }
+        elif "TOP" in current_step_name:
+            return {
+                'submode': 'top', 
+                'reference': 'top_ref'
+            }
+        else:
+            # Default to bottom
+            return {
+                'submode': 'bottom',
+                'reference': 'bottom_ref'
+            }
+    
     def init_api_manager(self):
         """Initialize API managers for both INLINE BOTTOM and TOP using configuration"""
         try:

@@ -91,18 +91,17 @@
   },
 
   "PATHS": {
-  "top_ref": "data/reference_images/line_testing/top_reference.jpg",
-  "bottom_ref": "data/reference_images/line_testing/bottom_reference.jpg",
+  "top_ref": "data/reference_images/inline_testing/top_reference.jpg",
+  "bottom_ref": "data/reference_images/inline_testing/bottom_reference.jpg",
 
-  "front_ref": "data/referenceimages/eolt_testing/front_reference.jpg",
-  "rear_ref": "data/referenceimages/eolt_testing/rear_reference.jpg",
-  "left_ref": "data/referenceimages/eolt_testing/left_reference.jpg",
-  "right_ref": "data/referenceimages/eolt_testing/right_reference.jpg",
-
-  "front_mask": "data/referenceimages/eolt_testing/front_mask.png",
-  "rear_mask": "data/referenceimages/eolt_testing/rear_mask.png",
-  "left_mask": "data/referenceimages/eolt_testing/left_mask.png",
-  "right_mask": "data/referenceimages/eolt_testing/right_mask.png"
+  "front_ref": "data/reference_images/eolt_testing/front_reference.jpg",
+  "rear_ref": "data/reference_images/eolt_testing/rear_reference.jpg",
+  "left_ref": "data/reference_images/eolt_testing/left_reference.jpg",
+  "right_ref": "data/reference_images/eolt_testing/right_reference.jpg",
+  "front_mask": "data/reference_images/eolt_testing/front_mask.png",
+  "rear_mask": "data/reference_images/eolt_testing/rear_mask.png",
+  "left_mask": "data/reference_images/eolt_testing/left_mask.png",
+  "right_mask": "data/reference_images/eolt_testing/right_mask.png"
 }
 ,
 

@@ -48,18 +48,48 @@ class MainWindow(QMainWindow):
         self.inspection_window = None
         self.eolt_window = None
         self.inline_window = None
+        self.camera_integrator = None  # Will be set by main application
         
-        # Load configuration
+        # Initialize branding configuration
+        self.init_branding()
+        
+        # Initialize UI
+        self.init_ui()
+    
+    def init_branding(self):
+        """Initialize branding configuration from config or defaults"""
         try:
-            self.config = config_manager.load_config()
-            self.branding = self.config.gui.branding
-        except Exception as e:
-            print(f"Warning: Could not load config, using defaults: {e}")
-            # Create default branding config
-            from config import BrandingConfig
+            config = config_manager.load_config()
+            self.branding = getattr(config.gui, 'branding', None)
+        except:
+            self.branding = None
+        
+        # Fallback to defaults if branding not available
+        if not self.branding:
+            from dataclasses import dataclass
+            
+            @dataclass
+            class BrandingConfig:
+                logo_directory: str = "brand_images"
+                taisys_logo: str = "Taisys.jpeg"
+                avenya_logo: str = "Avenya.jpg"
+                logo_width: int = 300
+                logo_height: int = 200
+                show_logos: bool = True
+                background_color: str = "#ffffff"
+            
             self.branding = BrandingConfig()
         
-        self.init_ui()
+    def set_camera_integrator(self, camera_integrator):
+        """Set camera integrator for inspection windows"""
+        self.camera_integrator = camera_integrator
+        
+        # Pass to existing windows if they exist
+        if self.eolt_window and hasattr(self.eolt_window, 'set_camera_integrator'):
+            self.eolt_window.set_camera_integrator(camera_integrator)
+        
+        if self.inline_window and hasattr(self.inline_window, 'set_camera_integrator'):
+            self.inline_window.set_camera_integrator(camera_integrator)
     
     def init_ui(self):
         """Initialize the user interface"""
@@ -382,6 +412,11 @@ class MainWindow(QMainWindow):
         try:
             self.eolt_window = EOLTInspectionWindow()
             
+            # Set camera integrator if available
+            if self.camera_integrator and hasattr(self.eolt_window, 'set_camera_integrator'):
+                self.eolt_window.set_camera_integrator(self.camera_integrator)
+                print("🔗 Camera integrator connected to EOLT window")
+            
             # Connect window closed signal to restore main window
             self.eolt_window.window_closed.connect(self.restore_main_window)
             
@@ -410,6 +445,11 @@ class MainWindow(QMainWindow):
         # Create and show Inline inspection window
         try:
             self.inline_window = INLINEInspectionWindow()
+            
+            # Set camera integrator if available
+            if self.camera_integrator and hasattr(self.inline_window, 'set_camera_integrator'):
+                self.inline_window.set_camera_integrator(self.camera_integrator)
+                print("🔗 Camera integrator connected to INLINE window")
             
             # Connect window closed signal to restore main window
             self.inline_window.window_closed.connect(self.restore_main_window)

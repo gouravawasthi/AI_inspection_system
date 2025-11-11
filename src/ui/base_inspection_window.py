@@ -13,11 +13,12 @@ from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
                             QGroupBox, QSlider, QCheckBox, QLineEdit, QTextEdit,
                             QProgressBar, QMessageBox, QComboBox, QScrollArea)
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
-from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtGui import QPixmap, QFont, QImage
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.api_manager import APIManager
+from camera.camera_integrator import CameraIntegrator
 try:
     from config.config_manager import get_config_manager
 except ImportError:
@@ -56,6 +57,38 @@ class BaseInspectionWindow(QWidget):
         self.api_manager = None
         self.api_data_collected = {}
         
+        # Initialize camera integrator
+        self.camera_integrator = CameraIntegrator()
+        self.camera_integrator.camera.analysis_complete.connect(self.on_camera_analysis_complete)
+        self.camera_integrator.camera.error_occurred.connect(self.on_camera_error)
+        
+        # Set up logging
+        import logging
+        self.logger = logging.getLogger(f"{self.__class__.__name__}")
+        
+    def set_camera_integrator(self, camera_integrator):
+        """Set camera integrator from main application"""
+        if camera_integrator:
+            # Disconnect old integrator signals
+            if self.camera_integrator:
+                try:
+                    self.camera_integrator.camera.analysis_complete.disconnect(self.on_camera_analysis_complete)
+                    self.camera_integrator.camera.error_occurred.disconnect(self.on_camera_error)
+                except:
+                    pass
+            
+            # Set new integrator
+            self.camera_integrator = camera_integrator
+            
+            # Connect new signals
+            self.camera_integrator.camera.analysis_complete.connect(self.on_camera_analysis_complete)
+            self.camera_integrator.camera.error_occurred.connect(self.on_camera_error)
+            
+            # Reconnect camera signals after setting new integrator
+            self._connect_camera_signals()
+            
+            self.logger.info("Camera integrator updated from main application")
+        
         # Initialize inspection state for smart button control
         self.inspection_state = self.InspectionState.IDLE
         self.step_data_collected = False  # Track if current step has data
@@ -64,6 +97,254 @@ class BaseInspectionWindow(QWidget):
         # Initialize API manager for this inspection type
         self.init_api_manager()
         self.init_ui()
+        
+        # Connect camera signals after UI is created
+        self._connect_camera_signals()
+        
+        # Start camera streaming immediately (not waiting for barcode)
+        self._start_immediate_camera_streaming()
+    
+    def on_camera_analysis_complete(self, result):
+        """Handle camera analysis completion"""
+        try:
+            # Store the result
+            current_step_name = self.inspection_steps[self.current_step]
+            self.inspection_results[current_step_name] = {
+                'status': result.status,
+                'input_image': result.input_image,
+                'output_image': result.output_image,
+                'results': result.result,
+                'timestamp': datetime.now()
+            }
+            
+            # Update UI with results
+            self.update_camera_display_with_result(result)
+            
+            # Mark step as completed
+            self.step_data_collected = True
+            self.enter_step_completed_state()
+            
+            # Update button states
+            self.update_button_states()
+            
+        except Exception as e:
+            self.logger.error(f"Error handling camera analysis: {e}")
+            self.on_camera_error(f"Analysis processing error: {e}")
+    
+    def on_camera_error(self, error_msg: str):
+        """Handle camera errors"""
+        self.update_camera_display(f"❌ Camera Error:\n{error_msg}\n\nCheck camera connection and try again")
+        # Re-enable capture button to allow retry
+        self.start_inspection_button.setEnabled(True)
+    
+    def update_camera_display_with_result(self, result):
+        """Update result image display with algorithm output"""
+        try:
+            status_icon = "✅" if result.status == "PASS" else "❌"
+            current_step_name = self.inspection_steps[self.current_step]
+            
+            # If we have an output image from the algorithm, display it
+            if hasattr(result, 'output_image') and result.output_image is not None:
+                # Convert numpy array to QImage and display
+                import cv2
+                if isinstance(result.output_image, str):
+                    # If it's a path, load the image
+                    output_img = cv2.imread(result.output_image)
+                else:
+                    # If it's already an array
+                    output_img = result.output_image
+                
+                if output_img is not None:
+                    # Convert BGR to RGB
+                    rgb_img = cv2.cvtColor(output_img, cv2.COLOR_BGR2RGB)
+                    height, width, channel = rgb_img.shape
+                    bytes_per_line = 3 * width
+                    
+                    # Create QImage
+                    qimage = QImage(rgb_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                    
+                    # Convert to QPixmap and scale
+                    pixmap = QPixmap.fromImage(qimage)
+                    scaled_pixmap = pixmap.scaled(
+                        self.result_image_label.size(),
+                        Qt.KeepAspectRatio,
+                        Qt.SmoothTransformation
+                    )
+                    
+                    self.result_image_label.setPixmap(scaled_pixmap)
+                else:
+                    # Show text result if no image
+                    self.result_image_label.clear()
+                    self.result_image_label.setText(f"{status_icon} {current_step_name}\nStatus: {result.status}\nResult: {result.result}")
+            else:
+                # Show text result if no output image
+                self.result_image_label.clear()
+                self.result_image_label.setText(f"{status_icon} {current_step_name}\nStatus: {result.status}\nResult: {result.result}")
+                
+        except Exception as e:
+            self.logger.error(f"Error updating result display: {e}")
+            self.result_image_label.clear()
+            self.result_image_label.setText(f"❌ Error displaying result\n{e}")
+    
+    def update_result_display(self, text):
+        """Update result display with text (fallback when no algorithm result)"""
+        try:
+            # Clear any existing pixmap and show text in result area
+            self.result_image_label.clear()
+            self.result_image_label.setText(text)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating result display: {e}")
+    
+    def update_video_frame(self, qimage):
+        """Update live video display with video frame"""
+        try:
+            # Convert QImage to QPixmap and display in live video section
+            pixmap = QPixmap.fromImage(qimage)
+            
+            # Scale pixmap to fit live video label while maintaining aspect ratio
+            scaled_pixmap = pixmap.scaled(
+                self.live_video_label.size(), 
+                Qt.KeepAspectRatio, 
+                Qt.SmoothTransformation
+            )
+            
+            self.live_video_label.setPixmap(scaled_pixmap)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating video frame: {e}")
+    
+    def update_camera_status(self, state):
+        """Update camera status display"""
+        try:
+            from camera.camera_manager import CameraState
+            
+            status_map = {
+                CameraState.STOPPED: ("Camera: Stopped", "#e74c3c"),
+                CameraState.STREAMING: ("Camera: Live Streaming", "#27ae60"),
+                CameraState.FREEZING: ("Camera: Capturing...", "#f39c12"),
+                CameraState.CAPTURED: ("Camera: Frame Captured", "#3498db"),
+                CameraState.ANALYZING: ("Camera: Analyzing...", "#9b59b6"),
+                CameraState.ERROR: ("Camera: Error", "#e74c3c")
+            }
+            
+            status_text, color = status_map.get(state, ("Camera: Unknown", "#95a5a6"))
+            
+            self.camera_status.setText(status_text)
+            self.camera_status.setStyleSheet(f"color: {color}; font-size: 16px; font-weight: bold; margin: 5px;")
+            
+        except Exception as e:
+            self.logger.error(f"Error updating camera status: {e}")
+    
+    def update_camera_display(self, text):
+        """Update camera display with text (fallback when no video)"""
+        try:
+            # Clear any existing pixmap to show text
+            self.live_video_label.clear()
+            self.live_video_label.setText(text)
+            
+        except Exception as e:
+            self.logger.error(f"Error updating camera display: {e}")
+    
+    def _connect_camera_signals(self):
+        """Connect camera signals to UI updates"""
+        try:
+            if hasattr(self, 'camera_integrator') and hasattr(self, 'live_video_label'):
+                self.camera_integrator.camera.frame_ready.connect(self.update_video_frame)
+                self.camera_integrator.camera.state_changed.connect(self.update_camera_status)
+                self.logger.info("Camera signals connected to UI")
+        except Exception as e:
+            self.logger.error(f"Failed to connect camera signals: {e}")
+    
+    def _start_immediate_camera_streaming(self):
+        """Start camera streaming immediately when window opens"""
+        try:
+            # Start camera streaming without waiting for barcode
+            self.logger.info("Starting immediate camera streaming")
+            
+            # Get default inspection parameters
+            inspection_params = self.get_camera_inspection_params()
+            
+            # Start streaming via camera integrator
+            success = self.camera_integrator.start_inspection_streaming(
+                self.inspection_type,
+                **inspection_params
+            )
+            
+            if success:
+                self.camera_status.setText("Camera: Live Streaming")
+                self.camera_status.setStyleSheet("color: #27ae60; font-size: 14px; font-weight: bold; margin: 5px;")
+                self.logger.info(f"Immediate streaming started for {self.inspection_type}")
+            else:
+                self.camera_status.setText("Camera: Failed to start")
+                self.camera_status.setStyleSheet("color: #e74c3c; font-size: 14px; font-weight: bold; margin: 5px;")
+                
+        except Exception as e:
+            self.logger.error(f"Failed to start immediate streaming: {e}")
+            self.camera_status.setText("Camera: Error")
+            self.camera_status.setStyleSheet("color: #e74c3c; font-size: 14px; font-weight: bold; margin: 5px;")
+    
+    def start_camera_streaming(self):
+        """Start camera streaming for inspection type"""
+        try:
+            # Determine inspection parameters
+            inspection_params = self.get_camera_inspection_params()
+            
+            # Start streaming via camera integrator
+            success = self.camera_integrator.start_inspection_streaming(
+                self.inspection_type,
+                **inspection_params
+            )
+            
+            if success:
+                # Update status to show streaming started
+                self.camera_status.setText("Camera: Starting...")
+                self.camera_status.setStyleSheet("color: #f39c12; font-size: 16px; font-weight: bold; margin: 5px;")
+                
+                # Clear text display to prepare for video frames
+                self.live_video_label.clear()
+                
+                self.logger.info(f"Started {self.inspection_type} inspection streaming")
+            else:
+                self.update_camera_display("❌ Failed to start camera\n\nCheck camera connection")
+                
+        except Exception as e:
+            self.logger.error(f"Camera streaming start failed: {e}")
+            self.update_camera_display(f"❌ Camera initialization error:\n{e}")
+    
+    def get_camera_inspection_params(self) -> dict:
+        """Get inspection parameters for camera - override in child classes"""
+        return {}
+    
+    def trigger_camera_capture(self):
+        """Trigger camera capture and analysis"""
+        try:
+            if not self.camera_integrator.is_ready_for_capture():
+                self.update_camera_display("❌ Camera not ready\n\nCheck camera streaming")
+                return False
+            
+            # Disable capture button during processing
+            self.start_inspection_button.setEnabled(False)
+            self.start_inspection_button.setText("Processing...")
+            
+            # Update display
+            self.update_camera_display("📸 Capturing and analyzing...\n\nPlease wait...")
+            
+            # Trigger capture and analysis
+            success = self.camera_integrator.capture_and_analyze()
+            
+            if not success:
+                self.update_camera_display("❌ Capture failed\n\nTry again")
+                self.start_inspection_button.setEnabled(True)
+                self.start_inspection_button.setText("Capture")
+                
+            return success
+            
+        except Exception as e:
+            self.update_camera_display(f"❌ Capture error:\n{e}")
+            self.start_inspection_button.setEnabled(True)
+            self.start_inspection_button.setText("Capture")
+            return False
     
     def get_inspection_steps(self) -> List[str]:
         """Return list of inspection steps for this type - override in child classes"""
@@ -787,36 +1068,73 @@ class BaseInspectionWindow(QWidget):
                                 override_allowed=False)
     
     def create_camera_panel(self, main_layout):
-        """Create camera display panel with increased width"""
+        """Create camera display panel with vertical layout - live video on top, results below"""
         camera_panel = QFrame()
         camera_panel.setStyleSheet("QFrame { border: 2px solid #ccc; border-radius: 10px; background-color: white; }")
         camera_layout = QVBoxLayout()
         camera_panel.setLayout(camera_layout)
         
-        # Camera feed placeholder - larger due to increased panel width
-        self.camera_label = QLabel("Camera Feed\n\n📹\n\nCamera integration ready\nfor implementation")
-        self.camera_label.setAlignment(Qt.AlignCenter)
-        self.camera_label.setMinimumSize(960, 600)  # Increased width from 800 to 960
-        self.camera_label.setStyleSheet("""
+        # Title
+        title = QLabel("Camera Feed & Results")
+        title.setFont(QFont("Arial", 16, QFont.Bold))
+        title.setAlignment(Qt.AlignCenter)
+        title.setStyleSheet("color: #2c3e50; margin: 8px;")
+        camera_layout.addWidget(title)
+        
+        # Live video feed - upper section
+        self.live_video_label = QLabel("Starting live camera feed...")
+        self.live_video_label.setAlignment(Qt.AlignCenter)
+        self.live_video_label.setMinimumSize(640, 360)  # 16:9 aspect ratio
+        self.live_video_label.setMaximumSize(640, 360)
+        self.live_video_label.setStyleSheet("""
             background-color: #2c3e50; 
             color: white; 
-            font-size: 28px;  
+            font-size: 16px;  
             border-radius: 8px;
             border: 2px solid #34495e;
         """)
-        camera_layout.addWidget(self.camera_label)
+        self.live_video_label.setAlignment(Qt.AlignCenter)  # Center the video content
+        camera_layout.addWidget(self.live_video_label)
         
-        # Camera status and inspection info
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setFrameStyle(QFrame.Sunken)
+        separator.setStyleSheet("color: #bdc3c7; margin: 5px;")
+        camera_layout.addWidget(separator)
+        
+        # Algorithm result image - lower section
+        result_title = QLabel("Algorithm Result")
+        result_title.setFont(QFont("Arial", 14, QFont.Bold))
+        result_title.setAlignment(Qt.AlignCenter)
+        result_title.setStyleSheet("color: #2c3e50; margin: 5px;")
+        camera_layout.addWidget(result_title)
+        
+        self.result_image_label = QLabel("Waiting for capture and analysis...")
+        self.result_image_label.setAlignment(Qt.AlignCenter)
+        self.result_image_label.setMinimumSize(640, 240)  # Smaller for result
+        self.result_image_label.setMaximumSize(640, 240)
+        self.result_image_label.setStyleSheet("""
+            background-color: #34495e; 
+            color: white; 
+            font-size: 14px;  
+            border-radius: 8px;
+            border: 2px solid #2c3e50;
+        """)
+        self.result_image_label.setAlignment(Qt.AlignCenter)  # Center the result content
+        camera_layout.addWidget(self.result_image_label)
+        
+        # Camera status and inspection info - bottom
         info_layout = QHBoxLayout()
         
-        self.camera_status = QLabel("Camera: Simulation Mode")
+        self.camera_status = QLabel("Camera: Initializing...")
         self.camera_status.setAlignment(Qt.AlignCenter)
-        self.camera_status.setStyleSheet("color: #f39c12; font-size: 16px; font-weight: bold; margin: 5px;")  # Increased font size
+        self.camera_status.setStyleSheet("color: #f39c12; font-size: 14px; font-weight: bold; margin: 5px;")
         info_layout.addWidget(self.camera_status)
         
         self.inspection_info = QLabel(f"Type: {self.inspection_type}")
         self.inspection_info.setAlignment(Qt.AlignCenter)
-        self.inspection_info.setStyleSheet("color: #3498db; font-size: 16px; font-weight: bold; margin: 5px;")  # Increased font size
+        self.inspection_info.setStyleSheet("color: #3498db; font-size: 14px; font-weight: bold; margin: 5px;")
         info_layout.addWidget(self.inspection_info)
         
         camera_layout.addLayout(info_layout)
@@ -1150,6 +1468,10 @@ class BaseInspectionWindow(QWidget):
             self.update_barcode_status(f"Barcode validated: {barcode}", "success")
             self.update_camera_display(f"Barcode Validated: {barcode}\n\nReady to start {self.inspection_type} inspection")
             
+            # Camera streaming is already active from window initialization
+            # Update status to show barcode is ready
+            self.inspection_info.setText(f"Type: {self.inspection_type} | Barcode: {barcode}")
+            
             # Enter barcode validated state
             self.enter_barcode_entered_state()
         else:
@@ -1331,10 +1653,15 @@ class BaseInspectionWindow(QWidget):
     # ===== Inspection Control Methods =====
     
     def start_inspection(self):
-        """Start the inspection process"""
+        """Start the inspection process with camera capture"""
         # STRICT VALIDATION: Ensure valid barcode before starting inspection
         if not self.barcode:
             self._show_validation_failure_message("No valid barcode - cannot start inspection")
+            return
+        
+        # Check if camera is ready
+        if not self.camera_integrator.is_ready_for_capture():
+            self.update_camera_display("❌ Camera not ready\n\nPlease validate barcode first")
             return
         
         # Note: Barcode was already validated during submit_barcode() - no need to re-validate
@@ -1356,12 +1683,13 @@ class BaseInspectionWindow(QWidget):
         # Start first step
         self.start_step_inspection()
         
-        self.update_camera_display(f"🔍 {self.inspection_type} Inspection Started\n\nBarcode: {self.barcode}\n\nPosition product for first step")
+        # Trigger camera capture instead of simulation
+        self.trigger_camera_capture()
         
         # Add helpful instructions for user
         if len(self.inspection_steps) > 0:
             first_step = self.inspection_steps[0]
-            self.update_camera_display(f"🔍 Step 1: {first_step}\n\nBarcode: {self.barcode}\n\nPosition product for inspection\n\n💡 Tip: Simulate data collection for demo")
+            self.update_camera_display(f"� Capturing: {first_step}\n\nBarcode: {self.barcode}\n\nPlease wait for analysis...")
     
     def start_step_inspection(self):
         """Start inspection of current step"""
@@ -1385,7 +1713,7 @@ class BaseInspectionWindow(QWidget):
             self.update_camera_display(f"Inspecting: {step_name}\n\n📹\n\nPosition product for {step_name}\n\n💡 Click here to simulate data collection")
             
             # Make camera label clickable for demo purposes
-            self.camera_label.mousePressEvent = lambda event: self.simulate_step_data_collection()
+            self.live_video_label.mousePressEvent = lambda event: self.simulate_step_data_collection()
     
     def next_step(self):
         """Move to next step of inspection"""
@@ -1786,10 +2114,6 @@ class BaseInspectionWindow(QWidget):
     
     # ===== Utility Methods =====
     
-    def update_camera_display(self, message):
-        """Update camera display with a message"""
-        self.camera_label.setText(message)
-    
     def log_inspection_results(self):
         """Log inspection results to file"""
         try:
@@ -2006,5 +2330,9 @@ class BaseInspectionWindow(QWidget):
     
     def closeEvent(self, event):
         """Handle window close event"""
+        # Stop camera streaming
+        if hasattr(self, 'camera_integrator'):
+            self.camera_integrator.stop_inspection()
+        
         self.window_closed.emit()
         event.accept()

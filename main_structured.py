@@ -33,10 +33,12 @@ from config import config_manager, AppConfig
 from server.server import start_server, configure_database
 from api.api_manager import APIManager
 
+# Import ML and Camera components
+from ml.algorithm_engine import AlgorithmEngine
+from camera.camera_integrator import CameraIntegrator
+
 # TODO: Import when implemented
-# from camera.camera_interface import CameraManager
 # from image_processing.processor import ImageProcessor
-# from ml.inference import DefectDetector
 
 # GUI imports (conditional to handle missing PyQt5)
 try:
@@ -69,10 +71,10 @@ class AIInspectionSystem:
         self.main_window = None
         self.api_manager: Optional[APIManager] = None
         
-        # System components (to be implemented)
-        self.camera_manager = None
+        # System components - Camera and AI
+        self.camera_integrator: Optional[CameraIntegrator] = None
+        self.algorithm_engine: Optional[AlgorithmEngine] = None
         self.image_processor = None
-        self.defect_detector = None
         self.main_window = None
         
         # System state
@@ -154,30 +156,56 @@ class AIInspectionSystem:
 
     def initialize_camera_system(self) -> bool:
         """
-        Phase 3: Initialize camera and image processing
+        Phase 3: Initialize camera and algorithm engine
         """
         try:
-            self.logger.info("📷 Initializing camera system...")
+            self.logger.info("📷 Initializing camera and algorithm system...")
             
-            # TODO: Implement camera initialization
-            # self.camera_manager = CameraManager(self.config.camera)
-            # if not self.camera_manager.initialize():
-            #     self.logger.error("❌ Camera initialization failed")
-            #     return False
+            # Initialize algorithm engine first
+            config_dir = os.path.join(current_dir, 'configs')
+            algo_config_path = os.path.join(config_dir, 'algo.json')
             
-            self.logger.info("📸 Camera system initialized (MOCK)")
+            if not os.path.exists(algo_config_path):
+                self.logger.error(f"Algorithm config not found: {algo_config_path}")
+                return False
             
-            # TODO: Initialize image processing
-            # self.image_processor = ImageProcessor(self.config.image_processing)
-            # self.defect_detector = DefectDetector(self.config.ml)
+            self.algorithm_engine = AlgorithmEngine(algo_config_path, debug=True)
+            self.logger.info("✅ Algorithm engine initialized")
             
-            self.logger.info("🔍 Image processing system initialized (MOCK)")
-            self.camera_active = True
+            # Load reference images and masks
+            load_results = self.algorithm_engine.load_all_defaults()
+            loaded_count = sum(1 for success in load_results.values() if success)
+            total_count = len(load_results)
             
-            return True
+            self.logger.info(f"📸 References/Masks loaded: {loaded_count}/{total_count}")
+            
+            if loaded_count == 0:
+                self.logger.warning("⚠️ No reference images loaded - inspection may not work correctly")
+            
+            # Initialize camera integrator with algorithm engine
+            camera_config_path = os.path.join(config_dir, 'camera_config.json')
+            self.camera_integrator = CameraIntegrator(camera_config_path, algo_config_path)
+            
+            # Verify camera integration
+            if hasattr(self.camera_integrator, 'camera') and hasattr(self.camera_integrator, 'algorithm_engine'):
+                self.logger.info("✅ Camera integrator initialized with algorithm engine")
+                self.camera_active = True
+                
+                # Test camera readiness
+                if self.camera_integrator.camera._capture is not None:
+                    self.logger.info("� Camera device detected and ready")
+                else:
+                    self.logger.info("📹 Camera in simulation mode (no device detected)")
+                
+                return True
+            else:
+                self.logger.error("❌ Camera integrator missing required components")
+                return False
             
         except Exception as e:
             self.logger.error(f"❌ Camera system initialization failed: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
             return False
 
     def launch_gui_application(self) -> bool:
@@ -199,8 +227,13 @@ class AIInspectionSystem:
             self.gui_app = QApplication(sys.argv)
             self.gui_app.setApplicationName("AI Inspection System")
             
-            # Create main window
+            # Create main window with camera integrator
             self.main_window = MainWindow()
+            
+            # Connect camera integrator to main window if available
+            if hasattr(self.main_window, 'set_camera_integrator') and self.camera_integrator:
+                self.main_window.set_camera_integrator(self.camera_integrator)
+                self.logger.info("🔗 Camera integrator connected to main window")
             
             # Connect signals for inspection requests
             self.main_window.eolt_inspection_requested.connect(lambda: self._handle_inspection_request("EOLT"))
@@ -244,7 +277,7 @@ class AIInspectionSystem:
 
     def run_inspection_workflow(self, barcode: str) -> Dict[str, Any]:
         """
-        Main inspection workflow that ties everything together
+        Main inspection workflow with real camera capture and algorithm analysis
         """
         try:
             self.logger.info(f"🔍 Starting inspection for barcode: {barcode}")
@@ -261,53 +294,58 @@ class AIInspectionSystem:
                 self.logger.warning(f"Cannot proceed with inspection: {api_result['message']}")
                 return api_result
             
-            # Step 2: Camera captures image
-            # TODO: Implement camera capture
-            # image = self.camera_manager.capture_image()
-            # self.logger.info("📸 Image captured")
+            # Step 2: Verify camera and algorithm engine are ready
+            if not self.camera_integrator or not self.algorithm_engine:
+                self.logger.error("Camera or algorithm engine not initialized")
+                return {
+                    'status': 'error',
+                    'message': 'Camera or algorithm engine not ready',
+                    'data': None,
+                    'action_required': False
+                }
             
-            # Step 3: Image processing and AI analysis
-            # TODO: Implement image processing
-            # processed_image = self.image_processor.preprocess(image)
-            # defects = self.defect_detector.detect_defects(processed_image)
-            # inspection_result = self.image_processor.analyze_results(defects)
+            # Step 3: Camera captures frames, averages them, and runs algorithm
+            # This is now handled automatically by the camera integrator
+            # The capture process includes:
+            # - Stop live streaming and freeze last frame
+            # - Capture multiple frames based on config
+            # - Average the frames to reduce noise
+            # - Pass averaged frame to algorithm engine
+            # - Return results with original and processed images
             
-            # Mock inspection result for now
+            self.logger.info("📸 Starting frame capture and averaging process...")
+            
+            # The actual capture is triggered by the inspection window's capture button
+            # This workflow method focuses on the high-level orchestration
+            
+            # For now, return a placeholder result that indicates the capture is ready
+            # The real results will be handled by the inspection window when capture completes
+            
             inspection_result = {
                 'barcode': barcode,
                 'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),
-                'defects_detected': 0,
-                'quality_score': 0.95,
-                'pass_fail': 1,  # 1 = Pass, 0 = Fail
-                'manual_result': 1,
-                'details': {
-                    'scratch_count': 0,
-                    'dust_particles': 1,
-                    'color_deviation': 0.02
-                }
+                'status': 'capture_ready',
+                'message': 'Ready for capture - click capture button to proceed',
+                'camera_state': str(self.camera_integrator.get_camera_state()),
+                'algorithm_ready': True,
+                'references_loaded': len(self.algorithm_engine.references),
+                'masks_loaded': len(self.algorithm_engine.masks)
             }
             
-            # Step 4: Send results to API (POST new record)
-            # This creates the new entry we mentioned in the "proceed with new entry" message
-            workflow_name = list(self.config.workflows)[0].name if self.config.workflows else 'CHIP_TO_EOLT'
-            workflow = next((w for w in self.config.workflows if w.name == workflow_name), None)
-            
-            if workflow:
-                api_url = f"{self.config.api.base_url}/{workflow.api2_table}"
-                # TODO: POST inspection_result to api_url
-                self.logger.info(f"📤 Inspection results sent to {workflow.api2_table}")
-            
-            self.logger.info(f"✅ Inspection completed - Result: {'PASS' if inspection_result['pass_fail'] else 'FAIL'}")
+            self.logger.info(f"✅ Inspection workflow ready - Camera state: {inspection_result['camera_state']}")
+            self.logger.info(f"📚 References: {inspection_result['references_loaded']}, Masks: {inspection_result['masks_loaded']}")
             
             return {
-                'status': 'completed',
-                'message': f"Inspection completed - {'PASS' if inspection_result['pass_fail'] else 'FAIL'}",
+                'status': 'ready',
+                'message': 'System ready for inspection - use capture button to start',
                 'data': inspection_result,
                 'action_required': False
             }
             
         except Exception as e:
             self.logger.error(f"❌ Inspection workflow failed: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
             return {
                 'status': 'error',
                 'message': f"Inspection failed: {str(e)}",
@@ -395,9 +433,14 @@ class AIInspectionSystem:
                 self.logger.info("�️  GUI application closed")
             
             # TODO: Cleanup components
-            if self.camera_active:
-                # self.camera_manager.cleanup()
+            if self.camera_active and self.camera_integrator:
+                self.camera_integrator.stop_inspection()
                 self.logger.info("📷 Camera system stopped")
+            
+            # Cleanup algorithm engine
+            if self.algorithm_engine:
+                self.algorithm_engine = None
+                self.logger.info("🧠 Algorithm engine cleaned up")
             
             # Mark system as not ready
             self.system_ready = False
