@@ -2197,3 +2197,585 @@
 2025-11-10 21:29:14,505 - __main__ - INFO - �️  GUI application closed
 2025-11-10 21:29:14,505 - __main__ - INFO - 📷 Camera system stopped
 2025-11-10 21:29:14,505 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 12:36:19,671 - __main__ - INFO - ============================================================
+2025-11-11 12:36:19,712 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 12:36:19,713 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 12:36:19,713 - __main__ - INFO - Config Version: 1.0
+2025-11-11 12:36:19,713 - __main__ - INFO - ============================================================
+2025-11-11 12:36:19,714 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 12:36:19,714 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 12:36:19,714 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 12:36:19,714 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 12:36:19,724 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 12:36:19,725 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 12:36:19,968 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 12:36:20,016 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 12:36:20,017 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 12:36:20,977 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:20] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 12:36:20,981 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 12:36:21,982 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 12:36:21,982 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 12:36:21,982 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 12:36:21,982 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 12:36:21,983 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 12:36:22,367 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:22,369 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:22,370 - config - INFO - Creating default configuration
+2025-11-11 12:36:22,407 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:22,410 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:22,411 - config - INFO - Creating default configuration
+2025-11-11 12:36:22,759 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 12:36:22,762 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 12:36:22,762 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 12:36:25,535 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 12:36:25,535 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 12:36:25,538 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:25] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 12:36:25,543 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:25] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 12:36:25,544 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 12:36:25,545 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 12:36:25,545 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 12:36:25,547 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:25,548 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:36:25,548 - config - INFO - Creating default configuration
+2025-11-11 12:36:29,869 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:29] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:36:29,872 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:29] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:36:31,634 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:31] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:36:31,637 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:36:31] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:36:40,854 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 12:36:40,855 - __main__ - INFO - �️  GUI application closed
+2025-11-11 12:36:40,855 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 12:36:40,855 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 12:36:40,856 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 12:36:40,856 - __main__ - INFO - �️  GUI application closed
+2025-11-11 12:36:40,856 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 12:36:40,856 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 12:40:08,445 - __main__ - INFO - ============================================================
+2025-11-11 12:40:08,451 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 12:40:08,452 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 12:40:08,452 - __main__ - INFO - Config Version: 1.0
+2025-11-11 12:40:08,452 - __main__ - INFO - ============================================================
+2025-11-11 12:40:08,452 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 12:40:08,452 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 12:40:08,452 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 12:40:08,452 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 12:40:08,453 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 12:40:08,453 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 12:40:08,456 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 12:40:08,481 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 12:40:08,482 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 12:40:09,460 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:40:09] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 12:40:09,461 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 12:40:10,462 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 12:40:10,462 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 12:40:10,462 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 12:40:10,462 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 12:40:10,462 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 12:40:10,597 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:10,598 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:10,598 - config - INFO - Creating default configuration
+2025-11-11 12:40:10,605 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:10,606 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:10,606 - config - INFO - Creating default configuration
+2025-11-11 12:40:11,093 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 12:40:11,094 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 12:40:11,094 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 12:40:12,535 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 12:40:12,535 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 12:40:12,538 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:40:12] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 12:40:12,542 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:40:12] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 12:40:12,543 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 12:40:12,544 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 12:40:12,544 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 12:40:12,546 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:12,547 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 12:40:12,547 - config - INFO - Creating default configuration
+2025-11-11 12:40:19,196 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:40:19] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:40:19,200 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 12:40:19] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 12:40:24,844 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 12:40:24,845 - __main__ - INFO - �️  GUI application closed
+2025-11-11 12:40:24,845 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 12:40:24,845 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 12:40:24,845 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 12:40:24,845 - __main__ - INFO - �️  GUI application closed
+2025-11-11 12:40:24,845 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 12:40:24,845 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:00:19,717 - __main__ - INFO - ============================================================
+2025-11-11 13:00:19,718 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:00:19,718 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:00:19,718 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:00:19,718 - __main__ - INFO - ============================================================
+2025-11-11 13:00:19,718 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:00:19,718 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:00:19,719 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:00:19,719 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:00:19,719 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:00:19,719 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:00:19,725 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:00:19,743 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:00:19,743 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:00:20,729 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:20] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:00:20,731 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:00:21,731 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:00:21,731 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:00:21,732 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:00:21,732 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:00:21,732 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:00:21,957 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:21,958 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:21,958 - config - INFO - Creating default configuration
+2025-11-11 13:00:21,969 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:21,971 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:21,971 - config - INFO - Creating default configuration
+2025-11-11 13:00:22,297 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:00:22,298 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:00:22,298 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:00:24,530 - __main__ - INFO - 🚪 Quit requested from GUI
+2025-11-11 13:00:24,530 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:00:24,531 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:00:24,531 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:00:24,531 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:00:24,531 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:00:24,531 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:00:24,531 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:00:24,531 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:00:24,531 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:00:24,531 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:00:24,531 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:00:24,532 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:00:51,017 - __main__ - INFO - ============================================================
+2025-11-11 13:00:51,017 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:00:51,017 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:00:51,018 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:00:51,018 - __main__ - INFO - ============================================================
+2025-11-11 13:00:51,018 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:00:51,018 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:00:51,018 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:00:51,018 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:00:51,018 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:00:51,018 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:00:51,021 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:00:51,041 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:00:51,041 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:00:52,025 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:52] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:00:52,027 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:00:53,027 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:00:53,028 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:00:53,030 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:00:53,030 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:00:53,030 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:00:53,085 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:53,086 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:53,087 - config - INFO - Creating default configuration
+2025-11-11 13:00:53,094 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:53,096 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:53,096 - config - INFO - Creating default configuration
+2025-11-11 13:00:53,221 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:00:53,222 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:00:53,222 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:00:55,059 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:00:55,059 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:00:55,062 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:55] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:00:55,065 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:55] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:00:55,066 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 13:00:55,066 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 13:00:55,066 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:00:55,067 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:55,068 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:00:55,068 - config - INFO - Creating default configuration
+2025-11-11 13:00:58,551 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:58] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:00:58,555 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:00:58] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:01:07,692 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:01:07,693 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:01:07,695 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:01:07,695 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:01:07,695 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:01:07,696 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:01:07,696 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:01:07,697 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:05:00,794 - __main__ - INFO - ============================================================
+2025-11-11 13:05:00,794 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:05:00,794 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:05:00,794 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:05:00,795 - __main__ - INFO - ============================================================
+2025-11-11 13:05:00,795 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:05:00,795 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:05:00,795 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:05:00,795 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:05:00,795 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:05:00,796 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:05:00,801 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:05:00,817 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:05:00,817 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:05:01,805 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:05:01] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:05:01,806 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:05:02,807 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:05:02,807 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:05:02,808 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:05:02,808 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:05:02,808 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:05:02,850 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:05:02,851 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:05:02,851 - config - INFO - Creating default configuration
+2025-11-11 13:05:02,856 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:05:02,858 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:05:02,858 - config - INFO - Creating default configuration
+2025-11-11 13:05:02,957 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:05:02,957 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:05:02,957 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:06:03,166 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:06:03] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:08:40,401 - __main__ - INFO - ============================================================
+2025-11-11 13:08:40,402 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:08:40,402 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:08:40,402 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:08:40,403 - __main__ - INFO - ============================================================
+2025-11-11 13:08:40,403 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:08:40,403 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:08:40,403 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:08:40,403 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:08:40,404 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:08:40,404 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:08:40,410 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:08:40,449 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:08:40,450 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:08:41,416 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:08:41] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:08:41,418 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:08:42,419 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:08:42,419 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:08:42,419 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:08:42,419 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:08:42,419 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:08:42,633 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:42,634 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:42,634 - config - INFO - Creating default configuration
+2025-11-11 13:08:42,647 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:42,649 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:42,649 - config - INFO - Creating default configuration
+2025-11-11 13:08:43,255 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:08:43,256 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:08:43,256 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:08:45,081 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:08:45,081 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:08:45,085 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:08:45] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:08:45,088 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:08:45] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:08:45,089 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 13:08:45,089 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 13:08:45,090 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:08:45,094 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:45,096 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:08:45,096 - config - INFO - Creating default configuration
+2025-11-11 13:08:51,379 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:08:51] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:08:51,388 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:08:51] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:10:10,092 - __main__ - INFO - ============================================================
+2025-11-11 13:10:10,092 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:10:10,092 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:10:10,092 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:10:10,092 - __main__ - INFO - ============================================================
+2025-11-11 13:10:10,092 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:10:10,092 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:10:10,092 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:10:10,092 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:10:10,093 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:10:10,093 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:10:10,097 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:10:10,123 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:10:10,123 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:10:11,101 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:10:11] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:10:11,102 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:10:12,102 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:10:12,102 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:10:12,102 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:10:12,102 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:10:12,102 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:10:12,192 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:12,193 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:12,194 - config - INFO - Creating default configuration
+2025-11-11 13:10:12,201 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:12,202 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:12,203 - config - INFO - Creating default configuration
+2025-11-11 13:10:12,413 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:10:12,414 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:10:12,414 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:10:13,695 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:10:13,696 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:10:13,703 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:10:13] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:10:13,718 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:10:13] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:10:13,722 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 13:10:13,722 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 13:10:13,723 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:10:13,730 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:13,732 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:10:13,733 - config - INFO - Creating default configuration
+2025-11-11 13:10:18,033 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:10:18] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:10:18,035 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:10:18] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:11:43,017 - __main__ - INFO - ============================================================
+2025-11-11 13:11:43,017 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:11:43,017 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:11:43,017 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:11:43,017 - __main__ - INFO - ============================================================
+2025-11-11 13:11:43,017 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:11:43,018 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:11:43,018 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:11:43,018 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:11:43,018 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:11:43,018 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:11:43,020 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:11:43,040 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:11:43,040 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:11:44,025 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:11:44] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:11:44,027 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:11:45,027 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:11:45,028 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:11:45,028 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:11:45,028 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:11:45,028 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:11:45,100 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:45,101 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:45,101 - config - INFO - Creating default configuration
+2025-11-11 13:11:45,106 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:45,106 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:45,106 - config - INFO - Creating default configuration
+2025-11-11 13:11:45,248 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:11:45,248 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:11:45,249 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:11:46,483 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:11:46,483 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:11:46,488 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:11:46] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:11:46,494 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:11:46] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:11:46,495 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 13:11:46,495 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 13:11:46,495 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:11:46,496 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:46,497 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:11:46,497 - config - INFO - Creating default configuration
+2025-11-11 13:11:50,247 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:11:50] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:11:50,251 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:11:50] "GET /api/INLINEINSPECTIONTOP?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:13:28,270 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:13:28,271 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:13:28,272 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:13:28,272 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:13:28,273 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:13:28,273 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:13:28,274 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:13:28,274 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:17:35,357 - __main__ - INFO - ============================================================
+2025-11-11 13:17:35,359 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:17:35,359 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:17:35,359 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:17:35,359 - __main__ - INFO - ============================================================
+2025-11-11 13:17:35,360 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:17:35,360 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:17:35,360 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:17:35,360 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:17:35,361 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:17:35,361 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:17:35,368 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:17:35,403 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:17:35,404 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:17:36,373 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:17:36] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:17:36,375 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:17:37,376 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:17:37,376 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:17:37,377 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:17:37,377 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:17:37,378 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:17:37,608 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:37,609 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:37,609 - config - INFO - Creating default configuration
+2025-11-11 13:17:37,621 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:37,622 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:37,622 - config - INFO - Creating default configuration
+2025-11-11 13:17:38,388 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:17:38,388 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:17:38,390 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:17:40,613 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:17:40,614 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:17:40,616 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:17:40] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:17:40,622 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:17:40] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:17:40,624 - __main__ - INFO - API Check: error - Unexpected API response.
+2025-11-11 13:17:40,624 - __main__ - WARNING - Cannot proceed with inspection: Unexpected API response.
+2025-11-11 13:17:40,624 - __main__ - INFO - Inspection result: {'status': 'error', 'message': 'Unexpected API response.', 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:17:40,626 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:40,627 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:17:40,627 - config - INFO - Creating default configuration
+2025-11-11 13:17:46,484 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:17:46] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:17:46,494 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:17:46] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:26:47,164 - __main__ - INFO - ============================================================
+2025-11-11 13:26:47,164 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:26:47,164 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:26:47,164 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:26:47,164 - __main__ - INFO - ============================================================
+2025-11-11 13:26:47,164 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:26:47,164 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:26:47,164 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:26:47,164 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:26:47,165 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:26:47,166 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:26:47,186 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:26:47,186 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:26:47,188 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:26:47] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:26:47,190 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:26:48,190 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:26:48,190 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:26:48,190 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:26:48,190 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:26:48,190 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:26:48,243 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:48,244 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:48,244 - config - INFO - Creating default configuration
+2025-11-11 13:26:48,254 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:48,255 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:48,255 - config - INFO - Creating default configuration
+2025-11-11 13:26:48,392 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:26:48,392 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:26:48,393 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:26:50,576 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:26:50,577 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:26:50,579 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:26:50] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:26:50,582 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:26:50] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:26:50,583 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:26:50,583 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:26:50,583 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:26:50,584 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:50,585 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:26:50,585 - config - INFO - Creating default configuration
+2025-11-11 13:26:55,204 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:26:55] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:26:55,208 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:26:55] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:27:21,109 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:27:21,110 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:27:21,110 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:27:21,110 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:27:21,111 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-11 13:27:21,111 - __main__ - INFO - �️  GUI application closed
+2025-11-11 13:27:21,111 - __main__ - INFO - 📷 Camera system stopped
+2025-11-11 13:27:21,111 - __main__ - INFO - ✅ System shutdown completed
+2025-11-11 13:27:39,672 - __main__ - INFO - ============================================================
+2025-11-11 13:27:39,672 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:27:39,672 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:27:39,672 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:27:39,673 - __main__ - INFO - ============================================================
+2025-11-11 13:27:39,673 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:27:39,673 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:27:39,673 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:27:39,673 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:27:39,673 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:27:39,673 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:27:39,676 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:27:39,694 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:27:39,694 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:27:40,679 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:27:40] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:27:40,680 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:27:41,681 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:27:41,682 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:27:41,682 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:27:41,682 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:27:41,682 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:27:41,748 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:41,750 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:41,750 - config - INFO - Creating default configuration
+2025-11-11 13:27:41,757 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:41,759 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:41,759 - config - INFO - Creating default configuration
+2025-11-11 13:27:41,888 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:27:41,889 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:27:41,889 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:27:43,252 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:27:43,252 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:27:43,257 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:27:43] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:27:43,262 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:27:43] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:27:43,263 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:27:43,263 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:27:43,263 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:27:43,264 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:43,264 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:27:43,264 - config - INFO - Creating default configuration
+2025-11-11 13:27:47,015 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:27:47] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:27:47,019 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:27:47] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-11 13:32:27,655 - __main__ - INFO - ============================================================
+2025-11-11 13:32:27,655 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:32:27,655 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:32:27,655 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:32:27,655 - __main__ - INFO - ============================================================
+2025-11-11 13:32:27,655 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:32:27,655 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:32:27,655 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:32:27,655 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:32:27,656 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:32:27,656 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:32:27,662 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-11 13:32:27,682 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-11 13:32:27,682 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-11 13:32:28,667 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:32:28] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-11 13:32:28,668 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:32:29,669 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:32:29,669 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:32:29,669 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:32:29,669 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:32:29,669 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:32:29,818 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:29,820 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:29,820 - config - INFO - Creating default configuration
+2025-11-11 13:32:29,835 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:29,837 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:29,837 - config - INFO - Creating default configuration
+2025-11-11 13:32:30,294 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:32:30,294 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:32:30,294 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:32:32,161 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:32:32,161 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:32:32,163 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:32:32] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:32:32,166 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:32:32] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-11 13:32:32,168 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:32:32,168 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:32:32,168 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:32:32,170 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:32,171 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:32:32,171 - config - INFO - Creating default configuration
+2025-11-11 13:32:35,243 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:32:35] "GET /api/CHIPINSPECTION?barcode=B123 HTTP/1.1" 200 -
+2025-11-11 13:32:35,246 - werkzeug - INFO - 127.0.0.1 - - [11/Nov/2025 13:32:35] "GET /api/INLINEINSPECTIONBOTTOM?barcode=B123 HTTP/1.1" 200 -
+2025-11-11 13:40:15,466 - __main__ - INFO - ============================================================
+2025-11-11 13:40:15,469 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-11 13:40:15,469 - __main__ - INFO - Application Version: 1.0.0
+2025-11-11 13:40:15,469 - __main__ - INFO - Config Version: 1.0
+2025-11-11 13:40:15,469 - __main__ - INFO - ============================================================
+2025-11-11 13:40:15,469 - config - WARNING - Port 5001 is already in use
+2025-11-11 13:40:15,470 - __main__ - INFO - ✅ System configuration validated
+2025-11-11 13:40:15,470 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-11 13:40:15,470 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-11 13:40:15,470 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-11 13:40:15,470 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-11 13:40:15,471 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-11 13:40:15,481 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-11 13:40:16,484 - __main__ - INFO - ✅ API server started successfully
+2025-11-11 13:40:16,485 - __main__ - INFO - 📷 Initializing camera system...
+2025-11-11 13:40:16,485 - __main__ - INFO - 📸 Camera system initialized (MOCK)
+2025-11-11 13:40:16,485 - __main__ - INFO - 🔍 Image processing system initialized (MOCK)
+2025-11-11 13:40:16,485 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-11 13:40:16,629 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:16,630 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:16,631 - config - INFO - Creating default configuration
+2025-11-11 13:40:16,641 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:16,641 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:16,642 - config - INFO - Creating default configuration
+2025-11-11 13:40:16,862 - __main__ - INFO - ✅ GUI application ready
+2025-11-11 13:40:16,863 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-11 13:40:16,863 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-11 13:40:17,911 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-11 13:40:17,912 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-11 13:40:17,918 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:40:17,918 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-11 13:40:17,918 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-11 13:40:17,920 - config - WARNING - Failed to load JSON config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:17,921 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-11 13:40:17,922 - config - INFO - Creating default configuration

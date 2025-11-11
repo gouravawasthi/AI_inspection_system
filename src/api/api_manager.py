@@ -203,16 +203,16 @@ class APIManager:
         result2_eval = self._evaluate_manual_result(result2)
 
         # ---- API1 None ----
-        if result1 in (None, "", {}, []):
+        if result1_eval is None:
             msg["message"] = (
-                f"Barcode was not tested in previous {self.placeholders[0]} inspection, can’t proceed."
+                f"Barcode was not tested in previous {self.placeholders[0]} inspection, can't proceed."
             )
             return msg
 
         # ---- API1 True ----
-        if result1 is True:
+        if result1_eval is True:
             # API2 None → proceed with new entry (will do POST request after collecting results)
-            if result2 in (None, "", {}, []):
+            if result2_eval is None:
                 return {
                     "status": "success",
                     "message": f"Proceed with {self.placeholders[1]} - New entry will be created.",
@@ -222,7 +222,7 @@ class APIManager:
                 }
 
             # API2 contains duplicate → ask user
-            if isinstance(result2, dict) and len(result2) > 0:
+            if result2_eval is not None:
                 msg.update(
                     {
                         "status": "warning",
@@ -233,6 +233,13 @@ class APIManager:
                     }
                 )
                 return msg
+
+        # ---- API1 False (failed previous inspection) ----
+        if result1_eval is False:
+            msg["message"] = (
+                f"Barcode failed previous {self.placeholders[0]} inspection, cannot proceed."
+            )
+            return msg
 
         msg["message"] = "Unexpected API response."
         return msg

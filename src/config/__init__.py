@@ -333,6 +333,18 @@ class ConfigManager:
                 description="Chip inspection to EOLT testing workflow"
             ),
             InspectionWorkflow(
+                name="CHIP_TO_INLINE_BOTTOM",
+                api1_table="CHIPINSPECTION",
+                api2_table="INLINEINSPECTIONBOTTOM", 
+                description="Chip inspection to inline bottom inspection workflow"
+            ),
+            InspectionWorkflow(
+                name="INLINE_BOTTOM_TO_INLINE_TOP",
+                api1_table="INLINEINSPECTIONBOTTOM",
+                api2_table="INLINEINSPECTIONTOP",
+                description="Inline bottom to inline top inspection workflow"
+            ),
+            InspectionWorkflow(
                 name="INLINE_TOP_TO_EOLT",
                 api1_table="INLINEINSPECTIONTOP",
                 api2_table="EOLTINSPECTION", 

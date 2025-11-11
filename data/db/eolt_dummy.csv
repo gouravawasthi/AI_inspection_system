@@ -1,5 +1,5 @@
 Barcode,DT,Process_id,Station_id,Upper,Lower,Left,Right,Result,Printtext,Barcodetext,ManualUpper,ManualLower,ManualLeft,ManualRight,ManualResult
-A123,07/11/25 20:26,4,1,0,0,0,0,0,0,fbajsbf,0,1,0,1,0
+A123,07/11/25 20:26,4,1,0,0,0,0,0,0,fbajsbf,0,1,0,1,1
 B123,08/11/25 20:26,4,1,0,0,0,1,0,1,mnflaksdnfl,0,1,0,0,0
 C123,09/11/25 20:26,4,1,0,0,0,0,0,0,sdfasdlknf,0,1,1,1,0
 D123,10/11/25 20:26,4,1,0,0,1,1,0,1,sfmsdklfn,1,0,1,0,0

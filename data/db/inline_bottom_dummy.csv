@@ -1,5 +1,5 @@
 Barcode,DT,Process_id,Station_id,Antenna,Capacitor,Speaker,Result,ManualAntenna,ManualCapacitor,ManualSpeaker,ManualResult
-A123,06/11/25 20:14,2,1,0,0,0,0,0,0,0,0
+A123,06/11/25 20:14,2,1,0,0,0,0,0,0,0,1
 B123,06/11/25 20:14,2,1,0,0,0,0,0,0,0,0
 C123,06/11/25 20:14,2,1,0,0,0,0,0,1,0,0
 D123,06/11/25 20:14,2,1,0,0,1,0,0,0,0,0

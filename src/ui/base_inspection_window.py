@@ -478,7 +478,68 @@ class BaseInspectionWindow(QWidget):
     
     def _update_button_visual_state(self, button, enabled, button_type):
         """Update button visual appearance based on enabled state"""
-        if not enabled:
+        if enabled:
+            # Add highlighting for enabled buttons, especially after step completion
+            if button_type in ["next_step", "repeat_step"]:
+                # Enhanced highlighting for step control buttons
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #4CAF50;
+                        color: white;
+                        border: 3px solid #45a049;
+                        border-radius: 8px;
+                        padding: 12px 20px;
+                        font-size: 14px;
+                        font-weight: bold;
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                    }
+                    QPushButton:hover {
+                        background-color: #45a049;
+                        border: 3px solid #3d8b40;
+                        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+                        transform: translateY(-2px);
+                    }
+                    QPushButton:pressed {
+                        background-color: #3d8b40;
+                        transform: translateY(0px);
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    }
+                """)
+            elif button_type == "capture":
+                # Enhanced styling for capture button
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #2196F3;
+                        color: white;
+                        border: 2px solid #1976D2;
+                        border-radius: 6px;
+                        padding: 10px 16px;
+                        font-size: 13px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #1976D2;
+                        border: 2px solid #1565C0;
+                    }
+                """)
+            elif button_type == "manual_override":
+                # Enhanced styling for manual override
+                button.setStyleSheet("""
+                    QPushButton {
+                        background-color: #FF9800;
+                        color: white;
+                        border: 2px solid #F57C00;
+                        border-radius: 6px;
+                        padding: 10px 16px;
+                        font-size: 13px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #F57C00;
+                        border: 2px solid #E65100;
+                    }
+                """)
+        else:
             # Add visual indication for disabled state while keeping original colors
             current_style = button.styleSheet()
             if ":disabled" not in current_style:
@@ -497,6 +558,8 @@ class BaseInspectionWindow(QWidget):
                         background-color: {disabled_color};
                         color: #888888;
                         border: 1px solid #BBBBBB;
+                        box-shadow: none;
+                        transform: none;
                     }}
                 """)
     
@@ -628,6 +691,36 @@ class BaseInspectionWindow(QWidget):
         self.set_inspection_state(self.InspectionState.STEP_COMPLETED,
                                 step_data_collected=True,
                                 override_allowed=True)
+        
+        # Add brief animation to draw attention to enabled buttons
+        self._animate_button_highlight()
+    
+    def _animate_button_highlight(self):
+        """Brief animation to highlight newly enabled buttons"""
+        # Create a brief pulsing effect on the Next Step and Repeat Step buttons
+        if hasattr(self, 'next_step_button') and self.next_step_button.isEnabled():
+            self._pulse_button(self.next_step_button)
+        if hasattr(self, 'repeat_step_button') and self.repeat_step_button.isEnabled():
+            self._pulse_button(self.repeat_step_button)
+    
+    def _pulse_button(self, button):
+        """Create a pulsing effect on a button"""
+        original_style = button.styleSheet()
+        
+        # Bright highlight style
+        highlight_style = """
+            QPushButton {
+                background-color: #66BB6A !important;
+                border: 4px solid #FFF176 !important;
+                box-shadow: 0 0 20px rgba(255, 241, 118, 0.8) !important;
+            }
+        """
+        
+        # Apply highlight temporarily
+        button.setStyleSheet(original_style + highlight_style)
+        
+        # Reset to normal after brief delay
+        QTimer.singleShot(800, lambda: button.setStyleSheet(original_style))
     
     def enter_inspection_completed_state(self):
         """Enter inspection completed state - all steps done"""
@@ -797,12 +890,15 @@ class BaseInspectionWindow(QWidget):
                 background-color: #2196F3;
                 color: white;
                 border: 1px solid #333;
-                padding: 8px 16px;
-                font-size: 14px;
+                padding: 4px 8px;
+                font-size: 11px;
                 font-weight: bold;
-                border-radius: 4px;
-                margin: 2px 0px;
-                min-height: 40px;
+                border-radius: 3px;
+                margin: 1px 0px;
+                min-height: 24px;
+                max-height: 28px;
+                min-width: 60px;
+                max-width: 80px;
             }
             QPushButton:hover {
                 background-color: #1976D2;

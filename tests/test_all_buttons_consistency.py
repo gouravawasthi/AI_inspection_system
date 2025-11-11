@@ -148,7 +148,7 @@ class AllButtonsTest(QWidget):
         
         # Test API button
         test_api_button = QPushButton("Test API")
-        test_api_button.setStyleSheet(self.get_blue_button_style())
+        test_api_button.setStyleSheet(self.get_small_blue_button_style())
         api_layout.addWidget(test_api_button)
         
         # Submit to API button
@@ -201,6 +201,33 @@ class AllButtonsTest(QWidget):
                 border-radius: 4px;
                 margin: 2px 0px;
                 min-height: 40px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+            QPushButton:disabled {
+                background-color: #A8C8E8;
+                color: #888888;
+                border: 1px solid #BBBBBB;
+            }
+        """
+    
+    def get_small_blue_button_style(self):
+        """Get small blue button style for compact navigation buttons"""
+        return """
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: 1px solid #333;
+                padding: 4px 8px;
+                font-size: 11px;
+                font-weight: bold;
+                border-radius: 3px;
+                margin: 1px 0px;
+                min-height: 24px;
+                max-height: 28px;
+                min-width: 60px;
+                max-width: 80px;
             }
             QPushButton:hover {
                 background-color: #1976D2;
