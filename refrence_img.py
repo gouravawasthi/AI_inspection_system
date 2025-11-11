@@ -18,7 +18,7 @@ class ReferenceImageCapture:
         self.use_inverse = 1  # 1 for THRESH_BINARY_INV, 0 for THRESH_BINARY
         
         # Create folder structure
-        self.setup_folders()
+       
 
     def edit_mask_manual(self, face_name):
         """Allow manual editing (painting) of mask with exact preview-to-save consistency.
@@ -173,17 +173,7 @@ class ReferenceImageCapture:
                 brush_size = max(1, brush_size - 2)
                 print(f"  Brush size: {brush_size}")
 
-    def setup_folders(self):
-        """Create base folder and subfolders for each face"""
-        if not os.path.exists(self.base_folder):
-            os.makedirs(self.base_folder)
-            print(f"Created base folder: {self.base_folder}")
-        
-        for face in self.faces:
-            face_path = os.path.join(self.base_folder, face)
-            if not os.path.exists(face_path):
-                os.makedirs(face_path)
-                print(f"Created folder: {face_path}")
+    
     
     def show_menu(self):
         """Display main menu and get user choice"""
@@ -404,55 +394,69 @@ class ReferenceImageCapture:
         return False
     
     def save_images(self, face_name):
-        """Save reference image and mask for specific face"""
-        if face_name not in self.reference_frames:
-            print(f"Error: No reference frame for {face_name}")
+        """Save only the mask for specific face to a flat directory."""
+        if face_name not in self.masks:
+            print(f"⚠️ No mask found for {face_name}. Skipping save.")
             return False
-        face_folder = os.path.join(self.base_folder, face_name)
-        ref_path = os.path.join(face_folder, f'reference_{face_name}.png')
-        
-        cv2.imwrite(ref_path, self.reference_frames[face_name])
-        print(f"✓ Saved {face_name} reference: {ref_path}")
-        
-        if face_name in self.masks:
-            mask_path = os.path.join(face_folder, f'mask_{face_name}.png')
-            cv2.imwrite(mask_path, self.masks[face_name])
-            print(f"✓ Saved {face_name} mask: {mask_path}")
-        
+
+        # Ensure base folder exists
+        mask_folder = os.path.join("data", "reference_images", "eolt_testing")
+        os.makedirs(mask_folder, exist_ok=True)
+
+        # Construct output path (flat naming scheme)
+        mask_path = os.path.join(mask_folder, f"{face_name}_mask.jpg")
+
+        # Save mask image
+        cv2.imwrite(mask_path, self.masks[face_name])
+        print(f"✅ Saved {face_name} mask → {mask_path}")
+
         return True
+
+        
+        
     
     def process_face(self, face_name):
-        """Complete workflow for one face"""
+        """Process one face: load input image, create mask, and save only mask."""
         print(f"\n{'='*50}")
         print(f"  PROCESSING {face_name.upper()} FACE")
         print(f"{'='*50}")
-        use_video = input("Use video file instead of webcam? (y/n): ").strip().lower() == 'y'
-        if use_video:
-            video_path = input("Enter video file path: ").strip()
-            if not self.capture_from_video(video_path, face_name):
-                return False
-        else:
-            if not self.capture_reference(face_name):
-                return False
         
+        # Step 1: Input an existing image file
+        img_path = input(f"Enter image path for {face_name} face: ").strip()
+        if not os.path.exists(img_path):
+            print(f"❌ Error: File not found at {img_path}")
+            return False
 
-       
+        ref = cv2.imread(img_path)
+        if ref is None:
+            print(f"❌ Error: Unable to read image {img_path}")
+            return False
+
+        # Store temporarily as reference (for mask creation)
+        self.reference_frames[face_name] = ref
         
-    
-        create_mask_choice = input(f"\nCreate mask for {face_name} face? (y/n): ").strip().lower()
+        # Step 2: Create mask automatically
+        create_mask_choice = input(f"\nCreate mask automatically for {face_name}? (y/n): ").strip().lower()
         if create_mask_choice == 'y':
-            
             self.create_mask_auto(face_name)
-                # Step 2: Option for manual editing
+
+        # Step 3: Option for manual refinement
         manual_edit_choice = input(f"Do you want to manually refine the mask for {face_name}? (y/n): ").strip().lower()
         if manual_edit_choice == 'y':
             self.edit_mask_manual(face_name)
 
-        
-        # Step 3: Save images
+        # Step 4: Save mask only
         self.save_images(face_name)
-        
+
+        # Clean up reference (we don’t want to save it)
+        del self.reference_frames[face_name]
         return True
+
+
+       
+        
+    
+       
     
     def capture_all_faces(self):
         """Sequential capture of all four faces"""
@@ -505,5 +509,5 @@ class ReferenceImageCapture:
 
 if __name__ == "__main__":
     # Create capture object and run
-    capture = ReferenceImageCapture(base_folder='ref_img')
+    capture = ReferenceImageCapture(base_folder='data/reference_images/elot_testing')
     capture.run()
