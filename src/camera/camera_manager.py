@@ -39,6 +39,11 @@ class CameraConfig:
     exposure: int = 0
     flip_horizontal: bool = False
     flip_vertical: bool = False
+    # Capture-specific (high-res) settings used when the user clicks Capture
+    capture_frame_width: int = 1920
+    capture_frame_height: int = 1080
+    capture_flip_horizontal: bool = True
+    capture_flip_vertical: bool = False
     auto_white_balance: bool = True
     brightness: int = 0
     contrast: int = 0
@@ -79,6 +84,7 @@ class CameraManager(QObject):
         
         # Camera settings
         self._capture = None
+        self._temp_capture = None
         self._state = CameraState.STOPPED
         self._simulation_mode = False
         
@@ -192,7 +198,23 @@ class CameraManager(QObject):
             if self._current_frame is not None:
                 self._update_display(self._current_frame)
             
-            # Start capture sequence
+            # If possible, open a dedicated high-resolution capture for the actual capture
+            try:
+                if not self._simulation_mode:
+                    # Create temporary high-res capture so live stream can remain low-res for visualization
+                    self._temp_capture = cv2.VideoCapture(self.config.camera_id)
+                    # Set desired resolution for captured frames (from config)
+                    try:
+                        self._temp_capture.set(cv2.CAP_PROP_FRAME_WIDTH, int(self.config.capture_frame_width))
+                        self._temp_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, int(self.config.capture_frame_height))
+                    except Exception:
+                        # ignore failures to set properties
+                        pass
+            except Exception:
+                # If temporary capture fails, continue using the main capture
+                self._temp_capture = None
+
+            # Start capture sequence (captures from temp_capture if available)
             self._capture_timer.start(100)  # Capture every 100ms
             self.logger.info("Started capture sequence")
             return True
@@ -203,17 +225,26 @@ class CameraManager(QObject):
 
     def _capture_next_frame(self):
         """Capture next frame in the averaging sequence"""
-        if not self._capture or self._capture_frame_count >= self.config.capture_frames_for_averaging:
+        source_cap = self._temp_capture if self._temp_capture is not None else self._capture
+        if not source_cap or self._capture_frame_count >= self.config.capture_frames_for_averaging:
             self._capture_timer.stop()
             self._finalize_capture()
             return
-            
-        ret, frame = self._capture.read()
+        ret, frame = source_cap.read()
         if not ret:
             self._handle_error("Failed to capture frame for averaging")
             return
-            
-        # Apply transformations
+        # If using the dedicated capture, apply user-requested flip
+        # Apply capture-specific flip if using the temporary high-res capture
+        try:
+            if self._temp_capture is not None and getattr(self.config, 'capture_flip_horizontal', False):
+                frame = cv2.flip(frame, 1)
+            if self._temp_capture is not None and getattr(self.config, 'capture_flip_vertical', False):
+                frame = cv2.flip(frame, 0)
+        except Exception:
+            pass
+
+        # Apply transformations (config flip settings etc.)
         processed_frame = self._apply_transformations(frame)
         self._captured_frames.append(processed_frame.copy())
         self._capture_frame_count += 1
@@ -327,6 +358,16 @@ class CameraManager(QObject):
                 status=status,
                 results=results
             )
+            # Release temporary high-res capture if it was used
+            try:
+                if self._temp_capture is not None:
+                    try:
+                        self._temp_capture.release()
+                    except Exception:
+                        pass
+                    self._temp_capture = None
+            except Exception:
+                pass
             
             # Update display with processed result
             self._update_display(processed_frame)

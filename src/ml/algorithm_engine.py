@@ -398,8 +398,9 @@ class AlgorithmEngine:
         """
         try:
             # --- Step 0: Validate inputs ---
-            gold_img=self.references.get(side)
-            gold_mask=self.masks.get(side)
+            # references/masks are stored with keys like '<side>_ref' and '<side>_mask'
+            gold_img=self.references.get(f"{side}_ref")
+            gold_mask=self.masks.get(f"{side}_mask")
             if gold_img is None or new_img is None or gold_mask is None:
                 return {"Status": 0, "Message": "One or more input images are missing."}
 
@@ -497,7 +498,8 @@ class AlgorithmEngine:
         results: Dict[str, int] = {}
 
         try:
-            if mode.lower() == 'elot':
+            # EOLT processing (note: external callers use 'eolt')
+            if mode.lower() == 'eolt':
                 # ---- Input validation ----
                 if not side:
                     status = _InternalStatus(1, "EOLT requires 'side' parameter")
@@ -522,11 +524,14 @@ class AlgorithmEngine:
                     status = _InternalStatus(1, f"EOLT mask '{mask_key_for_side}' not loaded")
                     return self._make_output(original, annotated, status, results)
 
+                # reference and mask are loaded from self.references/self.masks inside inspect_image
                 ref_img = self.references[ref_key_for_side]
                 mask_arr = self.masks.get(mask_key_for_side) if mask_key_for_side else None
 
                 # ---- Gold vs Reference comparison ----
-                result = self.inspect_image(ref_img, mask_arr, original, side_key)
+                # inspect_image expects (new_img, position_hint, side)
+                # pass the captured frame as new_img and use side_key as the position_hint
+                result = self.inspect_image(original, side_key, side_key)
 
                 if result["Status"] == 0:
                     status = _InternalStatus(1, result["Message"])

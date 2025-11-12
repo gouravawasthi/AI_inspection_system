@@ -94,7 +94,12 @@ class CameraIntegrator:
         submode = self._current_inspection_params.get('submode', 'bottom')
         ref_key = self._current_inspection_params.get('reference', f'{submode}_ref')
         
-        self.logger.info(f"Running INLINE analysis - submode: {submode}")
+        self.logger.info(f"Running INLINE analysis - submode: {submode}, reference: {ref_key}")
+        
+        # Verify reference is loaded
+        if ref_key not in self.algorithm_engine.references:
+            self.logger.warning(f"Reference {ref_key} not found, using default")
+            ref_key = f'{submode}_ref'  # Use default naming
         
         result = self.camera.analyze_frame_with_algorithm(
             self.algorithm_engine,
@@ -102,6 +107,12 @@ class CameraIntegrator:
             submode=submode,
             ref=ref_key
         )
+        
+        if result:
+            self.logger.info(f"INLINE analysis completed: {result.result}")
+            self.logger.info(f"Algorithm results: {result.results}")
+        else:
+            self.logger.error("INLINE analysis failed - no result returned")
         
         return result
     
@@ -111,7 +122,16 @@ class CameraIntegrator:
         ref_key = self._current_inspection_params.get('reference', f'{side}_ref')
         mask_key = self._current_inspection_params.get('mask', f'{side}_mask')
         
-        self.logger.info(f"Running EOLT analysis - side: {side}")
+        self.logger.info(f"Running EOLT analysis - side: {side}, reference: {ref_key}, mask: {mask_key}")
+        
+        # Verify reference and mask are loaded
+        if ref_key not in self.algorithm_engine.references:
+            self.logger.warning(f"Reference {ref_key} not found, using default")
+            ref_key = f'{side}_ref'
+            
+        if mask_key not in self.algorithm_engine.masks:
+            self.logger.warning(f"Mask {mask_key} not found, using default")
+            mask_key = f'{side}_mask'
         
         result = self.camera.analyze_frame_with_algorithm(
             self.algorithm_engine,
@@ -120,6 +140,12 @@ class CameraIntegrator:
             ref=ref_key,
             mask=mask_key
         )
+        
+        if result:
+            self.logger.info(f"EOLT analysis completed: {result.result}")
+            self.logger.info(f"Algorithm results: {result.results}")
+        else:
+            self.logger.error("EOLT analysis failed - no result returned")
         
         return result
     
