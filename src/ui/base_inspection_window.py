@@ -5,6 +5,7 @@ Provides common functionality for EOLT and INLINE testing
 
 import sys
 import os
+import numpy as np
 import csv
 from datetime import datetime
 from typing import Optional, Dict, Any, List
@@ -105,32 +106,168 @@ class BaseInspectionWindow(QWidget):
         self._start_immediate_camera_streaming()
     
     def on_camera_analysis_complete(self, result):
-        """Handle camera analysis completion"""
+        """Handle camera analysis completion - properly processes InspectionResult"""
         try:
-            # Store the result
+            self.logger.info("Analysis complete callback triggered")
+            
+            if self.current_step >= len(self.inspection_steps):
+                self.logger.error("Invalid step index")
+                return
+                
             current_step_name = self.inspection_steps[self.current_step]
+            
+            # Extract data from InspectionResult
+            overall_result = result.result if hasattr(result, 'result') else "UNKNOWN"
+            status = result.status if hasattr(result, 'status') else {}
+            results_dict = result.results if hasattr(result, 'results') else {}
+            
+            # Convert to step data format
+            step_data = self._convert_results_to_step_data(current_step_name, overall_result, results_dict)
+            
+            # Store the result
             self.inspection_results[current_step_name] = {
-                'status': result.status,
-                'input_image': result.input_image,
-                'output_image': result.output_image,
-                'results': result.result,
-                'timestamp': datetime.now()
+                'status': status,
+                'result': overall_result,
+                'results': results_dict,
+                'input_image': result.original if hasattr(result, 'original') else None,
+                'output_image': result.annotated if hasattr(result, 'annotated') else None,
+                'timestamp': datetime.now(),
+                'data': step_data
             }
             
-            # Update UI with results
-            self.update_camera_display_with_result(result)
+            # Update UI with annotated image
+            self.update_result_display_with_image(result)
             
             # Mark step as completed
             self.step_data_collected = True
             self.enter_step_completed_state()
+            
+            # Update step status
+            self.update_step_status(self.current_step, "COMPLETED")
+            
+            # Re-enable capture button
+            self.start_inspection_button.setEnabled(True)
+            self.start_inspection_button.setText("Capture")
             
             # Update button states
             self.update_button_states()
             
         except Exception as e:
             self.logger.error(f"Error handling camera analysis: {e}")
+            import traceback
+            traceback.print_exc()
             self.on_camera_error(f"Analysis processing error: {e}")
-    
+    def _convert_results_to_step_data(self, step_name: str, overall_result: str, results_dict: Dict) -> Dict:
+        """Convert algorithm results to step data format"""
+        from datetime import datetime
+        
+        try:
+            from config.config_manager import get_config_manager
+            config = get_config_manager()
+        except:
+            config = None
+        
+        data = {
+            "Barcode": None,
+            "DT": datetime.now().isoformat(),
+            "Result": 1 if overall_result == "PASS" else 0,
+        }
+        
+        if config:
+            if "TOP" in step_name:
+                data["Process_id"] = config.get_process_id("INLINE_TOP")
+                data["Station_ID"] = config.get_station_id("INLINE_TOP")
+            elif "BOTTOM" in step_name:
+                data["Process_id"] = config.get_process_id("INLINE_BOTTOM")
+                data["Station_ID"] = config.get_station_id("INLINE_BOTTOM")
+        
+        if "TOP" in step_name:
+            screw = results_dict.get('Screw', results_dict.get('screw', 0))
+            plate = results_dict.get('Plate', results_dict.get('plate', 0))
+            screw_val = 1 if str(screw).upper() == "PASS" or screw == 1 else 0
+            plate_val = 1 if str(plate).upper() == "PASS" or plate == 1 else 0
+            
+            data.update({
+                "Screw": screw_val,
+                "Plate": plate_val,
+                "ManualScrew": screw_val,
+                "ManualPlate": plate_val,
+                "ManualResult": 1 if (screw_val == 1 and plate_val == 1) else 0
+            })
+            data["_display"] = {
+                "Screw": "PASS" if screw_val == 1 else "FAIL",
+                "Plate": "PASS" if plate_val == 1 else "FAIL",
+                "Result": "PASS" if data["ManualResult"] == 1 else "FAIL"
+            }
+            
+        elif "BOTTOM" in step_name:
+            antenna = results_dict.get('Antenna', results_dict.get('antenna', 0))
+            capacitor = results_dict.get('Capacitor', results_dict.get('capacitor', 0))
+            speaker = results_dict.get('Speaker', results_dict.get('speaker', 0))
+            antenna_val = 1 if str(antenna).upper() == "PASS" or antenna == 1 else 0
+            capacitor_val = 1 if str(capacitor).upper() == "PASS" or capacitor == 1 else 0
+            speaker_val = 1 if str(speaker).upper() == "PASS" or speaker == 1 else 0
+            
+            data.update({
+                "Antenna": antenna_val,
+                "Capacitor": capacitor_val,
+                "Speaker": speaker_val,
+                "ManualAntenna": antenna_val,
+                "ManualCapacitor": capacitor_val,
+                "ManualSpeaker": speaker_val,
+                "ManualResult": 1 if (antenna_val == 1 and capacitor_val == 1 and speaker_val == 1) else 0
+            })
+            data["_display"] = {
+                "Antenna": "PASS" if antenna_val == 1 else "FAIL",
+                "Capacitor": "PASS" if capacitor_val == 1 else "FAIL",
+                "Speaker": "PASS" if speaker_val == 1 else "FAIL",
+                "Result": "PASS" if data["ManualResult"] == 1 else "FAIL"
+            }
+        
+        return data
+
+    def update_result_display_with_image(self, result):
+        """Update result image display with algorithm output"""
+        try:
+            import cv2
+            from PyQt5.QtGui import QImage, QPixmap
+            from PyQt5.QtCore import Qt
+            
+            status_icon = "✅" if result.result == "PASS" else "❌"
+            current_step_name = self.inspection_steps[self.current_step]
+            
+            annotated_image = None
+            if hasattr(result, 'annotated') and result.annotated is not None:
+                if isinstance(result.annotated, str):
+                    annotated_image = cv2.imread(result.annotated)
+                elif isinstance(result.annotated, np.ndarray):
+                    annotated_image = result.annotated
+            
+            if annotated_image is not None:
+                rgb_img = cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)
+                height, width, channel = rgb_img.shape
+                bytes_per_line = 3 * width
+                qimage = QImage(rgb_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                pixmap = QPixmap.fromImage(qimage)
+                scaled_pixmap = pixmap.scaled(
+                    self.result_image_label.size(),
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+                self.result_image_label.setPixmap(scaled_pixmap)
+            else:
+                result_text = f"{status_icon} {current_step_name}\n\nResult: {result.result}\n"
+                if hasattr(result, 'results') and result.results:
+                    result_text += "\nComponents:\n"
+                    for key, value in result.results.items():
+                        result_text += f"  {key}: {value}\n"
+                self.result_image_label.clear()
+                self.result_image_label.setText(result_text)
+                
+        except Exception as e:
+            self.logger.error(f"Error updating result display: {e}")
+            self.result_image_label.clear()
+            self.result_image_label.setText(f"❌ Error displaying result\n{e}")
     def on_camera_error(self, error_msg: str):
         """Handle camera errors"""
         self.update_camera_display(f"❌ Camera Error:\n{error_msg}\n\nCheck camera connection and try again")
@@ -768,7 +905,7 @@ class BaseInspectionWindow(QWidget):
         # Enable when: barcode entered and not currently inspecting
         capture_enabled = (
             has_barcode and 
-            self.inspection_state in [self.InspectionState.BARCODE_ENTERED, self.InspectionState.DATA_SUBMITTED]
+            self.inspection_state in [self.InspectionState.BARCODE_ENTERED, self.InspectionState.STEP_IN_PROGRESS,self.InspectionState.DATA_SUBMITTED]
         )
         self.start_inspection_button.setEnabled(capture_enabled)
         self._update_button_visual_state(self.start_inspection_button, capture_enabled, "capture")
@@ -1655,6 +1792,7 @@ class BaseInspectionWindow(QWidget):
     def start_inspection(self):
         """Start the inspection process with camera capture"""
         # STRICT VALIDATION: Ensure valid barcode before starting inspection
+
         if not self.barcode:
             self._show_validation_failure_message("No valid barcode - cannot start inspection")
             return
@@ -1929,6 +2067,7 @@ class BaseInspectionWindow(QWidget):
                                       f"Type: {self.inspection_type}")
                 self.log_inspection_results()
                 self.reset_for_new_inspection()
+                self.back()
             else:
                 QMessageBox.critical(self, "Submission Failed", 
                                    "Failed to submit data to one or more API endpoints.\n\n"
@@ -2051,7 +2190,10 @@ class BaseInspectionWindow(QWidget):
         # Show message for new barcode entry and enter idle state
         self.enter_idle_state()
         self.update_barcode_status("Scan or enter new barcode", "waiting")
-    
+    def back(self):
+        self.window_closed.emit()
+            # Close this inspection window
+        self.close()
     def back_to_main(self):
         """Return to main window and bring it to foreground"""
         if self.inspection_results and self.current_step > 0:

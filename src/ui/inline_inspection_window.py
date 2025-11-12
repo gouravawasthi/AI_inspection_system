@@ -152,38 +152,46 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         return ["INLINEINSPECTIONBOTTOM", "INLINEINSPECTIONTOP"]
     
     def collect_inspection_data(self, step: str) -> Dict[str, Any]:
-        """Collect inspection data for INLINE step"""
-        import random
+        """Collect inspection data for INLINE step - uses actual algorithm results"""
         from datetime import datetime
         
         if step == "TOP: Capture":
-            return self.collect_top_capture_data()
+            return self.collect_top_capture_data(step)
         elif step == "BOTTOM: Capture":
-            return self.collect_bottom_capture_data()
+            return self.collect_bottom_capture_data(step)
         
         return {}
-    
-    def collect_top_capture_data(self) -> Dict[str, Any]:
-        """Collect data for TOP inspection capture - Screw and Plate"""
-        import random
+
+    def collect_top_capture_data(self, step_name: str) -> Dict[str, Any]:
+        """Collect data for TOP inspection - extract from actual algorithm results"""
         from datetime import datetime
         
         # Get configuration
         config = get_config_manager()
         
-        # Get pass rates from configuration
-        screw_pass_rate = config.get_component_pass_rate("SCREW")
-        plate_pass_rate = config.get_component_pass_rate("PLATE")
-        
-        # Simulate algorithm results for components (1=PASS, 0=FAIL)
-        screw_value = 1 if random.random() <= screw_pass_rate else 0
-        plate_value = 1 if random.random() <= plate_pass_rate else 0
+        # Extract actual algorithm results from stored inspection data
+        if step_name in self.inspection_results:
+            algo_result = self.inspection_results[step_name]
+            algo_data = algo_result.get('results', {})
+            
+            # Extract component results from algorithm output
+            # Assuming algorithm returns structure like:
+            # {'Screw': 1, 'Plate': 0, ...} or {'Screw': 'PASS', 'Plate': 'FAIL', ...}
+            screw_value = self._extract_component_value(algo_data, 'Screw')
+            plate_value = self._extract_component_value(algo_data, 'Plate')
+            
+            print(f"🔍 TOP Algorithm Results: Screw={screw_value}, Plate={plate_value}")
+        else:
+            # Fallback: No algorithm results yet (shouldn't happen in normal flow)
+            print(f"⚠️ Warning: No algorithm results found for {step_name}, using defaults")
+            screw_value = 0
+            plate_value = 0
         
         # Get process and station IDs from configuration
         process_id = config.get_process_id("INLINE_TOP")
         station_id = config.get_station_id("INLINE_TOP")
         
-        # Initialize data with None values (as per requirement d)
+        # Build data structure
         data = {
             # Required fields
             "Barcode": None,  # Will be set during API submission
@@ -197,19 +205,19 @@ class INLINEInspectionWindow(BaseInspectionWindow):
             "Result": None,  # Will be calculated
             
             # Manual fields (copied from algorithm results)
-            "ManualScrew": screw_value,  # Copy algorithm result
-            "ManualPlate": plate_value,  # Copy algorithm result
+            "ManualScrew": screw_value,
+            "ManualPlate": plate_value,
             "ManualResult": None  # Will be calculated
         }
         
-        # Calculate overall result (requirement d: ManualResult = 1 only if all manual fields = 1)
+        # Calculate overall result (ManualResult = 1 only if all components = 1)
         manual_result = 1 if (screw_value == 1 and plate_value == 1) else 0
-        overall_result = 1 if manual_result == 1 else 0  # Store as 1/0 for database
+        overall_result = 1 if manual_result == 1 else 0
         
         data["Result"] = overall_result
         data["ManualResult"] = manual_result
         
-        # Store display-friendly versions for UI (keep the numeric values for API)
+        # Store display-friendly versions for UI
         data["_display"] = {
             "Screw": "PASS" if screw_value == 1 else "FAIL",
             "Plate": "PASS" if plate_value == 1 else "FAIL",
@@ -217,30 +225,37 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         }
         
         return data
-    
-    def collect_bottom_capture_data(self) -> Dict[str, Any]:
-        """Collect data for BOTTOM inspection capture step"""
-        import random
+
+    def collect_bottom_capture_data(self, step_name: str) -> Dict[str, Any]:
+        """Collect data for BOTTOM inspection - extract from actual algorithm results"""
         from datetime import datetime
         
         # Get configuration
         config = get_config_manager()
         
-        # Get pass rates from configuration  
-        antenna_pass_rate = config.get_component_pass_rate("ANTENNA")
-        capacitor_pass_rate = config.get_component_pass_rate("CAPACITOR")
-        speaker_pass_rate = config.get_component_pass_rate("SPEAKER")
-        
-        # Simulate algorithm results for components (1=PASS, 0=FAIL)
-        antenna_value = 1 if random.random() <= antenna_pass_rate else 0
-        capacitor_value = 1 if random.random() <= capacitor_pass_rate else 0
-        speaker_value = 1 if random.random() <= speaker_pass_rate else 0
+        # Extract actual algorithm results from stored inspection data
+        if step_name in self.inspection_results:
+            algo_result = self.inspection_results[step_name]
+            algo_data = algo_result.get('results', {})
+            
+            # Extract component results from algorithm output
+            antenna_value = self._extract_component_value(algo_data, 'Antenna')
+            capacitor_value = self._extract_component_value(algo_data, 'Capacitor')
+            speaker_value = self._extract_component_value(algo_data, 'Speaker')
+            
+            print(f"🔍 BOTTOM Algorithm Results: Antenna={antenna_value}, Capacitor={capacitor_value}, Speaker={speaker_value}")
+        else:
+            # Fallback: No algorithm results yet
+            print(f"⚠️ Warning: No algorithm results found for {step_name}, using defaults")
+            antenna_value = 0
+            capacitor_value = 0
+            speaker_value = 0
         
         # Get process and station IDs from configuration
         process_id = config.get_process_id("INLINE_BOTTOM")
         station_id = config.get_station_id("INLINE_BOTTOM")
         
-        # Initialize data with None values (as per requirement d)
+        # Build data structure
         data = {
             # Required fields
             "Barcode": None,  # Will be set during API submission
@@ -255,28 +270,181 @@ class INLINEInspectionWindow(BaseInspectionWindow):
             "Result": None,  # Will be calculated
             
             # Manual fields (copied from algorithm results)
-            "ManualAntenna": antenna_value,  # Copy algorithm result
-            "ManualCapacitor": capacitor_value,  # Copy algorithm result
-            "ManualSpeaker": speaker_value,  # Copy algorithm result
+            "ManualAntenna": antenna_value,
+            "ManualCapacitor": capacitor_value,
+            "ManualSpeaker": speaker_value,
             "ManualResult": None  # Will be calculated
         }
         
-        # Calculate overall result (requirement d: ManualResult = 1 only if all manual fields = 1)
+        # Calculate overall result (ManualResult = 1 only if all components = 1)
         manual_result = 1 if (antenna_value == 1 and capacitor_value == 1 and speaker_value == 1) else 0
-        overall_result = 1 if manual_result == 1 else 0  # Store as 1/0 for database
+        overall_result = 1 if manual_result == 1 else 0
         
         data["Result"] = overall_result
         data["ManualResult"] = manual_result
         
-        # Store display-friendly versions for UI (keep the numeric values for API)
+        # Store display-friendly versions for UI
         data["_display"] = {
             "Antenna": "PASS" if antenna_value == 1 else "FAIL",
-            "Capacitor": "PASS" if capacitor_value == 1 else "FAIL", 
+            "Capacitor": "PASS" if capacitor_value == 1 else "FAIL",
             "Speaker": "PASS" if speaker_value == 1 else "FAIL",
             "Result": "PASS" if overall_result == 1 else "FAIL"
         }
         
         return data
+
+    def _extract_component_value(self, algo_data: dict, component_name: str) -> int:
+        """
+        Extract component value from algorithm results and normalize to 1/0
+        
+        Handles multiple algorithm output formats:
+        - {'Screw': 1, 'Plate': 0} → direct integer
+        - {'Screw': 'PASS', 'Plate': 'FAIL'} → string status
+        - {'Screw': True, 'Plate': False} → boolean
+        - {'results': {'Screw': 1, ...}} → nested structure
+        """
+        # Try direct access first
+        value = algo_data.get(component_name)
+        
+        # Try nested 'results' key
+        if value is None and 'results' in algo_data:
+            value = algo_data['results'].get(component_name)
+        
+        # Try case-insensitive match
+        if value is None:
+            for key, val in algo_data.items():
+                if key.lower() == component_name.lower():
+                    value = val
+                    break
+        
+        # Normalize value to 1 (PASS) or 0 (FAIL)
+        if value is None:
+            print(f"⚠️ Warning: Component '{component_name}' not found in algorithm results, defaulting to FAIL")
+            return 0
+        
+        # Handle different value types
+        if isinstance(value, int):
+            return 1 if value == 1 else 0
+        elif isinstance(value, bool):
+            return 1 if value else 0
+        elif isinstance(value, str):
+            # Handle string status: "PASS", "pass", "OK", "1", etc.
+            value_upper = value.upper()
+            if value_upper in ['PASS', 'OK', '1', 'TRUE', 'SUCCESS']:
+                return 1
+            else:
+                return 0
+        elif isinstance(value, float):
+            # Handle confidence scores (>0.5 = PASS)
+            return 1 if value > 0.5 else 0
+        else:
+            print(f"⚠️ Warning: Unknown value type for '{component_name}': {type(value)}, defaulting to FAIL")
+            return 0
+    def next_step(self):
+        """Override base class to handle INLINE camera transitions"""
+        from datetime import datetime
+        from PyQt5.QtWidgets import QMessageBox
+        from PyQt5.QtCore import QTimer
+        
+        if self.current_step < len(self.inspection_steps):
+            step_name = self.inspection_steps[self.current_step]
+            step_data = self.collect_inspection_data(step_name)
+            
+            if self.validate_step_data(step_name, step_data):
+                # Record result
+                step_time = (datetime.now() - self.step_start_time).total_seconds()
+                self.inspection_results[step_name] = {
+                    'data': step_data,
+                    'time': step_time,
+                    'timestamp': datetime.now()
+                }
+                
+                self.api_data_collected.update(step_data)
+                self._update_submit_button_for_inline()
+                self.update_step_status(self.current_step, "COMPLETED")
+                self._update_camera_with_inline_results(step_name, step_data)
+                
+                self.current_step += 1
+                self.progress_bar.setValue(self.current_step)
+                
+                if self.current_step < len(self.inspection_steps):
+                    next_step_name = self.inspection_steps[self.current_step]
+                    
+                    # ===== KEY FIXES =====
+                    # 1. Resume camera streaming
+                    self.camera_integrator.camera.resume_streaming()
+                    
+                    # 2. Clear result display
+                    self.result_image_label.clear()
+                    self.result_image_label.setText("Waiting for capture and analysis...")
+                    
+                    # 3. Switch camera mode BOTTOM → TOP
+                    if "TOP" in next_step_name and "BOTTOM" in step_name:
+                        self.camera_integrator.stop_inspection()
+                        QTimer.singleShot(200, lambda: self._start_top_camera_streaming(next_step_name))
+                    
+                    # 4. Re-enable capture button
+                    self.step_data_collected = False
+                    self.set_inspection_state(
+                        self.InspectionState.BARCODE_ENTERED,
+                        step_data_collected=False,
+                        override_allowed=True
+                    )
+                    
+                    # 5. Start new step
+                    self.start_step_inspection()
+                else:
+                    self.complete_inspection()
+            else:
+                QMessageBox.warning(self, "Invalid Data", f"Validation failed: {step_name}")
+                self.step_data_collected = False
+                self.update_button_states()
+
+    def _start_top_camera_streaming(self, next_step_name):
+        """Switch camera from BOTTOM to TOP mode"""
+        success = self.camera_integrator.start_inspection_streaming(
+            self.inspection_type,
+            submode='top',
+            reference='top_ref'
+        )
+    
+        if success:
+            self.camera_status.setText("Camera: TOP Mode - Live Streaming")
+            self.camera_status.setStyleSheet("color: #27ae60; font-size: 14px; font-weight: bold;")
+            self.update_camera_display(
+                f"📸 {next_step_name}\n\n"
+                "🔼 Position product for TOP inspection\n\n"
+                "✅ Press Capture when ready"
+        )
+
+    def start_step_inspection(self):
+        """Override to add INLINE-specific instructions"""
+        if self.current_step < len(self.inspection_steps):
+            step_name = self.inspection_steps[self.current_step]
+            self.step_start_time = datetime.now()
+            self.current_step_label.setText(f"Step: {step_name}")
+            
+            self.enter_step_in_progress_state()
+            
+            for i in range(self.step_status_layout.count()):
+                label = self.step_status_layout.itemAt(i).widget()
+                if label and hasattr(label, 'setText'):
+                    if i == self.current_step:
+                        label.setText(f"{self.inspection_steps[i]}: In Progress")
+                        label.setStyleSheet("color: #3498db; font-weight: bold; padding: 3px; font-size: 11px;")
+            
+            if "BOTTOM" in step_name:
+                self.update_camera_display(
+                    f"📸 {step_name}\n\n"
+                    "🔽 Position product for BOTTOM\n\n"
+                    "✅ Press Capture to begin"
+                )
+            elif "TOP" in step_name:
+                self.update_camera_display(
+                    f"📸 {step_name}\n\n"
+                    "🔼 Position product for TOP\n\n"
+                    "✅ Press Capture to begin"
+                )
     
     def collect_top_inspection_data(self, step: str) -> Dict[str, Any]:
         """Collect data for TOP inspection steps"""

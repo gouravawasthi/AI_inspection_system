@@ -70,7 +70,8 @@ class CameraManager(QObject):
     state_changed = pyqtSignal(CameraState)
     analysis_complete = pyqtSignal(InspectionResult)
     error_occurred = pyqtSignal(str)
-    capture_progress = pyqtSignal(int, int)  # current_frame, total_frames
+    capture_progress = pyqtSignal(int, int) 
+    capture_complete = pyqtSignal() # current_frame, total_frames
 
     def __init__(self, config_path: Optional[str] = None):
         super().__init__()
@@ -363,6 +364,8 @@ class CameraManager(QObject):
             # Update state and GUI
             self._state = CameraState.CAPTURED
             self.state_changed.emit(self._state)
+            
+            self.capture_complete.emit() 
 
             # Show averaged (high-res) result scaled/padded into the display area
             self._update_display(self._averaged_frame)

@@ -35,10 +35,13 @@ class CameraIntegrator:
         # Connect signals
         self.camera.analysis_complete.connect(self._on_analysis_complete)
         self.camera.error_occurred.connect(self._on_camera_error)
+        self.camera.capture_complete.connect(self._on_capture_completed)
         
         # Inspection state
         self._current_inspection_type = None
         self._current_inspection_params = {}
+        self._analysis_pending = False  # Track if analysis needs to be triggered
+        self.camera.state_changed.connect(self._on_camera_state_changed)  # NEW signal connection
         
     def start_inspection_streaming(self, inspection_type: str, **params) -> bool:
         """Start camera streaming for inspection"""
@@ -63,11 +66,13 @@ class CameraIntegrator:
             return False
             
         try:
+            self._analysis_pending = True
             # Trigger capture sequence
             success = self.camera.trigger_capture_and_average()
             if not success:
+                self._analysis_pending = False
                 return False
-                
+
             # Analysis will be triggered automatically when capture completes
             # via the state machine in camera manager
             return True
@@ -75,7 +80,23 @@ class CameraIntegrator:
         except Exception as e:
             self.logger.error(f"Capture and analyze failed: {e}")
             return False
-    
+    def _on_camera_state_changed(self, new_state: CameraState):
+        """Monitor camera state changes and trigger analysis when capture completes"""
+        self.logger.info(f"Camera state changed to: {new_state}")
+        
+        if new_state == CameraState.CAPTURED and self._analysis_pending:
+            self.logger.info("Capture complete, triggering analysis...")
+            self._analysis_pending = False
+            
+            try:
+                if self._current_inspection_type == "INLINE":
+                    self._run_inline_analysis()
+                elif self._current_inspection_type == "EOLT":
+                    self._run_eolt_analysis()
+                else:
+                    self.logger.error(f"Unknown inspection type: {self._current_inspection_type}")
+            except Exception as e:
+                self.logger.error(f"Analysis execution failed: {e}")
     def _on_capture_completed(self):
         """Called when frame capture and averaging is complete"""
         try:
@@ -157,13 +178,17 @@ class CameraIntegrator:
         
     def _on_camera_error(self, error_msg: str):
         """Handle camera errors"""
+        self._analysis_pending = False
         self.logger.error(f"Camera error: {error_msg}")
     
     def stop_inspection(self):
         """Stop current inspection"""
+        
+        
         self.camera.stop()
         self._current_inspection_type = None
         self._current_inspection_params = {}
+        self._analysis_pending = False
         self.logger.info("Inspection stopped")
     
     def get_camera_state(self) -> CameraState:
