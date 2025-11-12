@@ -5792,3 +5792,509 @@
 2025-11-12 05:57:20,312 - CameraManager - INFO - Started capture sequence
 2025-11-12 05:57:20,407 - CameraManager - ERROR - Failed to capture frame for averaging
 2025-11-12 05:57:20,407 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:10:53,199 - __main__ - INFO - ============================================================
+2025-11-12 06:10:53,202 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-12 06:10:53,203 - __main__ - INFO - Application Version: 1.0.0
+2025-11-12 06:10:53,203 - __main__ - INFO - Config Version: 1.0
+2025-11-12 06:10:53,203 - __main__ - INFO - ============================================================
+2025-11-12 06:10:53,204 - __main__ - INFO - ✅ System configuration validated
+2025-11-12 06:10:53,205 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-12 06:10:53,205 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-12 06:10:53,205 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-12 06:10:53,206 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-12 06:10:53,206 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-12 06:10:53,216 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-12 06:10:53,232 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-12 06:10:53,232 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-12 06:10:54,233 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:10:54] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-12 06:10:54,235 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-12 06:10:55,235 - __main__ - INFO - ✅ API server started successfully
+2025-11-12 06:10:55,235 - __main__ - INFO - 📷 Initializing camera and algorithm system...
+2025-11-12 06:10:55,517 - __main__ - INFO - ✅ Algorithm engine initialized
+2025-11-12 06:10:55,715 - __main__ - INFO - 📸 References/Masks loaded: 10/10
+2025-11-12 06:10:55,896 - __main__ - INFO - ✅ Camera integrator initialized with algorithm engine
+2025-11-12 06:10:55,896 - __main__ - INFO - 📹 Camera in simulation mode (no device detected)
+2025-11-12 06:10:55,896 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-12 06:10:57,954 - config - WARNING - Failed to load JSON config: APIConfig.__init__() got an unexpected keyword argument 'endpoints'
+2025-11-12 06:10:57,955 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-12 06:10:57,957 - config - INFO - Creating default configuration
+2025-11-12 06:10:58,966 - __main__ - INFO - 🔗 Camera integrator connected to main window
+2025-11-12 06:10:58,967 - __main__ - INFO - ✅ GUI application ready
+2025-11-12 06:10:58,967 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-12 06:10:58,967 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-12 06:11:01,451 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-12 06:11:01,451 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-12 06:11:01,461 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:11:01] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:11:01,465 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:11:01] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:11:01,466 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:11:01,466 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:11:01,466 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-12 06:11:01,616 - INLINEInspectionWindow - INFO - Camera integrator updated from main application
+2025-11-12 06:11:01,693 - INLINEInspectionWindow - INFO - Camera signals connected to UI
+2025-11-12 06:11:01,694 - INLINEInspectionWindow - INFO - Starting immediate camera streaming
+2025-11-12 06:11:01,838 - CameraManager - INFO - Camera streaming started
+2025-11-12 06:11:01,839 - CameraIntegrator - INFO - Started INLINE inspection streaming
+2025-11-12 06:11:01,839 - INLINEInspectionWindow - INFO - Immediate streaming started for INLINE
+2025-11-12 06:11:37,162 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:11:37] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:11:37,166 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:11:37] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:11:40,438 - CameraManager - INFO - Started capture sequence
+2025-11-12 06:11:40,543 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:11:40,544 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:33:16,896 - __main__ - INFO - ============================================================
+2025-11-12 06:33:16,905 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-12 06:33:16,905 - __main__ - INFO - Application Version: 1.0.0
+2025-11-12 06:33:16,905 - __main__ - INFO - Config Version: 1.0
+2025-11-12 06:33:16,905 - __main__ - INFO - ============================================================
+2025-11-12 06:33:16,906 - __main__ - INFO - ✅ System configuration validated
+2025-11-12 06:33:16,906 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-12 06:33:16,906 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-12 06:33:16,906 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-12 06:33:16,906 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-12 06:33:16,906 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-12 06:33:16,923 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-12 06:33:16,964 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-12 06:33:16,964 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-12 06:33:17,940 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:33:17] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-12 06:33:17,941 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-12 06:33:18,942 - __main__ - INFO - ✅ API server started successfully
+2025-11-12 06:33:18,942 - __main__ - INFO - 📷 Initializing camera and algorithm system...
+2025-11-12 06:33:19,158 - __main__ - INFO - ✅ Algorithm engine initialized
+2025-11-12 06:33:19,296 - __main__ - INFO - 📸 References/Masks loaded: 6/10
+2025-11-12 06:33:19,427 - __main__ - INFO - ✅ Camera integrator initialized with algorithm engine
+2025-11-12 06:33:19,427 - __main__ - INFO - 📹 Camera in simulation mode (no device detected)
+2025-11-12 06:33:19,427 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-12 06:33:21,448 - config - WARNING - Failed to load JSON config: APIConfig.__init__() got an unexpected keyword argument 'endpoints'
+2025-11-12 06:33:21,449 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-12 06:33:21,449 - config - INFO - Creating default configuration
+2025-11-12 06:33:22,529 - __main__ - INFO - 🔗 Camera integrator connected to main window
+2025-11-12 06:33:22,529 - __main__ - INFO - ✅ GUI application ready
+2025-11-12 06:33:22,530 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-12 06:33:22,530 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-12 06:33:25,388 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-12 06:33:25,392 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-12 06:33:25,439 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:33:25] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:33:25,453 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:33:25] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:33:25,460 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:33:25,460 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:33:25,463 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-12 06:33:25,697 - INLINEInspectionWindow - INFO - Camera integrator updated from main application
+2025-11-12 06:33:25,787 - INLINEInspectionWindow - INFO - Camera signals connected to UI
+2025-11-12 06:33:25,788 - INLINEInspectionWindow - INFO - Starting immediate camera streaming
+2025-11-12 06:33:25,947 - CameraManager - INFO - Camera streaming started
+2025-11-12 06:33:25,948 - CameraIntegrator - INFO - Started INLINE inspection streaming
+2025-11-12 06:33:25,948 - INLINEInspectionWindow - INFO - Immediate streaming started for INLINE
+2025-11-12 06:33:52,266 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:33:52] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:33:52,269 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:33:52] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:33:54,344 - CameraManager - INFO - Started capture sequence
+2025-11-12 06:33:54,449 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:33:54,450 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:42:43,409 - __main__ - INFO - ============================================================
+2025-11-12 06:42:43,414 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-12 06:42:43,414 - __main__ - INFO - Application Version: 1.0.0
+2025-11-12 06:42:43,415 - __main__ - INFO - Config Version: 1.0
+2025-11-12 06:42:43,415 - __main__ - INFO - ============================================================
+2025-11-12 06:42:43,416 - __main__ - INFO - ✅ System configuration validated
+2025-11-12 06:42:43,416 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-12 06:42:43,416 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-12 06:42:43,416 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-12 06:42:43,416 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-12 06:42:43,417 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-12 06:42:43,431 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-12 06:42:43,459 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-12 06:42:43,460 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-12 06:42:44,468 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:42:44] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-12 06:42:44,470 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-12 06:42:45,471 - __main__ - INFO - ✅ API server started successfully
+2025-11-12 06:42:45,472 - __main__ - INFO - 📷 Initializing camera and algorithm system...
+2025-11-12 06:42:45,845 - __main__ - INFO - ✅ Algorithm engine initialized
+2025-11-12 06:42:46,108 - __main__ - INFO - 📸 References/Masks loaded: 6/10
+2025-11-12 06:42:46,523 - __main__ - INFO - ✅ Camera integrator initialized with algorithm engine
+2025-11-12 06:42:46,524 - __main__ - INFO - 📹 Camera in simulation mode (no device detected)
+2025-11-12 06:42:46,526 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-12 06:42:49,599 - config - WARNING - Failed to load JSON config: APIConfig.__init__() got an unexpected keyword argument 'endpoints'
+2025-11-12 06:42:49,600 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-12 06:42:49,601 - config - INFO - Creating default configuration
+2025-11-12 06:42:50,797 - __main__ - INFO - 🔗 Camera integrator connected to main window
+2025-11-12 06:42:50,798 - __main__ - INFO - ✅ GUI application ready
+2025-11-12 06:42:50,798 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-12 06:42:50,798 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-12 06:42:54,601 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-12 06:42:54,602 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-12 06:42:54,629 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:42:54] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:42:54,640 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:42:54] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:42:54,642 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:42:54,642 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:42:54,643 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-12 06:42:54,812 - INLINEInspectionWindow - INFO - Camera integrator updated from main application
+2025-11-12 06:42:54,907 - INLINEInspectionWindow - INFO - Camera signals connected to UI
+2025-11-12 06:42:54,908 - INLINEInspectionWindow - INFO - Starting immediate camera streaming
+2025-11-12 06:42:55,085 - CameraManager - INFO - Camera streaming started
+2025-11-12 06:42:55,085 - CameraIntegrator - INFO - Started INLINE inspection streaming
+2025-11-12 06:42:55,085 - INLINEInspectionWindow - INFO - Immediate streaming started for INLINE
+2025-11-12 06:43:07,523 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:43:07] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:43:07,530 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:43:07] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:43:10,974 - CameraManager - INFO - Started capture sequence
+2025-11-12 06:43:11,079 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,079 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,183 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:11,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:11,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,085 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,185 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,285 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,488 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,583 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,685 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,783 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:12,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:12,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,185 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,283 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,489 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,490 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,583 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:13,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:13,985 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,085 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,183 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,285 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,383 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,386 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,585 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,685 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,783 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:14,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:14,985 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,686 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,686 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,783 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,883 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:15,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:15,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,183 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,283 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,383 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,583 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:16,983 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:16,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,085 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,185 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,587 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,588 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,686 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:17,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:17,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,085 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,285 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,585 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,685 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:18,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:18,985 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,383 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,485 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,688 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,689 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,783 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:19,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:19,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,283 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,483 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,787 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,787 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,883 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,883 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:20,983 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:20,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,485 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,685 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:21,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:21,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,083 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,285 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,585 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:22,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:22,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,083 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,283 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,485 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,808 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,808 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,885 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:23,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:23,986 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,084 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,085 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,384 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,483 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,583 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,683 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,884 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,884 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:24,984 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:24,984 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,083 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,084 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,184 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,184 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,284 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,284 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,383 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,384 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,484 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,484 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,584 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,584 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,684 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,684 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,784 - CameraManager - ERROR - Failed to capture frame for averaging
+2025-11-12 06:43:25,784 - CameraIntegrator - ERROR - Camera error: Failed to capture frame for averaging
+2025-11-12 06:43:25,851 - CameraManager - INFO - Camera stopped
+2025-11-12 06:43:25,851 - CameraIntegrator - INFO - Inspection stopped
+2025-11-12 06:43:25,853 - CameraManager - INFO - Camera stopped
+2025-11-12 06:43:25,854 - CameraIntegrator - INFO - Inspection stopped
+2025-11-12 06:43:25,854 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-12 06:43:25,854 - __main__ - INFO - �️  GUI application closed
+2025-11-12 06:43:25,857 - CameraManager - INFO - Camera stopped
+2025-11-12 06:43:25,858 - CameraIntegrator - INFO - Inspection stopped
+2025-11-12 06:43:25,858 - __main__ - INFO - 📷 Camera system stopped
+2025-11-12 06:43:25,859 - __main__ - INFO - 🧠 Algorithm engine cleaned up
+2025-11-12 06:43:25,860 - __main__ - INFO - ✅ System shutdown completed
+2025-11-12 06:43:25,861 - __main__ - INFO - 🛑 Shutting down AI Inspection System...
+2025-11-12 06:43:25,862 - __main__ - INFO - �️  GUI application closed
+2025-11-12 06:43:25,863 - CameraManager - INFO - Camera stopped
+2025-11-12 06:43:25,863 - CameraIntegrator - INFO - Inspection stopped
+2025-11-12 06:43:25,863 - __main__ - INFO - 📷 Camera system stopped
+2025-11-12 06:43:25,863 - __main__ - INFO - ✅ System shutdown completed
+2025-11-12 06:49:52,734 - __main__ - INFO - ============================================================
+2025-11-12 06:49:52,738 - __main__ - INFO - AI VISUAL DEFECT INSPECTION SYSTEM
+2025-11-12 06:49:52,738 - __main__ - INFO - Application Version: 1.0.0
+2025-11-12 06:49:52,739 - __main__ - INFO - Config Version: 1.0
+2025-11-12 06:49:52,739 - __main__ - INFO - ============================================================
+2025-11-12 06:49:52,739 - __main__ - INFO - ✅ System configuration validated
+2025-11-12 06:49:52,740 - __main__ - INFO - 🚀 Starting API server component...
+2025-11-12 06:49:52,740 - __main__ - INFO - Database: /home/taisys/Desktop/AI_inspection_system/data/db/inspection_data.db
+2025-11-12 06:49:52,740 - __main__ - INFO - Using workflow: CHIP_TO_EOLT - Chip inspection to EOLT testing workflow
+2025-11-12 06:49:52,740 - __main__ - INFO - 🔧 Starting Flask server in background thread...
+2025-11-12 06:49:52,741 - __main__ - INFO - ⏳ Waiting for server startup at http://127.0.0.1:5001/api/CHIPINSPECTION
+2025-11-12 06:49:52,754 - __main__ - INFO - 🔄 Server starting... (attempt 1/15)
+2025-11-12 06:49:52,808 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5001
+2025-11-12 06:49:52,809 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-12 06:49:53,799 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:49:53] "GET /api/CHIPINSPECTION HTTP/1.1" 200 -
+2025-11-12 06:49:53,800 - __main__ - INFO - ✅ Server responded successfully (status: 200)
+2025-11-12 06:49:54,801 - __main__ - INFO - ✅ API server started successfully
+2025-11-12 06:49:54,801 - __main__ - INFO - 📷 Initializing camera and algorithm system...
+2025-11-12 06:49:55,057 - __main__ - INFO - ✅ Algorithm engine initialized
+2025-11-12 06:49:55,201 - __main__ - INFO - 📸 References/Masks loaded: 6/10
+2025-11-12 06:49:55,331 - __main__ - INFO - ✅ Camera integrator initialized with algorithm engine
+2025-11-12 06:49:55,331 - __main__ - INFO - 📹 Camera in simulation mode (no device detected)
+2025-11-12 06:49:55,332 - __main__ - INFO - 🖥️  Launching GUI application...
+2025-11-12 06:49:57,646 - config - WARNING - Failed to load JSON config: APIConfig.__init__() got an unexpected keyword argument 'endpoints'
+2025-11-12 06:49:57,650 - config - WARNING - Failed to load INI config: AppConfig.__init__() missing 5 required positional arguments: 'camera', 'image_processing', 'ml', 'gui', and 'inspection'
+2025-11-12 06:49:57,650 - config - INFO - Creating default configuration
+2025-11-12 06:49:59,167 - __main__ - INFO - 🔗 Camera integrator connected to main window
+2025-11-12 06:49:59,170 - __main__ - INFO - ✅ GUI application ready
+2025-11-12 06:49:59,170 - __main__ - INFO - 🚀 Starting main application loop...
+2025-11-12 06:49:59,170 - __main__ - INFO - 📱 Running in GUI mode
+2025-11-12 06:50:00,369 - __main__ - INFO - 🔍 INLINE inspection requested from GUI
+2025-11-12 06:50:00,385 - __main__ - INFO - 🔍 Starting inspection for barcode: TEST_INLINE_123
+2025-11-12 06:50:00,450 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:50:00] "[33mGET /api/CHIPINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:50:00,454 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:50:00] "[33mGET /api/EOLTINSPECTION?barcode=TEST_INLINE_123 HTTP/1.1[0m" 404 -
+2025-11-12 06:50:00,455 - __main__ - INFO - API Check: error - Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:50:00,456 - __main__ - WARNING - Cannot proceed with inspection: Barcode was not tested in previous chipinspection inspection, can't proceed.
+2025-11-12 06:50:00,456 - __main__ - INFO - Inspection result: {'status': 'error', 'message': "Barcode was not tested in previous chipinspection inspection, can't proceed.", 'buttons': [], 'data': None, 'action_required': False}
+2025-11-12 06:50:01,179 - INLINEInspectionWindow - INFO - Camera integrator updated from main application
+2025-11-12 06:50:03,892 - INLINEInspectionWindow - INFO - Camera signals connected to UI
+2025-11-12 06:50:03,901 - INLINEInspectionWindow - INFO - Starting immediate camera streaming
+2025-11-12 06:50:04,167 - CameraManager - INFO - Camera streaming started
+2025-11-12 06:50:04,167 - CameraIntegrator - INFO - Started INLINE inspection streaming
+2025-11-12 06:50:04,167 - INLINEInspectionWindow - INFO - Immediate streaming started for INLINE
+2025-11-12 06:50:09,658 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:50:09] "GET /api/CHIPINSPECTION?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:50:09,664 - werkzeug - INFO - 127.0.0.1 - - [12/Nov/2025 06:50:09] "GET /api/INLINEINSPECTIONBOTTOM?barcode=A123 HTTP/1.1" 200 -
+2025-11-12 06:50:12,285 - CameraManager - INFO - Started capture sequence (averaging)
+2025-11-12 06:50:12,967 - CameraManager - INFO - Captured and averaged 5 frames
