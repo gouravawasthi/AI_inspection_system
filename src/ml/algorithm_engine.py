@@ -55,7 +55,7 @@ class _InternalStatus:
 # Algorithm engine
 # -------------------------
 class AlgorithmEngine:
-    def __init__(self, config_path = "/Users/veervardhansingh/NOVUS/AI_inspection_system/configs/algo.json", debug: bool = False):
+    def __init__(self, config_path = "configs/algo.json", debug: bool = False):
         """
         :param config: AlgoConfig instance (DEFAULT_ALGO_CONFIG used when None)
         :param debug: print debug traces on exceptions

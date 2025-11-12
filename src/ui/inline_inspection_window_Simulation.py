@@ -173,14 +173,18 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         # Get configuration
         config = get_config_manager()
         
-        process_id = config.get_process_id()
-        station_id = config.get_station_id()
-        frame = self.current_frame
-
-        result = self.engine.process(frame, mode="inline", submode="top", ref="top_ref")
-        if result["status"]["status_code"] != 0:
-            raise RuntimeError(result["status"]["message"])
-        self.display_processed_image(result["processed_annotated"])
+        # Get pass rates from configuration
+        screw_pass_rate = config.get_component_pass_rate("SCREW")
+        plate_pass_rate = config.get_component_pass_rate("PLATE")
+        
+        # Simulate algorithm results for components (1=PASS, 0=FAIL)
+        screw_value = 1 if random.random() <= screw_pass_rate else 0
+        plate_value = 1 if random.random() <= plate_pass_rate else 0
+        
+        # Get process and station IDs from configuration
+        process_id = config.get_process_id("INLINE_TOP")
+        station_id = config.get_station_id("INLINE_TOP")
+        
         # Initialize data with None values (as per requirement d)
         data = {
             # Required fields
@@ -224,14 +228,19 @@ class INLINEInspectionWindow(BaseInspectionWindow):
         # Get configuration
         config = get_config_manager()
         
-        process_id = config.get_process_id()
-        station_id = config.get_station_id()
-        frame = self.current_frame
-
-        result = self.engine.process(frame, mode="inline", submode="bottom", ref="bottom_ref")
-        if result["status"]["status_code"] != 0:
-            raise RuntimeError(result["status"]["message"])
-        self.display_processed_image(result["processed_annotated"])
+        # Get pass rates from configuration  
+        antenna_pass_rate = config.get_component_pass_rate("ANTENNA")
+        capacitor_pass_rate = config.get_component_pass_rate("CAPACITOR")
+        speaker_pass_rate = config.get_component_pass_rate("SPEAKER")
+        
+        # Simulate algorithm results for components (1=PASS, 0=FAIL)
+        antenna_value = 1 if random.random() <= antenna_pass_rate else 0
+        capacitor_value = 1 if random.random() <= capacitor_pass_rate else 0
+        speaker_value = 1 if random.random() <= speaker_pass_rate else 0
+        
+        # Get process and station IDs from configuration
+        process_id = config.get_process_id("INLINE_BOTTOM")
+        station_id = config.get_station_id("INLINE_BOTTOM")
         
         # Initialize data with None values (as per requirement d)
         data = {
